@@ -37,30 +37,34 @@ namespace Pilot_Quirks
         }
 
 
-        [HarmonyPatch(typeof(SimGameState), "HirePilot", new Type[] { typeof(Pilot) })]
+        [HarmonyPatch(typeof(SimGameState), "AddPilotToRoster", new Type[] { typeof(PilotDef), typeof(bool) } )]
         public static class Pilot_Gained
         {
-            public static void Postfix(SimGameState __instance, PilotDef __ref)
+            public static void Postfix(SimGameState __instance, PilotDef def, bool updatePilotDiscardPile = false)
             {
-                Helper.Logger.LogLine("HirePilot");
-                Helper.Logger.LogLine(__ref.ToString());
-                Helper.Logger.LogLine(__ref.PilotTags.Contains("pilot_tech").ToString());
-                if (__ref.PilotTags.Contains("pilot_tech"))
+                Helper.Logger.LogLine("Add Pilot");
+                Helper.Logger.LogLine(def.ToString());
+                Helper.Logger.LogLine(def.PilotTags.Contains("pilot_tech").ToString());
+                if (updatePilotDiscardPile == true)
                 {
-                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.TechBonus, -1, true);
+                    if (def.PilotTags.Contains("pilot_tech"))
+                    {
+                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.TechBonus, -1, true);
+                    }
                 }
+               
             }
         }
 
         [HarmonyPatch(typeof(SimGameState), "KillPilot", new Type[] { typeof(Pilot) })]
         public static class Pilot_Died
         {
-            public static void Postfix(SimGameState __instance, Pilot __ref)
+            public static void Postfix(SimGameState __instance, Pilot p)
             {
                 Helper.Logger.LogLine("Pilot_Died");
-                Helper.Logger.LogLine(__ref.ToString());
-                Helper.Logger.LogLine(__ref.pilotDef.PilotTags.Contains("pilot_tech").ToString());
-                if (__ref.pilotDef.PilotTags.Contains("pilot_tech"))
+                Helper.Logger.LogLine(p.ToString());
+                Helper.Logger.LogLine(p.pilotDef.PilotTags.Contains("pilot_tech").ToString());
+                if (p.pilotDef.PilotTags.Contains("pilot_tech"))
                 {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.TechBonus, -1, true);
                 }
@@ -78,6 +82,24 @@ namespace Pilot_Quirks
                 if (p.pilotDef.PilotTags.Contains("pilot_tech"))
                 {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.TechBonus, -1, true);
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(SimGameState), "_OnDefsLoadComplete")]
+        public static class Initialize_New_Game
+        {
+            public static void Postfix(SimGameState __instance)
+            {
+                Helper.Logger.LogLine("Initialize");
+                foreach (Pilot pilot in __instance.PilotRoster)
+                {
+                    Helper.Logger.LogLine(pilot.ToString());
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_tech"))
+                    {
+                        Helper.Logger.LogLine("Tech Found");
+                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.TechBonus, -1, true);
+                    }
                 }
             }
         }
