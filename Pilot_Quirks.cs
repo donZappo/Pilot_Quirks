@@ -101,12 +101,14 @@ namespace Pilot_Quirks
                         __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
                     }
                 }
+                ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //Pilot commander = __instance.Commander;
                 //if (commander.pilotDef.PilotTags.Contains("pilot_klutz"))
                 //{
                 //    Helper.Logger.LogLine("Tech Found");
                 //    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
                 //}
+                ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             }
         }
 
@@ -119,11 +121,13 @@ namespace Pilot_Quirks
         {
             private static void Postfix(ToHit __instance, ref float __result, AbstractActor attacker, Weapon weapon, ICombatant target, Vector3 attackPosition, Vector3 targetPosition, LineOfFireLevel lofLevel, bool isCalledShot)
             {
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 Pilot pilot = attacker.GetPilot();
                 if (pilot.pilotDef.PilotTags.Contains("pilot_reckless"))
                 {
                     __result = __result + (float)settings.pilot_reckless_ToHitBonus;
                 }
+                ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             }
         }
 
