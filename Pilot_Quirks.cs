@@ -44,10 +44,10 @@ namespace Pilot_Quirks
             {
                 Helper.Logger.LogLine("Add Pilot");
                 Helper.Logger.LogLine(def.ToString());
-                Helper.Logger.LogLine(def.PilotTags.Contains("pilot_tech").ToString());
+                Helper.Logger.LogLine(def.PilotTags.Contains("pilot_klutz").ToString());
                 if (updatePilotDiscardPile == true)
                 {
-                    if (def.PilotTags.Contains("pilot_tech"))
+                    if (def.PilotTags.Contains("pilot_klutz"))
                     {
                         __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
                     }
@@ -63,8 +63,8 @@ namespace Pilot_Quirks
             {
                 Helper.Logger.LogLine("Pilot_Died");
                 Helper.Logger.LogLine(p.ToString());
-                Helper.Logger.LogLine(p.pilotDef.PilotTags.Contains("pilot_tech").ToString());
-                if (p.pilotDef.PilotTags.Contains("pilot_tech"))
+                Helper.Logger.LogLine(p.pilotDef.PilotTags.Contains("pilot_klutz").ToString());
+                if (p.pilotDef.PilotTags.Contains("pilot_klutz"))
                 {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_tech_TechBonus, -1, true);
                 }
@@ -78,8 +78,8 @@ namespace Pilot_Quirks
             {
                 Helper.Logger.LogLine("FirePilot");
                 Helper.Logger.LogLine(p.ToString());
-                Helper.Logger.LogLine(p.pilotDef.PilotTags.Contains("pilot_tech").ToString());
-                if (p.pilotDef.PilotTags.Contains("pilot_tech"))
+                Helper.Logger.LogLine(p.pilotDef.PilotTags.Contains("pilot_klutz").ToString());
+                if (p.pilotDef.PilotTags.Contains("pilot_klutz"))
                 {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_tech_TechBonus, -1, true);
                 }
@@ -95,12 +95,18 @@ namespace Pilot_Quirks
                 foreach (Pilot pilot in __instance.PilotRoster)
                 {
                     Helper.Logger.LogLine(pilot.ToString());
-                    if (pilot.pilotDef.PilotTags.Contains("pilot_tech"))
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_klutz"))
                     {
                         Helper.Logger.LogLine("Tech Found");
                         __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
                     }
                 }
+                //Pilot commander = __instance.Commander;
+                //if (commander.pilotDef.PilotTags.Contains("pilot_klutz"))
+                //{
+                //    Helper.Logger.LogLine("Tech Found");
+                //    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
+                //}
             }
         }
 
