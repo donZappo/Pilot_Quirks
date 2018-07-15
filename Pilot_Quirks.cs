@@ -49,7 +49,7 @@ namespace Pilot_Quirks
                 {
                     if (def.PilotTags.Contains("pilot_tech"))
                     {
-                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.TechBonus, -1, true);
+                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
                     }
                 }
                
@@ -66,7 +66,7 @@ namespace Pilot_Quirks
                 Helper.Logger.LogLine(p.pilotDef.PilotTags.Contains("pilot_tech").ToString());
                 if (p.pilotDef.PilotTags.Contains("pilot_tech"))
                 {
-                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.TechBonus, -1, true);
+                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_tech_TechBonus, -1, true);
                 }
             }
         }
@@ -81,7 +81,7 @@ namespace Pilot_Quirks
                 Helper.Logger.LogLine(p.pilotDef.PilotTags.Contains("pilot_tech").ToString());
                 if (p.pilotDef.PilotTags.Contains("pilot_tech"))
                 {
-                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.TechBonus, -1, true);
+                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_tech_TechBonus, -1, true);
                 }
             }
         }
@@ -98,12 +98,59 @@ namespace Pilot_Quirks
                     if (pilot.pilotDef.PilotTags.Contains("pilot_tech"))
                     {
                         Helper.Logger.LogLine("Tech Found");
-                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.TechBonus, -1, true);
+                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
                     }
                 }
             }
         }
 
+        /// <summary>
+        /// Following is to-hit modifiers area.
+        /// </summary>
+
+        [HarmonyPatch(typeof(ToHit), "GetAllModifiers")]
+        public static class ToHit_GetAllModifiers_Patch
+        {
+            private static void Postfix(ToHit __instance, ref float __result, AbstractActor attacker, Weapon weapon, ICombatant target, Vector3 attackPosition, Vector3 targetPosition, LineOfFireLevel lofLevel, bool isCalledShot)
+            {
+                Pilot pilot = attacker.GetPilot();
+                if (pilot.pilotDef.PilotTags.Contains("pilot_reckless"))
+                {
+                    __result = __result + (float)settings.pilot_reckless_ToHitBonus;
+                }
+            }
+        }
+
+        //public string GetAllModifiersDescription(AbstractActor attacker, Weapon weapon, ICombatant target, Vector3 attackPosition, Vector3 targetPosition, LineOfFireLevel lofLevel, bool isCalledShot)
+        [HarmonyPatch(typeof(ToHit), "GetAllModifiersDescription")]
+        public static class ToHit_GetAllModifiersDescription_Patch
+        {
+            private static void Postfix(ToHit __instance, ref string __result, AbstractActor attacker, Weapon weapon, ICombatant target, Vector3 attackPosition, Vector3 targetPosition, LineOfFireLevel lofLevel, bool isCalledShot)
+            {
+                Pilot pilot = attacker.GetPilot();
+                if (pilot.pilotDef.PilotTags.Contains("pilot_reckless"))
+                {
+                    __result = string.Format("{0}RECKLESS {1:+#;-#}; ", __result, settings.pilot_reckless_ToHitBonus);
+                }
+            }
+        }
+
+        //private void UpdateToolTipsSelf()
+        [HarmonyPatch(typeof(CombatHUDWeaponSlot), "SetHitChance", new Type[] { typeof(ICombatant) })]
+        public static class CombatHUDWeaponSlot_SetHitChance_Patch
+        {
+            private static void Postfix(CombatHUDWeaponSlot __instance, ICombatant target)
+            {
+                AbstractActor actor = __instance.DisplayedWeapon.parent;
+                var _this = Traverse.Create(__instance);
+                Pilot pilot = actor.GetPilot();
+                if (pilot.pilotDef.PilotTags.Contains("pilot_reckless"))
+                {
+                    _this.Method("AddToolTipDetail", "RECKLESS", settings.pilot_reckless_ToHitBonus).GetValue();
+                }
+            }
+        }
+        
         public static class Helper
         {
             public static Settings LoadSettings()
@@ -158,7 +205,9 @@ namespace Pilot_Quirks
         }
         internal class ModSettings
         {
-            public int TechBonus = 100;
+            public int pilot_tech_TechBonus = 100;
+            public int pilot_reckless_ToHitBonus = -1;
+            public int pilot_reckless_ToBeHitPenalty = 1;
 
 
             public int FatigueTimeStart = 7;
