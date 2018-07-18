@@ -136,10 +136,39 @@ namespace Pilot_Quirks
                 }
             }
         }
+        [HarmonyPatch(typeof(SimGameState), "GetReputationShopAdjustment", new Type[] { typeof(Faction) })]
+        public static class Merchant_Bonus
+        {
+            public static void Postfix(SimGameState __instance, ref float __result)
+            {
+                float MerchantCount = 0;
+                foreach(Pilot pilot in __instance.PilotRoster)
+                {
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_merchant"))
+                    {
+                        MerchantCount = MerchantCount + 1;
+                    }
+                }
+                __result = __result - settings.pilot_merchant_ShopDiscount * MerchantCount/100;
+            }
+        }
+        [HarmonyPatch(typeof(Pilot), "InjurePilot")]
+        public static class Lucky_Pilot
+        {
+            public static void Prefix(Pilot __instance, int dmg)
+            {
+                var rng = new System.Random();
+                int Roll = rng.Next(1, 101);
+                if (Roll <= settings.pilot_lucky_InjuryAvoidance)
+                {
+                    dmg = 0;
+                }
+            }
+        }
 
-        /// <summary>
-        /// Following is to-hit modifiers area.
-        /// </summary>
+            /// <summary>
+            /// Following is to-hit modifiers area.
+            /// </summary>
 
         [HarmonyPatch(typeof(ToHit), "GetAllModifiers")]
         public static class ToHit_GetAllModifiers_Patch
@@ -168,7 +197,6 @@ namespace Pilot_Quirks
             }
         }
 
-        //public string GetAllModifiersDescription(AbstractActor attacker, Weapon weapon, ICombatant target, Vector3 attackPosition, Vector3 targetPosition, LineOfFireLevel lofLevel, bool isCalledShot)
         [HarmonyPatch(typeof(ToHit), "GetAllModifiersDescription")]
         public static class ToHit_GetAllModifiersDescription_Patch
         {
@@ -182,7 +210,6 @@ namespace Pilot_Quirks
             }
         }
 
-        //private void UpdateToolTipsSelf()
         [HarmonyPatch(typeof(CombatHUDWeaponSlot), "SetHitChance", new Type[] { typeof(ICombatant) })]
         public static class CombatHUDWeaponSlot_SetHitChance_Patch
         {
@@ -197,7 +224,20 @@ namespace Pilot_Quirks
                 }
             }
         }
-        
+
+        [HarmonyPatch(typeof(Mech), "GetHitLocation", new Type[] { typeof(AbstractActor), typeof(Vector3), typeof(float), typeof(ArmorLocation), typeof(float) })]
+        public static class Assassin_Patch
+        {
+            private static void Prefix(Mech __instance, AbstractActor attacker, float bonusMultiplier)
+            {
+                Pilot pilot = attacker.GetPilot();
+                if (pilot.pilotDef.PilotTags.Contains("pilot_assassin"))
+                {
+                    bonusMultiplier = bonusMultiplier + settings.pilot_assassin_CalledShotBonus;
+                }
+            }
+        }
+
         public static class Helper
         {
             public static Settings LoadSettings()
@@ -257,19 +297,11 @@ namespace Pilot_Quirks
             public int pilot_reckless_ToBeHitBonus = -1;
             public int pilot_cautious_ToHitBonus = 1;
             public int pilot_cautious_ToBeHitBonus = 1;
+            public float pilot_assassin_CalledShotBonus = 0.25f;
+            public float pilot_merchant_ShopDiscount = 1;
+            public int pilot_lucky_InjuryAvoidance = 10;
             public bool IsSaveGame = false;
 
-
-            public int FatigueTimeStart = 7;
-            public int MoraleModifier = 5;
-            public int StartingMorale = 25;
-            public int FatigueMinimum = 0;
-            public int MoralePositiveTierOne = 5;
-            public int MoralePositiveTierTwo = 15;
-            public int MoraleNegativeTierOne = -5;
-            public int MoraleNegativeTierTwo = -15;
-            public double FatigueFactor = 2.5;
-            public bool InjuriesHurt = true;
         }
     }
 }

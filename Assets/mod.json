@@ -1,0 +1,24 @@
+{
+    "Name": "Pilot Quirks",
+    "Enabled": true,
+
+    "Version": "0.1",
+    "Description": "Adds pilot abilities based upon what tags they have.",
+    "Author": "don Zappo",
+    "Website": "",
+	
+	"DLL": "Pilot_Quirks.dll",
+	
+	"Settings": {
+        "IsSaveGame": true,
+		"pilot_tech_TechBonus" : 100,
+		"pilot_reckless_ToHitBonus" : -1,
+		"pilot_reckless_ToBeHitBonus" : -1,
+        "pilot_cautious_ToHitBonus" : 1,
+        "pilot_cautious_ToBeHitBonus" : 1,
+        "pilot_assassin_CalledShotBonus" : 0.25,
+        "pilot_merchant_ShopDiscount" : 1,
+		"pilot_lucky_InjuryAvoidance" : 10,
+	}
+}
+		
