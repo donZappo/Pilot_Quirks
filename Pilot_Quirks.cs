@@ -67,8 +67,24 @@ namespace Pilot_Quirks
                     {
                         __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_disgraced_MoralePenalty, -1, true);
                     }
+
+                    if (def.PilotTags.Contains("pilot_comstar"))
+                    {
+                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_comstar_TechBonus, -1, true);
+                    }
+
+                    if (def.PilotTags.Contains("pilot_honest"))
+                    {
+                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_honest_MoraleBonus, -1, true);
+                    }
+
+                    if (def.PilotTags.Contains("pilot_dishonest"))
+                    {
+                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_dishonest_MoralePenalty, -1, true);
+                    }
+
                 }
-               
+
             }
         }
 
@@ -89,6 +105,21 @@ namespace Pilot_Quirks
                 {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_disgraced_MoralePenalty, -1, true);
                 }
+
+                if (p.pilotDef.PilotTags.Contains("pilot_comstar"))
+                {
+                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_comstar_TechBonus, -1, true);
+                }
+
+                if (p.pilotDef.PilotTags.Contains("pilot_honest"))
+                {
+                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_honest_MoraleBonus, -1, true);
+                }
+
+                if (p.pilotDef.PilotTags.Contains("pilot_honest"))
+                {
+                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_dishonest_MoralePenalty, -1, true);
+                }
             }
         }
 
@@ -105,6 +136,21 @@ namespace Pilot_Quirks
                 if (p.pilotDef.PilotTags.Contains("pilot_disgraced"))
                 {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_disgraced_MoralePenalty, -1, true);
+                }
+
+                if (p.pilotDef.PilotTags.Contains("pilot_comstar"))
+                {
+                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_comstar_TechBonus, -1, true);
+                }
+
+                if (p.pilotDef.PilotTags.Contains("pilot_honest"))
+                {
+                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_honest_MoraleBonus, -1, true);
+                }
+
+                if (p.pilotDef.PilotTags.Contains("pilot_dishonest"))
+                {
+                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_dishonest_MoralePenalty, -1, true);
                 }
             }
         }
@@ -125,16 +171,67 @@ namespace Pilot_Quirks
                     {
                         __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_disgraced_MoralePenalty, -1, true);
                     }
+
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_comstar"))
+                    {
+                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_comstar_TechBonus, -1, true);
+                    }
+
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_honest"))
+                    {
+                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_honest_MoraleBonus, -1, true);
+                    }
+
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_dishonest"))
+                    {
+                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_dishonest_MoralePenalty, -1, true);
+                    }
                 }
             }
         }
 
         [HarmonyPatch(typeof(SimGameState), "OnDayPassed")]
-        public static class SaveGameUpdater
+        public static class DayPasser
         {
             public static void Postfix(SimGameState __instance)
             {
-                if (settings.IsSaveGame)
+                foreach (Pilot pilot in __instance.PilotRoster)
+                {
+                    var rng = new System.Random();
+                    int Roll = rng.Next(1, 100);
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_unstable"))
+                    {
+                        if (Roll <= 33)
+                        {
+                            pilot.pilotDef.PilotTags.Add("pilot_morale_high");
+                            pilot.pilotDef.PilotTags.Remove("pilot_morale_low");
+                        }
+                        else if (Roll > 33 && Roll <= 66)
+                        {
+                            pilot.pilotDef.PilotTags.Add("pilot_morale_low");
+                            pilot.pilotDef.PilotTags.Remove("pilot_morale_high");
+                        }
+                        else
+                        {
+                            pilot.pilotDef.PilotTags.Remove("pilot_morale_low");
+                            pilot.pilotDef.PilotTags.Remove("pilot_morale_high");
+                        }
+                    }
+
+                }
+                foreach (Pilot pilot in __instance.PilotRoster)
+                {
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_criminal"))
+                    {
+                        var rng = new System.Random();
+                        int Roll = rng.Next(1, 101);
+                        if (Roll < settings.pilot_criminal_StealPercent)
+                        {
+                            __instance.AddFunds(settings.pilot_criminal_StealAmount, null, true);
+                        } 
+                    }
+                }
+                    if (settings.IsSaveGame)
                 {
                     foreach (Pilot pilot in __instance.PilotRoster)
                     {
@@ -146,6 +243,17 @@ namespace Pilot_Quirks
                         if (pilot.pilotDef.PilotTags.Contains("pilot_disgraced"))
                         {
                             __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_disgraced_MoralePenalty, -1, true);
+                        }
+
+
+                        if (pilot.pilotDef.PilotTags.Contains("pilot_honest"))
+                        {
+                            __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_honest_MoraleBonus, -1, true);
+                        }
+
+                        if (pilot.pilotDef.PilotTags.Contains("pilot_dishonest"))
+                        {
+                            __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_dishonest_MoralePenalty, -1, true);
                         }
                     }
                 }
@@ -167,6 +275,39 @@ namespace Pilot_Quirks
                 __result = __result - settings.pilot_merchant_ShopDiscount * MerchantCount/100;
             }
         }
+
+        [HarmonyPatch(typeof(Shop), "PopulateInventory")]
+        public static class Criminal_Shops
+        {
+            public static void Prefix(Shop __instance, int max)
+            {
+                SimGameState Sim = Traverse.Create(__instance).Field("Sim").GetValue<SimGameState>();
+                if (Sim.CurSystem.Tags.Contains("planet_other_blackmarket"))
+                {
+                    bool honest = false;
+                    foreach (Pilot pilot in Sim.PilotRoster)
+                    {
+                        if (pilot.pilotDef.PilotTags.Contains("pilot_honest"))
+                            honest = true;
+                    }
+                    foreach (Pilot pilot in Sim.PilotRoster)
+                    {
+                        if (pilot.pilotDef.PilotTags.Contains("pilot_criminal") && !honest)
+                        max = max + 2;
+                    }
+                }
+
+                foreach (Pilot pilot in Sim.PilotRoster)
+                {
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_comstar"))
+                    {
+                        max = max + 3;
+                    }
+                }
+            } 
+        }
+
+
         [HarmonyPatch(typeof(Pilot), "InjurePilot")]
         public static class Lucky_Pilot
         {
@@ -192,12 +333,21 @@ namespace Pilot_Quirks
                     __result = (int)(XPModifier * (float)xpEarned);
                 }
             }
+            
         }
+        [HarmonyPatch(typeof(Team), "BaselineMoraleGain")]
+        public static class Rebellious_Area
+        {
+            private static void Postfix(Team __instance)
+            {
+            }
+        }
+
             /// <summary>
             /// Following is to-hit modifiers area.
             /// </summary>
 
-        [HarmonyPatch(typeof(ToHit), "GetAllModifiers")]
+            [HarmonyPatch(typeof(ToHit), "GetAllModifiers")]
         public static class ToHit_GetAllModifiers_Patch
         {
             private static void Postfix(ToHit __instance, ref float __result, AbstractActor attacker, Weapon weapon, ICombatant target, Vector3 attackPosition, Vector3 targetPosition, LineOfFireLevel lofLevel, bool isCalledShot)
@@ -231,6 +381,15 @@ namespace Pilot_Quirks
                 {
                     __result = __result + (float)settings.pilot_lostech_ToHitBonus;
                 }
+
+                if (TargetPilot.pilotDef.PilotTags.Contains("pilot_jinxed"))
+                {
+                    __result = __result + (float)settings.pilot_jinxed_ToBeHitBonus;
+                }
+                if (TargetPilot.pilotDef.PilotTags.Contains("pilot_jinxed"))
+                {
+                    __result = __result + (float)settings.pilot_reckless_ToBeHitBonus;
+                }
             }
         }
 
@@ -245,6 +404,11 @@ namespace Pilot_Quirks
                     __result = string.Format("{0}RECKLESS {1:+#;-#}; ", __result, settings.pilot_reckless_ToHitBonus);
                 }
 
+                if (pilot.pilotDef.PilotTags.Contains("pilot_cautious"))
+                {
+                    __result = string.Format("{0}CAUTIOUS {1:+#;-#}; ", __result, settings.pilot_cautious_ToHitBonus);
+                }
+
                 if (pilot.pilotDef.PilotTags.Contains("pilot_drunk") && pilot.pilotDef.TimeoutRemaining > 0)
                 {
                     __result = string.Format("{0}DRUNK {1:+#;-#}; ", __result, settings.pilot_drunk_ToHitBonus);
@@ -253,6 +417,11 @@ namespace Pilot_Quirks
                 if (pilot.pilotDef.PilotTags.Contains("pilot_lostech") && weapon.componentDef.ComponentTags.Contains("component_type_lostech"))
                 {
                     __result = string.Format("{0}LOSTECH TECHNICIAN {1:+#;-#}; ", __result, settings.pilot_lostech_ToHitBonus);
+                }
+
+                if (pilot.pilotDef.PilotTags.Contains("pilot_jinxed"))
+                {
+                    __result = string.Format("{0}JINXED {1:+#;-#}; ", __result, settings.pilot_reckless_ToHitBonus);
                 }
             }
         }
@@ -270,6 +439,11 @@ namespace Pilot_Quirks
                     _this.Method("AddToolTipDetail", "RECKLESS", settings.pilot_reckless_ToHitBonus).GetValue();
                 }
 
+                if (pilot.pilotDef.PilotTags.Contains("pilot_cautious"))
+                {
+                    _this.Method("AddToolTipDetail", "CAUTIOUS", settings.pilot_cautious_ToHitBonus).GetValue();
+                }
+
                 if (pilot.pilotDef.PilotTags.Contains("pilot_drunk") && pilot.pilotDef.TimeoutRemaining > 0)
                 {
                     _this.Method("AddToolTipDetail", "DRUNK", settings.pilot_drunk_ToHitBonus).GetValue();
@@ -278,6 +452,11 @@ namespace Pilot_Quirks
                 if (__instance.tag.Contains("component_type_lostech") && pilot.pilotDef.PilotTags.Contains("pilot_lostech"))
                 {
                     _this.Method("AddToolTipDetail", "LOSTECH TECH", settings.pilot_lostech_ToHitBonus).GetValue();
+                }
+
+                if (pilot.pilotDef.PilotTags.Contains("pilot_jinxed"))
+                {
+                    _this.Method("AddToolTipDetail", "JINXED", settings.pilot_jinxed_ToHitBonus).GetValue();
                 }
             }
         }
@@ -293,12 +472,24 @@ namespace Pilot_Quirks
         }
 
         [HarmonyPatch(typeof(SimGameState), "GetMechWarriorValue")]
-        public static class Wealthy_For_free
+        public static class Change_Pilot_Cost
         {
             private static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
             {
                 if (def.PilotTags.Contains("pilot_wealthy"))
+                {
                     __result = 0;
+                }
+
+                if (def.PilotTags.Contains("pilot_noble"))
+                {
+                    __result = (int)(__result + settings.pilot_noble_IncreasedCost * __result);
+                }
+
+                if (def.PilotTags.Contains("pilot_spacer"))
+                {
+                    __result = (int)(__result + settings.pilot_spacer_DecreasedCost * __result);
+                }
             }
         }
 
@@ -380,10 +571,20 @@ namespace Pilot_Quirks
             public float pilot_merchant_ShopDiscount = 1;
             public int pilot_lucky_InjuryAvoidance = 10;
             public int pilot_disgraced_MoralePenalty = -1;
+            public int pilot_jinxed_ToHitBonus = 1;
+            public int pilot_jinxed_ToBeHitBonus = -1;
 
             public int pilot_drunk_ToHitBonus = 1;
             public int pilot_lostech_ToHitBonus = -1;
             public float pilot_naive_LessExperience = 0.1f;
+            public float pilot_noble_IncreasedCost = 0.5f;
+            public int pilot_criminal_StealPercent = 5;
+            public int pilot_criminal_StealAmount = -1000;
+            public float pilot_spacer_DecreasedCost = -0.5f;
+            public int pilot_comstar_TechBonus = 200;
+            public int pilot_comstar_StoreBonus = 3;
+            public int pilot_honest_MoraleBonus = 1;
+            public int pilot_dishonest_MoralePenalty = -1;
 
 
             public bool IsSaveGame = false;
