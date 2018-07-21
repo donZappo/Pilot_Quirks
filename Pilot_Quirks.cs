@@ -504,6 +504,104 @@ namespace Pilot_Quirks
         {
             private static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
             {
+                float CostPerMonth = __result;
+                if (def.PilotTags.Contains("pilot_tech"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_dependable"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_merchant"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_brave"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_assassin"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_athletic"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_gladiator"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_lucky"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_drunk"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_lostech"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_disgraced"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.2 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_naive"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_military"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_mechwarrior"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.2 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_bookish"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_command"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.2 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_officer"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.3 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_unstable"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_jinxed"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.2 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_klutz"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_criminal"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_comstar"))
+                {
+                    CostPerMonth = CostPerMonth + (float)1.0 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_dishonest"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                }
+                if (CostPerMonth < 0)
+                    CostPerMonth = 0;
+
+                __result = (int)CostPerMonth;
+                
                 if (def.PilotTags.Contains("pilot_wealthy"))
                 {
                     __result = 0;
@@ -518,6 +616,115 @@ namespace Pilot_Quirks
                 {
                     __result = (int)(__result + settings.pilot_spacer_DecreasedCost * __result);
                 }
+            }
+        }
+
+        [HarmonyPatch(typeof(SimGameState), "GetMechWarriorHiringCost")]
+        public static class Change_Pilot_Hiring_Cost
+        {
+            private static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
+            {
+                float CostPerMonth = __result;
+                if (def.PilotTags.Contains("pilot_tech"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_dependable"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_merchant"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_brave"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_assassin"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_athletic"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_gladiator"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_lucky"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_drunk"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_lostech"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_disgraced"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.2 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_naive"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_military"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_mechwarrior"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.2 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_bookish"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_command"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.2 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_officer"))
+                {
+                    CostPerMonth = CostPerMonth + (float)0.3 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_unstable"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_jinxed"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.2 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_klutz"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_criminal"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_comstar"))
+                {
+                    CostPerMonth = CostPerMonth + (float)1.0 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_dishonest"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                }
+                if (def.PilotTags.Contains("pilot_noble"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.5 * (__result);
+                }
+                if (CostPerMonth < 0)
+                    CostPerMonth = 0;
+
+                __result = (int)CostPerMonth;
             }
         }
 
