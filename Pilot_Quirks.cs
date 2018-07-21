@@ -336,18 +336,46 @@ namespace Pilot_Quirks
             
         }
         [HarmonyPatch(typeof(Team), "BaselineMoraleGain")]
-        public static class Rebellious_Area
+        public static class Rebellious_Area_Prefix
         {
-            private static void Postfix(Team __instance)
+            private static bool Prefix(Team __instance)
             {
+                bool rebelpilot = false;
+                bool officer = false;
+                int edgecase = 0;
+                foreach (AbstractActor actor in __instance.units)
+                {
+                    Pilot pilot = actor.GetPilot();
+                    if(pilot.pilotDef.PilotTags.Contains("pilot_rebellious"))
+                    {
+                        rebelpilot = true;
+                    }
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_officer") || pilot.pilotDef.PilotTags.Contains("commander_player"))
+                    {
+                        officer = true;
+                    }
+                    if(rebelpilot && officer)
+                    {
+                        edgecase = edgecase + 1;
+                    }
+                }
+                if (rebelpilot && officer && edgecase != 1)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
             }
         }
 
-            /// <summary>
-            /// Following is to-hit modifiers area.
-            /// </summary>
+        
+        /// <summary>
+        /// Following is to-hit modifiers area.
+        /// </summary>
 
-            [HarmonyPatch(typeof(ToHit), "GetAllModifiers")]
+        [HarmonyPatch(typeof(ToHit), "GetAllModifiers")]
         public static class ToHit_GetAllModifiers_Patch
         {
             private static void Postfix(ToHit __instance, ref float __result, AbstractActor attacker, Weapon weapon, ICombatant target, Vector3 attackPosition, Vector3 targetPosition, LineOfFireLevel lofLevel, bool isCalledShot)
