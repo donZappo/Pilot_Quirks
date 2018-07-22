@@ -337,37 +337,71 @@ namespace Pilot_Quirks
         {
             private static bool Prefix(Team __instance)
             {
-                bool rebelpilot = false;
-                bool officer = false;
-                int edgecase = 0;
-                foreach (AbstractActor actor in __instance.units)
-                {
-                    Pilot pilot = actor.GetPilot();
-                    if(pilot.pilotDef.PilotTags.Contains("pilot_rebellious"))
-                    {
-                        rebelpilot = true;
-                    }
-                    if (pilot.pilotDef.PilotTags.Contains("pilot_officer") || pilot.pilotDef.PilotTags.Contains("commander_player"))
-                    {
-                        officer = true;
-                    }
-                    if(rebelpilot && officer)
-                    {
-                        edgecase = edgecase + 1;
-                    }
-                }
-                if (rebelpilot && officer && edgecase != 1)
-                {
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
+                return false;
             }
         }
 
-        
+        [HarmonyPatch(typeof(Team), "BaselineMoraleGain")]
+        public static class Rebellious_Area_Postfix
+        {
+            private static void Postfix(Team __instance,ref List<IStackSequence> __result)
+            {
+                //var attackLogger = Traverse.Create("Logger").GetValue<Logger>();
+                List<IStackSequence> list = new List<IStackSequence>();
+                bool rebelpilot = false;
+                bool officer = false;
+                int edgecase = 0;
+                if (__instance.Combat.TurnDirector.IsInterleaved)
+                {
+                    MoraleConstantsDef activeMoraleDef = __instance.Combat.Constants.GetActiveMoraleDef(__instance.Combat);
+                    int num = activeMoraleDef.MoraleBaselineGainPerRound;
+                    if (activeMoraleDef.MoraleBaselineMultiplyByActive)
+                    {
+                        num *= __instance.NumLivingUnits;
+                    }
+                    if (num > 0)
+                    {
+                        foreach (AbstractActor actor in __instance.units)
+                        {
+                            Pilot pilot = actor.GetPilot();
+                            if (pilot.pilotDef.PilotTags.Contains("pilot_rebellious"))
+                            {
+                                rebelpilot = true;
+                            }
+                            if (pilot.pilotDef.PilotTags.Contains("pilot_officer") || pilot.pilotDef.PilotTags.Contains("commander_player"))
+                            {
+                                officer = true;
+                            }
+                            if (rebelpilot && officer)
+                            {
+                                edgecase = edgecase + 1;
+                            }
+                        }
+                        if (rebelpilot && officer && edgecase != 1)
+                        {
+                            //attackLogger.Log(string.Format("MORALE: team {0} gains {1} baseline morale", __instance.DisplayName, 0));
+                            __instance.ModifyMorale(0);
+                        }
+                        else
+                        {
+                            //attackLogger.Log(string.Format("MORALE: team {0} gains {1} baseline morale", __instance.DisplayName, num));
+                            __instance.ModifyMorale(num);
+                        }
+                        if (__instance == __instance.Combat.LocalPlayerTeam)
+                        {
+                            list.Add(new DelaySequence(__instance.Combat, 1f));
+                        }
+                    }
+                    else
+                    {
+                        //attackLogger.Log(string.Format("MORALE: team {0} gains {0} baseline morale", __instance.DisplayName));
+                    }
+                }
+                __result = list;
+            }
+        }
+
+
         /// <summary>
         /// Following is to-hit modifiers area.
         /// </summary>
