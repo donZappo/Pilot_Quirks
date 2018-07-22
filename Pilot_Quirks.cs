@@ -151,40 +151,40 @@ namespace Pilot_Quirks
             }
         }
 
-        [HarmonyPatch(typeof(SimGameState), "_OnDefsLoadComplete")]
-        public static class Initialize_New_Game
-        {
-            public static void Postfix(SimGameState __instance)
-            {
-                foreach (Pilot pilot in __instance.PilotRoster)
-                {
-                    if (pilot.pilotDef.PilotTags.Contains("pilot_tech"))
-                    {
-                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
-                    }
+        //[HarmonyPatch(typeof(SimGameState), "_OnDefsLoadComplete")]
+        //public static class Initialize_New_Game
+        //{
+        //    public static void Postfix(SimGameState __instance)
+        //    {
+        //        foreach (Pilot pilot in __instance.PilotRoster)
+        //        {
+        //            if (pilot.pilotDef.PilotTags.Contains("pilot_tech"))
+        //            {
+        //                __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
+        //            }
 
-                    if (pilot.pilotDef.PilotTags.Contains("pilot_disgraced"))
-                    {
-                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_disgraced_MoralePenalty, -1, true);
-                    }
+        //            if (pilot.pilotDef.PilotTags.Contains("pilot_disgraced"))
+        //            {
+        //                __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_disgraced_MoralePenalty, -1, true);
+        //            }
 
-                    if (pilot.pilotDef.PilotTags.Contains("pilot_comstar"))
-                    {
-                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_comstar_TechBonus, -1, true);
-                    }
+        //            if (pilot.pilotDef.PilotTags.Contains("pilot_comstar"))
+        //            {
+        //                __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_comstar_TechBonus, -1, true);
+        //            }
 
-                    if (pilot.pilotDef.PilotTags.Contains("pilot_honest"))
-                    {
-                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_honest_MoraleBonus, -1, true);
-                    }
+        //            if (pilot.pilotDef.PilotTags.Contains("pilot_honest"))
+        //            {
+        //                __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_honest_MoraleBonus, -1, true);
+        //            }
 
-                    if (pilot.pilotDef.PilotTags.Contains("pilot_dishonest"))
-                    {
-                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_dishonest_MoralePenalty, -1, true);
-                    }
-                }
-            }
-        }
+        //            if (pilot.pilotDef.PilotTags.Contains("pilot_dishonest"))
+        //            {
+        //                __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_dishonest_MoralePenalty, -1, true);
+        //            }
+        //        }
+        //    }
+        //}
 
         [HarmonyPatch(typeof(SimGameState), "OnDayPassed")]
         public static class DayPasser
@@ -412,42 +412,44 @@ namespace Pilot_Quirks
             private static void Postfix(ToHit __instance, ref float __result, AbstractActor attacker, Weapon weapon, ICombatant target, Vector3 attackPosition, Vector3 targetPosition, LineOfFireLevel lofLevel, bool isCalledShot)
             {
                 Pilot pilot = attacker.GetPilot();
-                Pilot TargetPilot = target.GetPilot();
+                try
+                {
+                    Pilot TargetPilot = target.GetPilot();
+                    if (TargetPilot.pilotDef.PilotTags.Contains("pilot_reckless"))
+                    {
+                        __result = __result + (float)settings.pilot_reckless_ToBeHitBonus;
+                    }
+                    if (TargetPilot.pilotDef.PilotTags.Contains("pilot_cautious"))
+                    {
+                        __result = __result + (float)settings.pilot_reckless_ToBeHitBonus;
+                    }
+                    if (TargetPilot.pilotDef.PilotTags.Contains("pilot_jinxed"))
+                    {
+                        __result = __result + (float)settings.pilot_jinxed_ToBeHitBonus;
+                    }
+                    if (TargetPilot.pilotDef.PilotTags.Contains("pilot_jinxed"))
+                    {
+                        __result = __result + (float)settings.pilot_reckless_ToBeHitBonus;
+                    }
+                }
+                catch (Exception)
+                {
+                }
                 if (pilot.pilotDef.PilotTags.Contains("pilot_reckless"))
                 {
                     __result = __result + (float)settings.pilot_reckless_ToHitBonus;
                 }
-                if (TargetPilot.pilotDef.PilotTags.Contains("pilot_reckless"))
-                {
-                    __result = __result + (float)settings.pilot_reckless_ToBeHitBonus;
-                }
-
                 if (pilot.pilotDef.PilotTags.Contains("pilot_cautious"))
                 {
                     __result = __result + (float)settings.pilot_reckless_ToHitBonus;
                 }
-                if (TargetPilot.pilotDef.PilotTags.Contains("pilot_cautious"))
-                {
-                    __result = __result + (float)settings.pilot_reckless_ToBeHitBonus;
-                }
-
                 if (pilot.pilotDef.PilotTags.Contains("pilot_drunk") && pilot.pilotDef.TimeoutRemaining > 0)
                 {
                     __result = __result + (float)settings.pilot_drunk_ToHitBonus;
                 }
-
                 if (pilot.pilotDef.PilotTags.Contains("pilot_lostech") && weapon.componentDef.ComponentTags.Contains("component_type_lostech"))
                 {
                     __result = __result + (float)settings.pilot_lostech_ToHitBonus;
-                }
-
-                if (TargetPilot.pilotDef.PilotTags.Contains("pilot_jinxed"))
-                {
-                    __result = __result + (float)settings.pilot_jinxed_ToBeHitBonus;
-                }
-                if (TargetPilot.pilotDef.PilotTags.Contains("pilot_jinxed"))
-                {
-                    __result = __result + (float)settings.pilot_reckless_ToBeHitBonus;
                 }
             }
         }
