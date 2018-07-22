@@ -21,7 +21,6 @@ namespace Pilot_Quirks
 
         public static void Init(string directory, string modSettings)
         {
-            Helper.Logger.LogLine("Init");
             ModDirectory = directory;
             try
             {
@@ -93,9 +92,6 @@ namespace Pilot_Quirks
         {
             public static void Postfix(SimGameState __instance, Pilot p)
             {
-                Helper.Logger.LogLine("Pilot_Died");
-                Helper.Logger.LogLine(p.ToString());
-                Helper.Logger.LogLine(p.pilotDef.PilotTags.Contains("pilot_tech").ToString());
                 if (p.pilotDef.PilotTags.Contains("pilot_tech"))
                 {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_tech_TechBonus, -1, true);
@@ -325,12 +321,13 @@ namespace Pilot_Quirks
         [HarmonyPatch(typeof(AAR_UnitStatusWidget), "FillInData")]
         public static class Adjust_Pilot_XP
         {
-            public static void Prefix(AAR_UnitStatusWidget __instance, int xpEarned, ref int __result, UnitResult __UnitData)
+            public static void Prefix(AAR_UnitStatusWidget __instance, int xpEarned)
             {
-                if (__UnitData.pilot.pilotDef.PilotTags.Contains("pilot_naive"))
+                UnitResult unit = Traverse.Create(__instance).Field("UnitData").GetValue<UnitResult>();
+                if (unit.pilot.pilotDef.PilotTags.Contains("pilot_naive"))
                 {
                     float XPModifier = 1 - settings.pilot_naive_LessExperience;
-                    __result = (int)(XPModifier * (float)xpEarned);
+                    xpEarned = (int)(XPModifier * (float)xpEarned);
                 }
             }
             
@@ -502,7 +499,7 @@ namespace Pilot_Quirks
         [HarmonyPatch(typeof(SimGameState), "GetMechWarriorValue")]
         public static class Change_Pilot_Cost
         {
-            private static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
+            public static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
             {
                 float CostPerMonth = __result;
                 if (def.PilotTags.Contains("pilot_tech"))
@@ -622,7 +619,7 @@ namespace Pilot_Quirks
         [HarmonyPatch(typeof(SimGameState), "GetMechWarriorHiringCost")]
         public static class Change_Pilot_Hiring_Cost
         {
-            private static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
+            public static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
             {
                 float CostPerMonth = __result;
                 if (def.PilotTags.Contains("pilot_tech"))
@@ -719,10 +716,11 @@ namespace Pilot_Quirks
                 }
                 if (def.PilotTags.Contains("pilot_noble"))
                 {
-                    CostPerMonth = CostPerMonth - (float)0.5 * (__result);
+                    CostPerMonth = CostPerMonth + (float)0.5 * (__result);
                 }
                 if (CostPerMonth < 0)
                     CostPerMonth = 0;
+                
 
                 __result = (int)CostPerMonth;
             }
