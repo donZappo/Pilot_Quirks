@@ -57,9 +57,20 @@ namespace Pilot_Quirks
             {
                 if (updatePilotDiscardPile == true)
                 {
-                    if (def.PilotTags.Contains("pilot_tech"))
+                    if (def.PilotTags.Contains("pilot_tech") && !settings.pilot_tech_vanillaTech)
                     {
                         __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
+                    }
+                    else if (def.PilotTags.Contains("pilot_tech") && settings.pilot_tech_vanillaTech)
+                    {
+                        int TechCount = 0;
+                        foreach (Pilot techpilot in __instance.PilotRoster)
+                        {
+                            if (def.PilotTags.Contains("pilot_tech"))
+                                TechCount = TechCount + 1;
+                        }
+                        if(TechCount % settings.pilot_tech_TechsNeeded == 0)
+                            __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
                     }
 
                     if (def.PilotTags.Contains("pilot_disgraced"))
@@ -92,9 +103,20 @@ namespace Pilot_Quirks
         {
             public static void Postfix(SimGameState __instance, Pilot p)
             {
-                if (p.pilotDef.PilotTags.Contains("pilot_tech"))
+                if (p.pilotDef.PilotTags.Contains("pilot_tech") && !settings.pilot_tech_vanillaTech)
                 {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_tech_TechBonus, -1, true);
+                }
+                else if (p.pilotDef.PilotTags.Contains("pilot_tech") && settings.pilot_tech_vanillaTech)
+                {
+                    int TechCount = 0;
+                    foreach (Pilot techpilot in __instance.PilotRoster)
+                    {
+                        if (techpilot.pilotDef.PilotTags.Contains("pilot_tech"))
+                            TechCount = TechCount + 1;
+                    }
+                    if (TechCount % settings.pilot_tech_TechsNeeded == 0)
+                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_tech_TechBonus, -1, true);
                 }
 
                 if (p.pilotDef.PilotTags.Contains("pilot_disgraced"))
@@ -124,9 +146,20 @@ namespace Pilot_Quirks
         {
             public static void Prefix(SimGameState __instance, Pilot p)
             {
-                if (p.pilotDef.PilotTags.Contains("pilot_tech"))
+                if (p.pilotDef.PilotTags.Contains("pilot_tech") && !settings.pilot_tech_vanillaTech)
                 {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_tech_TechBonus, -1, true);
+                }
+                else if (p.pilotDef.PilotTags.Contains("pilot_tech") && settings.pilot_tech_vanillaTech)
+                {
+                    int TechCount = 0;
+                    foreach (Pilot techpilot in __instance.PilotRoster)
+                    {
+                        if (techpilot.pilotDef.PilotTags.Contains("pilot_tech"))
+                            TechCount = TechCount + 1;
+                    }
+                    if (TechCount % settings.pilot_tech_TechsNeeded == 0)
+                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_tech_TechBonus, -1, true);
                 }
 
                 if (p.pilotDef.PilotTags.Contains("pilot_disgraced"))
@@ -231,9 +264,20 @@ namespace Pilot_Quirks
                 {
                     foreach (Pilot pilot in __instance.PilotRoster)
                     {
-                        if (pilot.pilotDef.PilotTags.Contains("pilot_tech"))
+                        if (pilot.pilotDef.PilotTags.Contains("pilot_tech") && !settings.pilot_tech_vanillaTech)
                         {
                             __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
+                        }
+                        else if (settings.pilot_tech_vanillaTech)
+                        {
+                            int TechCount = 0;
+                            foreach (Pilot techpilot in __instance.PilotRoster)
+                            {
+                                if (pilot.pilotDef.PilotTags.Contains("pilot_tech"))
+                                    TechCount = TechCount + 1;
+                            }
+                            int TechAdd = TechCount / settings.pilot_tech_TechsNeeded;
+                                __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
                         }
 
                         if (pilot.pilotDef.PilotTags.Contains("pilot_disgraced"))
@@ -832,6 +876,8 @@ namespace Pilot_Quirks
         internal class ModSettings
         {
             public int pilot_tech_TechBonus = 100;
+            public bool pilot_tech_vanillaTech = false;
+            public int pilot_tech_TechsNeeded = 3;
             public int pilot_reckless_ToHitBonus = -1;
             public int pilot_reckless_ToBeHitBonus = -1;
             public int pilot_cautious_ToHitBonus = 1;
