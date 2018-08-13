@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
+using BattleTech.Data;
+using HBS.Collections;
 
 namespace Pilot_Quirks
 {
@@ -52,26 +54,45 @@ namespace Pilot_Quirks
         //    }
         //}
 
-        public static void AddMorale(SimGameState __instance)
+        public static void AdjustMorale(SimGameState __instance, Pilot pilot, PilotDef pilotDef)
         {
-            foreach (Pilot pilot in __instance.PilotRoster)
+            var stats = __instance.CompanyStats;
+            TagSet tags;
+            if (pilot == null)
             {
-                var tags = pilot.pilotDef.PilotTags;
-                var stats = __instance.CompanyStats;
-                if (tags.Contains("pilot_disgraced"))
-                {
-                    stats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_disgraced_MoralePenalty, -1, true);
-                }
+                tags = pilotDef.PilotTags;
+            }
+            else
+            {
+                tags = pilot.pilotDef.PilotTags;
+            }
 
-                if (tags.Contains("pilot_honest"))
-                {
-                    stats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_honest_MoraleBonus, -1, true);
-                }
+            if (tags.Contains("pilot_honest"))
+            {
+                stats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_honest_MoraleBonus, -1, true);
+            }
+            
+            if (tags.Contains("pilot_dishonest"))
+            {
+                stats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_dishonest_MoralePenalty, -1, true);
+            }
+            
+            if (tags.Contains("pilot_disgraced"))
+            {
+                stats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_disgraced_MoralePenalty, -1, true);
+            }
+            
+            if (tags.Contains("pilot_comstar"))
+            {
+                stats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_comstar_TechBonus, -1, true);
+            }
+        }
 
-                if (tags.Contains("pilot_dishonest"))
-                {
-                    stats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_dishonest_MoralePenalty, -1, true);
-                }
+        public static void CampaignStartMoraleAdjustment(SimGameState __instance)
+        {
+            foreach (var pilot in __instance.PilotRoster)
+            {
+                AdjustMorale(__instance, pilot, null);
             }
         }
 
@@ -83,7 +104,7 @@ namespace Pilot_Quirks
                 var codes = new List<CodeInstruction>(instructions);
                 var instructionsToInsert = new List<CodeInstruction>();
                 var index = codes.FindIndex(code => code.operand == (object) "Start Game");
-                var targetMethod = AccessTools.Method(typeof(Pre_Control), "AddMorale");
+                var targetMethod = AccessTools.Method(typeof(Pre_Control), "CampaignStartMoraleAdjustment");
                 
                 instructionsToInsert.Add(new CodeInstruction(OpCodes.Ldarg_0));
                 instructionsToInsert.Add(new CodeInstruction(OpCodes.Call, targetMethod));
@@ -116,26 +137,7 @@ namespace Pilot_Quirks
                             __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
                     }
 
-                    if (def.PilotTags.Contains("pilot_disgraced"))
-                    {
-                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_disgraced_MoralePenalty, -1, true);
-                    }
-
-                    if (def.PilotTags.Contains("pilot_comstar"))
-                    {
-                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_comstar_TechBonus, -1, true);
-                    }
-
-                    if (def.PilotTags.Contains("pilot_honest"))
-                    {
-                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_honest_MoraleBonus, -1, true);
-                    }
-
-                    if (def.PilotTags.Contains("pilot_dishonest"))
-                    {
-                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_dishonest_MoralePenalty, -1, true);
-                    }
-
+                    AdjustMorale(__instance, null, def);
                 }
 
             }
@@ -162,25 +164,7 @@ namespace Pilot_Quirks
                         __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_tech_TechBonus, -1, true);
                 }
 
-                if (p.pilotDef.PilotTags.Contains("pilot_disgraced"))
-                {
-                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_disgraced_MoralePenalty, -1, true);
-                }
-
-                if (p.pilotDef.PilotTags.Contains("pilot_comstar"))
-                {
-                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_comstar_TechBonus, -1, true);
-                }
-
-                if (p.pilotDef.PilotTags.Contains("pilot_honest"))
-                {
-                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_honest_MoraleBonus, -1, true);
-                }
-
-                if (p.pilotDef.PilotTags.Contains("pilot_dishonest"))
-                {
-                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_dishonest_MoralePenalty, -1, true);
-                }
+                AdjustMorale(__instance, p, null);
             }
         }
 
@@ -205,25 +189,7 @@ namespace Pilot_Quirks
                         __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_tech_TechBonus, -1, true);
                 }
 
-                if (p.pilotDef.PilotTags.Contains("pilot_disgraced"))
-                {
-                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_disgraced_MoralePenalty, -1, true);
-                }
-
-                if (p.pilotDef.PilotTags.Contains("pilot_comstar"))
-                {
-                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_comstar_TechBonus, -1, true);
-                }
-
-                if (p.pilotDef.PilotTags.Contains("pilot_honest"))
-                {
-                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_honest_MoraleBonus, -1, true);
-                }
-
-                if (p.pilotDef.PilotTags.Contains("pilot_dishonest"))
-                {
-                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_dishonest_MoralePenalty, -1, true);
-                }
+                AdjustMorale(__instance, p, null);
             }
         }
 
@@ -307,6 +273,8 @@ namespace Pilot_Quirks
                 {
                     foreach (Pilot pilot in __instance.PilotRoster)
                     {
+                        
+                        // TODO should probably be factored with AdjustMorale() but it's work
                         if (pilot.pilotDef.PilotTags.Contains("pilot_tech") && !settings.pilot_tech_vanillaTech)
                         {
                             __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
