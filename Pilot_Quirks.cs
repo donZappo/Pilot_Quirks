@@ -83,7 +83,28 @@ namespace Pilot_Quirks
 
         }
       
-        public static void AdjustTechBonus(SimGameState __instance, Pilot pilot, PilotDef pilotDef)
+        public static void AddTechBonus(SimGameState __instance, Pilot pilot, PilotDef pilotDef)
+        {
+            ResolveTagsAndStats(__instance, pilot, pilotDef, out var tags, out var stats);
+
+            if (tags.Contains("pilot_tech") && !settings.pilot_tech_vanillaTech)
+            {
+                stats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
+            }
+            else if (tags.Contains("pilot_tech") && settings.pilot_tech_vanillaTech)
+            {
+                int TechCount = 0;
+                foreach (Pilot techpilot in __instance.PilotRoster)
+                {
+                    if (tags.Contains("pilot_tech"))
+                        TechCount = TechCount + 1;
+                }
+                if (TechCount % settings.pilot_tech_TechsNeeded == 0)
+                    stats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
+            }
+        }
+        
+        public static void SubtractTechBonus(SimGameState __instance, Pilot pilot, PilotDef pilotDef)
         {
             ResolveTagsAndStats(__instance, pilot, pilotDef, out var tags, out var stats);
 
@@ -142,7 +163,7 @@ namespace Pilot_Quirks
             {
                 if (updatePilotDiscardPile == true)
                 {
-                    AdjustTechBonus(__instance, null, def);
+                    AddTechBonus(__instance, null, def);
                     AdjustMorale(__instance, null, def);
                 }
             }
@@ -153,7 +174,7 @@ namespace Pilot_Quirks
         {
             public static void Postfix(SimGameState __instance, Pilot p)
             {
-                AdjustTechBonus(__instance, p, null);
+                SubtractTechBonus(__instance, p, null);
                 AdjustMorale(__instance, p, null);
             }
         }
@@ -163,7 +184,7 @@ namespace Pilot_Quirks
         {
             public static void Prefix(SimGameState __instance, Pilot p)
             {
-                AdjustTechBonus(__instance, p, null);
+                SubtractTechBonus(__instance, p, null);
                 AdjustMorale(__instance, p, null);
             }
         }
@@ -248,7 +269,7 @@ namespace Pilot_Quirks
                 {
                     foreach (Pilot pilot in __instance.PilotRoster)
                     {
-                        AdjustTechBonus(__instance, pilot, null);
+                        AddTechBonus(__instance, pilot, null);
                         AdjustMorale(__instance, pilot, null);
                         }
                     }
