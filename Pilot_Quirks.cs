@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
-using BattleTech.Data;
 using HBS.Collections;
 
 namespace Pilot_Quirks
@@ -53,75 +52,67 @@ namespace Pilot_Quirks
         //        }
         //    }
         //}
+
+        /// <summary>
+        /// adjusts all tag stats based on the boolean.  one of Pilot or PilotDef will be null
+        /// </summary>
+        /// <param name="__instance"></param>
+        /// <param name="pilot"></param>
+        /// <param name="pilotDef"></param>
+        /// <param name="add">False reduces the stats</param>
+        public static void AdjustStats(SimGameState __instance, Pilot pilot, PilotDef pilotDef, bool add)
+        {
+            AdjustMorale(__instance, pilot, pilotDef, add);
+            AdjustTech(__instance, pilot, pilotDef, add);
+        }
+        
+        
+        public static void AdjustMorale(SimGameState __instance, Pilot pilot, PilotDef pilotDef, bool add)
+        {
+            ResolveTagsAndStats(__instance, pilot, pilotDef, out var tags, out var stats);
+            var op = add ? StatCollection.StatOperation.Int_Add : StatCollection.StatOperation.Int_Subtract;
+
+            if (tags.Contains("pilot_disgraced"))
+            {
+                stats.ModifyStat<int>("SimGame", 0, "Morale", op, settings.pilot_disgraced_MoralePenalty, -1, true);
+            }
+
+            if (tags.Contains("pilot_honest"))
+            {
+                stats.ModifyStat<int>("SimGame", 0, "Morale", op, settings.pilot_honest_MoraleBonus, -1, true);
+            }
+
+            if (tags.Contains("pilot_dishonest"))
+            {
+                stats.ModifyStat<int>("SimGame", 0, "Morale", op, settings.pilot_dishonest_MoralePenalty, -1, true);
+            }
+        }
+
+        public static void AdjustTech(SimGameState __instance, Pilot pilot, PilotDef pilotDef, bool add)
+        {
+            ResolveTagsAndStats(__instance, pilot, pilotDef, out var tags, out var stats);
+            var op = add ? StatCollection.StatOperation.Int_Add : StatCollection.StatOperation.Int_Subtract;
+
+            if (tags.Contains("pilot_tech"))
+            {
+                if (!settings.pilot_tech_vanillaTech)
+                {
+                    stats.ModifyStat<int>("SimGame", 0, "MechTechSkill", op, settings.pilot_tech_TechBonus, -1, true);
+                }
+                else
+                {
+                    int TechCount = tags.Count(tag => tag.Contains("pilot_tech"));
+                    if(TechCount % settings.pilot_tech_TechsNeeded == 0)
+                        stats.ModifyStat<int>("SimGame", 0, "MechTechSkill", op, settings.pilot_tech_TechBonus, -1, true);
+                }
+            }
+        }
         
         public static void CampaignStartMoraleAdjustment(SimGameState __instance)
         {
             foreach (var pilot in __instance.PilotRoster)
             {
-                AdjustMorale(__instance, pilot, null);
-            }
-        }
-
-        public static void AdjustMorale(SimGameState __instance, Pilot pilot, PilotDef pilotDef)
-        {
-            ResolveTagsAndStats(__instance, pilot, pilotDef, out var tags, out var stats);
-
-            if (tags.Contains("pilot_honest"))
-            {
-                stats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_honest_MoraleBonus, -1, true);
-            }
-            
-            if (tags.Contains("pilot_dishonest"))
-            {
-                stats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_dishonest_MoralePenalty, -1, true);
-            }
-            
-            if (tags.Contains("pilot_disgraced"))
-            {
-                stats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_disgraced_MoralePenalty, -1, true);
-            }
-
-        }
-      
-        public static void AddTechBonus(SimGameState __instance, Pilot pilot, PilotDef pilotDef)
-        {
-            ResolveTagsAndStats(__instance, pilot, pilotDef, out var tags, out var stats);
-
-            if (tags.Contains("pilot_tech") && !settings.pilot_tech_vanillaTech)
-            {
-                stats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
-            }
-            else if (tags.Contains("pilot_tech") && settings.pilot_tech_vanillaTech)
-            {
-                int TechCount = 0;
-                foreach (Pilot techpilot in __instance.PilotRoster)
-                {
-                    if (tags.Contains("pilot_tech"))
-                        TechCount = TechCount + 1;
-                }
-                if (TechCount % settings.pilot_tech_TechsNeeded == 0)
-                    stats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
-            }
-        }
-        
-        public static void SubtractTechBonus(SimGameState __instance, Pilot pilot, PilotDef pilotDef)
-        {
-            ResolveTagsAndStats(__instance, pilot, pilotDef, out var tags, out var stats);
-
-            if (tags.Contains("pilot_tech") && !settings.pilot_tech_vanillaTech)
-            {
-                stats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
-            }
-            else if (tags.Contains("pilot_tech") && settings.pilot_tech_vanillaTech)
-            {
-                int TechCount = 0;
-                foreach (Pilot techpilot in __instance.PilotRoster)
-                {
-                    if (tags.Contains("pilot_tech"))
-                        TechCount = TechCount + 1;
-                }
-                if (TechCount % settings.pilot_tech_TechsNeeded == 0)
-                    stats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
+                AdjustMorale(__instance, pilot, null, add: true);
             }
         }
 
@@ -137,7 +128,7 @@ namespace Pilot_Quirks
                 tags = pilot.pilotDef.PilotTags;
             }
         }
-
+       
         [HarmonyPatch(typeof(SimGameState), "_OnAttachUXComplete")]
         public static class PatchCampaignStartMorale
         {
@@ -162,9 +153,8 @@ namespace Pilot_Quirks
             public static void Postfix(SimGameState __instance, PilotDef def, bool updatePilotDiscardPile = false)
             {
                 if (updatePilotDiscardPile == true)
-                {
-                    AddTechBonus(__instance, null, def);
-                    AdjustMorale(__instance, null, def);
+                {                  
+                    AdjustStats(__instance, null, def, add: true);
                 }
             }
         }
@@ -174,8 +164,7 @@ namespace Pilot_Quirks
         {
             public static void Postfix(SimGameState __instance, Pilot p)
             {
-                SubtractTechBonus(__instance, p, null);
-                AdjustMorale(__instance, p, null);
+                AdjustStats(__instance, p, null, add: false);
             }
         }
 
@@ -184,8 +173,7 @@ namespace Pilot_Quirks
         {
             public static void Prefix(SimGameState __instance, Pilot p)
             {
-                SubtractTechBonus(__instance, p, null);
-                AdjustMorale(__instance, p, null);
+                AdjustStats(__instance, p, null, add: false);
             }
         }
 
@@ -265,16 +253,16 @@ namespace Pilot_Quirks
                         } 
                     }
                 }
-                    if (settings.IsSaveGame)
+
+                if (settings.IsSaveGame)
                 {
                     foreach (Pilot pilot in __instance.PilotRoster)
                     {
-                        AddTechBonus(__instance, pilot, null);
-                        AdjustMorale(__instance, pilot, null);
-                        }
+                        AdjustStats(__instance, pilot, null, add: true);
                     }
                 }
             }
+        }
         
         [HarmonyPatch(typeof(SimGameState), "GetReputationShopAdjustment", new Type[] { typeof(Faction) })]
         public static class Merchant_Bonus
