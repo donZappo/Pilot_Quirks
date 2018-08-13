@@ -7,7 +7,9 @@ using Newtonsoft.Json;
 using System.IO;
 using UnityEngine;
 using System.Collections.Generic;
-
+using System.Linq;
+using System.Reflection.Emit;
+using System.Text;
 
 namespace Pilot_Quirks
 {
@@ -49,6 +51,47 @@ namespace Pilot_Quirks
         //        }
         //    }
         //}
+
+        public static void AddMorale(SimGameState __instance)
+        {
+            foreach (Pilot pilot in __instance.PilotRoster)
+            {
+                var tags = pilot.pilotDef.PilotTags;
+                var stats = __instance.CompanyStats;
+                if (tags.Contains("pilot_disgraced"))
+                {
+                    stats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_disgraced_MoralePenalty, -1, true);
+                }
+
+                if (tags.Contains("pilot_honest"))
+                {
+                    stats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_honest_MoraleBonus, -1, true);
+                }
+
+                if (tags.Contains("pilot_dishonest"))
+                {
+                    stats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_dishonest_MoralePenalty, -1, true);
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(SimGameState), "_OnAttachUXComplete")]
+        public static class PatchCampaignStartMorale
+        {
+            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                var codes = new List<CodeInstruction>(instructions);
+                var instructionsToInsert = new List<CodeInstruction>();
+                var index = codes.FindIndex(code => code.operand == (object) "Start Game");
+                var targetMethod = AccessTools.Method(typeof(Pre_Control), "AddMorale");
+                
+                instructionsToInsert.Add(new CodeInstruction(OpCodes.Ldarg_0));
+                instructionsToInsert.Add(new CodeInstruction(OpCodes.Call, targetMethod));
+                codes.InsertRange(index + 2, instructionsToInsert);
+                
+                return codes.AsEnumerable();
+            }
+        }
 
         [HarmonyPatch(typeof(SimGameState), "AddPilotToRoster", new Type[] { typeof(PilotDef), typeof(bool) } )]
         public static class Pilot_Gained
