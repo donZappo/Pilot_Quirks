@@ -177,7 +177,7 @@ namespace Pilot_Quirks
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_honest_MoraleBonus, -1, true);
                 }
 
-                if (p.pilotDef.PilotTags.Contains("pilot_honest"))
+                if (p.pilotDef.PilotTags.Contains("pilot_dishonest"))
                 {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_dishonest_MoralePenalty, -1, true);
                 }
