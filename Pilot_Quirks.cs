@@ -417,8 +417,7 @@ namespace Pilot_Quirks
                     xpEarned = (int)(XPModifier * (float)xpEarned);
                 }
             }
-            
-        }
+                   }
         [HarmonyPatch(typeof(Team), "BaselineMoraleGain")]
         public static class Rebellious_Area_Prefix
         {
