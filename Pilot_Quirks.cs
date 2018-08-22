@@ -141,7 +141,7 @@ namespace Pilot_Quirks
             }
         }
 
-        [HarmonyPatch(typeof(SimGameState), "KillPilot", new Type[] { typeof(Pilot) })]
+        [HarmonyPatch(typeof(SimGameState), "KillPilot", new Type[] { typeof(Pilot) , typeof(bool) , typeof(string) , typeof(string)})]
         public static class Pilot_Died
         {
             public static void Postfix(SimGameState __instance, Pilot p)
@@ -418,7 +418,7 @@ namespace Pilot_Quirks
                 }
             }
                    }
-        [HarmonyPatch(typeof(Team), "BaselineMoraleGain")]
+        [HarmonyPatch(typeof(Team), "ApplyBaselineMoraleGain")]
         public static class Rebellious_Area_Prefix
         {
             private static bool Prefix(Team __instance)
@@ -427,52 +427,43 @@ namespace Pilot_Quirks
             }
         }
 
-        [HarmonyPatch(typeof(Team), "BaselineMoraleGain")]
+        [HarmonyPatch(typeof(Team), "ApplyBaselineMoraleGain")]
         public static class Rebellious_Area_Postfix
         {
-            private static void Postfix(Team __instance,ref List<IStackSequence> __result)
+            private static void Postfix(Team __instance, ref List<IStackSequence> __result)
             {
-                //var attackLogger = Traverse.Create("Logger").GetValue<Logger>();
                 List<IStackSequence> list = new List<IStackSequence>();
                 bool rebelpilot = false;
                 bool officer = false;
                 int edgecase = 0;
-                if (__instance.Combat.TurnDirector.IsInterleaved)
+                if (__instance.Combat.TurnDirector.IsInterleaved && (__instance.Combat.Constants.GetActiveMoraleDef(__instance.Combat).CanAIBeInspired ||
+                    !(__instance is AITeam)))
                 {
-                    MoraleConstantsDef activeMoraleDef = __instance.Combat.Constants.GetActiveMoraleDef(__instance.Combat);
-                    int num = activeMoraleDef.MoraleBaselineGainPerRound;
-                    if (activeMoraleDef.MoraleBaselineMultiplyByActive)
+                    int baselineMoraleGain = __instance.BaselineMoraleGain;
+                    foreach (AbstractActor actor in __instance.units)
                     {
-                        num *= __instance.NumLivingUnits;
+                        Pilot pilot = actor.GetPilot();
+                        if (pilot.pilotDef.PilotTags.Contains("pilot_rebellious"))
+                        {
+                            rebelpilot = true;
+                        }
+                        if (pilot.pilotDef.PilotTags.Contains("pilot_officer") || pilot.pilotDef.PilotTags.Contains("commander_player"))
+                        {
+                            officer = true;
+                        }
+                        if (rebelpilot && officer)
+                        {
+                            edgecase = edgecase + 1;
+                        }
+                        if (officer && rebelpilot && edgecase != 1)
+                        {
+                            baselineMoraleGain = 0;
+                        }
                     }
-                    if (num > 0)
+
+                    if (baselineMoraleGain > 0)
                     {
-                        foreach (AbstractActor actor in __instance.units)
-                        {
-                            Pilot pilot = actor.GetPilot();
-                            if (pilot.pilotDef.PilotTags.Contains("pilot_rebellious"))
-                            {
-                                rebelpilot = true;
-                            }
-                            if (pilot.pilotDef.PilotTags.Contains("pilot_officer") || pilot.pilotDef.PilotTags.Contains("commander_player"))
-                            {
-                                officer = true;
-                            }
-                            if (rebelpilot && officer)
-                            {
-                                edgecase = edgecase + 1;
-                            }
-                        }
-                        if (rebelpilot && officer && edgecase != 1)
-                        {
-                            //attackLogger.Log(string.Format("MORALE: team {0} gains {1} baseline morale", __instance.DisplayName, 0));
-                            __instance.ModifyMorale(0);
-                        }
-                        else
-                        {
-                            //attackLogger.Log(string.Format("MORALE: team {0} gains {1} baseline morale", __instance.DisplayName, num));
-                            __instance.ModifyMorale(num);
-                        }
+                        __instance.ModifyMorale(baselineMoraleGain);
                         if (__instance == __instance.Combat.LocalPlayerTeam)
                         {
                             list.Add(new DelaySequence(__instance.Combat, 1f));
@@ -480,7 +471,6 @@ namespace Pilot_Quirks
                     }
                     else
                     {
-                        //attackLogger.Log(string.Format("MORALE: team {0} gains {0} baseline morale", __instance.DisplayName));
                     }
                 }
                 __result = list;
@@ -850,7 +840,7 @@ namespace Pilot_Quirks
 
 
 
-        [HarmonyPatch(typeof(Mech), "GetHitLocation", new Type[] { typeof(AbstractActor), typeof(Vector3), typeof(float), typeof(ArmorLocation), typeof(float) })]
+        [HarmonyPatch(typeof(Mech), "GetHitLocation", new Type[] { typeof(AbstractActor), typeof(float), typeof(int), typeof(float) })]
         public static class Assassin_Patch
         {
             private static void Prefix(Mech __instance, AbstractActor attacker, float bonusMultiplier)
