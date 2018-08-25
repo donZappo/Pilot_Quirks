@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
+using Localize;
 
 namespace Pilot_Quirks
 {
@@ -851,6 +852,71 @@ namespace Pilot_Quirks
                 {
                     bonusMultiplier = bonusMultiplier + settings.pilot_assassin_CalledShotBonus;
                 }
+            }
+        }
+
+        // hacked from decompile
+        [HarmonyPatch(typeof(HumanDescriptionDef), nameof(HumanDescriptionDef.GetLocalizedDetails), MethodType.Normal)]
+        public static class GetLocalizedDetailsPatch
+        {
+            public static bool Prefix(HumanDescriptionDef __instance, ref Text __result)
+            {
+                var instance = __instance;
+                if (instance.Details == null)
+                {
+                    __result = new Text();
+                    return false;
+                }
+                if (instance.localizedDetails != null && instance.detailsParsed)
+                {
+                    __result = instance.localizedDetails;
+                    return false;
+                }
+                Text text = new Text();
+                if (instance.isGenerated)
+                {
+                    string[] strArray = instance.Details.Split(new string[4]
+                    {
+                Environment.NewLine,
+                "<b>",
+                ":</b>",
+                "\n\n"
+                    }, StringSplitOptions.RemoveEmptyEntries);
+                    // pad the array length to make it even
+                    if (strArray.Length % 2 != 0)
+                    {
+                        Array.Resize(ref strArray, strArray.Length + 1);
+                    }
+                    int index = 0;
+                    while (index < strArray.Length)
+                    {
+                        text.Append("<b>{0}:</b> {1}\n\n", (object[])new string[2]
+                        {
+                    strArray[index],
+                    strArray[index + 1]
+                        });
+                        index += 2;
+                    }
+                }
+                else if (instance.isCommander)
+                {
+                    string details = instance.Details;
+                    string[] separator = new string[1]
+                        {Environment.NewLine};
+                    int num = 1;
+                    foreach (object obj in details.Split(separator, (StringSplitOptions)num))
+                    {
+                        text.Append("{0} \n\n", obj);
+                    }
+                }
+                else
+                {
+                    text.Append(instance.Details, new object[0]);
+                }
+                instance.detailsParsed = true;
+                instance.localizedDetails = text;
+                __result = text;
+                return false;
             }
         }
 
