@@ -420,65 +420,36 @@ namespace Pilot_Quirks
             }
         }
         
-        [HarmonyPatch(typeof(Team), "ApplyBaselineMoraleGain")]
-        public static class Rebellious_Area_Prefix
+        [HarmonyPatch(typeof(Team), "CollectUnitBaseline")]
+        public static class Rebellious_Area
         {
-            private static bool Prefix(Team __instance)
+            private static void Postfix(Team __instance, ref int __result)
             {
-                return false;
-            }
-        }
-
-        [HarmonyPatch(typeof(Team), "ApplyBaselineMoraleGain")]
-        public static class Rebellious_Area_Postfix
-        {
-            private static void Postfix(Team __instance, ref List<IStackSequence> __result)
-            {
-                List<IStackSequence> list = new List<IStackSequence>();
                 bool rebelpilot = false;
                 bool officer = false;
                 int edgecase = 0;
-                if (__instance.Combat.TurnDirector.IsInterleaved && (__instance.Combat.Constants.GetActiveMoraleDef(__instance.Combat).CanAIBeInspired ||
-                    !(__instance is AITeam)))
+                foreach (AbstractActor actor in __instance.units)
                 {
-                    int baselineMoraleGain = __instance.BaselineMoraleGain;
-                    foreach (AbstractActor actor in __instance.units)
+                    Pilot pilot = actor.GetPilot();
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_rebellious"))
                     {
-                        Pilot pilot = actor.GetPilot();
-                        if (pilot.pilotDef.PilotTags.Contains("pilot_rebellious"))
-                        {
-                            rebelpilot = true;
-                        }
-                        if (pilot.pilotDef.PilotTags.Contains("pilot_officer") || pilot.pilotDef.PilotTags.Contains("commander_player"))
-                        {
-                            officer = true;
-                        }
-                        if (rebelpilot && officer)
-                        {
-                            edgecase = edgecase + 1;
-                        }
-                        if (officer && rebelpilot && edgecase != 1)
-                        {
-                            baselineMoraleGain = 0;
-                        }
+                        rebelpilot = true;
                     }
-
-                    if (baselineMoraleGain > 0)
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_officer") || pilot.pilotDef.PilotTags.Contains("commander_player"))
                     {
-                        __instance.ModifyMorale(baselineMoraleGain);
-                        if (__instance == __instance.Combat.LocalPlayerTeam)
-                        {
-                            list.Add(new DelaySequence(__instance.Combat, 1f));
-                        }
+                        officer = true;
                     }
-                    else
+                    if (rebelpilot && officer)
                     {
+                        edgecase = edgecase + 1;
+                    }
+                    if (officer && rebelpilot && edgecase != 1)
+                    {
+                        __result = __result - 5;     
                     }
                 }
-                __result = list;
             }
         }
-
 
         /// <summary>
         /// Following is to-hit modifiers area.
