@@ -292,9 +292,16 @@ namespace Pilot_Quirks
                     }
 
                 }
+                bool honest = false;
                 foreach (Pilot pilot in __instance.PilotRoster)
                 {
-                    if (pilot.pilotDef.PilotTags.Contains("pilot_criminal"))
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_honest"))
+                        honest = true;
+                }
+
+                foreach (Pilot pilot in __instance.PilotRoster)
+                {
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_criminal") && !honest)
                     {
                         var rng = new System.Random();
                         int Roll = rng.Next(1, 101);
@@ -368,15 +375,9 @@ namespace Pilot_Quirks
                 SimGameState Sim = Traverse.Create(__instance).Field("Sim").GetValue<SimGameState>();
                 if (Sim.CurSystem.Tags.Contains("planet_other_blackmarket"))
                 {
-                    bool honest = false;
                     foreach (Pilot pilot in Sim.PilotRoster)
                     {
-                        if (pilot.pilotDef.PilotTags.Contains("pilot_honest"))
-                            honest = true;
-                    }
-                    foreach (Pilot pilot in Sim.PilotRoster)
-                    {
-                        if (pilot.pilotDef.PilotTags.Contains("pilot_criminal") && !honest)
+                        if (pilot.pilotDef.PilotTags.Contains("pilot_criminal"))
                         max = max + 2;
                     }
                 }
