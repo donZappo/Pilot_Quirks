@@ -367,22 +367,26 @@ namespace Pilot_Quirks
             }
         }
 
-        [HarmonyPatch(typeof(SimGameState), "GetReputationShopAdjustment", new Type[] { typeof(SimGameReputation) })]
-        public static class Merchant_Bonus_SimGameRep
-        {
-            public static void Postfix(SimGameState __instance, ref float __result)
-            {
-                float MerchantCount = 0;
-                foreach (Pilot pilot in __instance.PilotRoster)
-                {
-                    if (pilot.pilotDef.PilotTags.Contains("pilot_merchant"))
-                    {
-                        MerchantCount = MerchantCount + 1;
-                    }
-                }
-                __result = __result - settings.pilot_merchant_ShopDiscount * MerchantCount / 100;
-            }
-        }
+        //[HarmonyPatch(typeof(SimGameState), "GetReputationShopAdjustment", new Type[] { typeof(SimGameReputation) })]
+        //public static class Merchant_Bonus_SimGameRep
+        //{
+        //    public static void Postfix(SimGameState __instance, ref float __result)
+        //    {
+        //        float MerchantCount = 0;
+        //        Helper.Logger.LogLine("SimGameReputation");
+        //        foreach (Pilot pilot in __instance.PilotRoster)
+        //        {
+        //            if (pilot.pilotDef.PilotTags.Contains("pilot_merchant"))
+        //            {
+        //                MerchantCount = MerchantCount + 1;
+        //            }
+        //        }
+        //        Helper.Logger.LogLine(MerchantCount.ToString());
+        //        Helper.Logger.LogLine(__result.ToString());
+        //        __result = __result - settings.pilot_merchant_ShopDiscount * MerchantCount / 100;
+        //        Helper.Logger.LogLine(__result.ToString());
+        //    }
+        //}
 
         [HarmonyPatch(typeof(Shop), "PopulateInventory")]
         public static class Criminal_Shops
