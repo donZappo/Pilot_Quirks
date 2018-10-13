@@ -351,7 +351,7 @@ namespace Pilot_Quirks
             }
         }
         [HarmonyPatch(typeof(SimGameState), "GetReputationShopAdjustment", new Type[] { typeof(Faction) })]
-        public static class Merchant_Bonus
+        public static class Merchant_Bonus_Faction
         {
             public static void Postfix(SimGameState __instance, ref float __result)
             {
@@ -364,6 +364,23 @@ namespace Pilot_Quirks
                     }
                 }
                 __result = __result - settings.pilot_merchant_ShopDiscount * MerchantCount/100;
+            }
+        }
+
+        [HarmonyPatch(typeof(SimGameState), "GetReputationShopAdjustment", new Type[] { typeof(SimGameReputation) })]
+        public static class Merchant_Bonus_SimGameRep
+        {
+            public static void Postfix(SimGameState __instance, ref float __result)
+            {
+                float MerchantCount = 0;
+                foreach (Pilot pilot in __instance.PilotRoster)
+                {
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_merchant"))
+                    {
+                        MerchantCount = MerchantCount + 1;
+                    }
+                }
+                __result = __result - settings.pilot_merchant_ShopDiscount * MerchantCount / 100;
             }
         }
 
