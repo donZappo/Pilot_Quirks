@@ -9,7 +9,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
-using System.Text;
 using Localize;
 
 namespace Pilot_Quirks
@@ -94,7 +93,7 @@ namespace Pilot_Quirks
             }
         }
 
-        [HarmonyPatch(typeof(SimGameState), "AddPilotToRoster", new Type[] { typeof(PilotDef), typeof(bool) } )]
+        [HarmonyPatch(typeof(SimGameState), "AddPilotToRoster", typeof(PilotDef), typeof(bool), typeof(bool))]
         public static class Pilot_Gained
         {
             public static void Postfix(SimGameState __instance, PilotDef def, bool updatePilotDiscardPile = false)
@@ -388,30 +387,30 @@ namespace Pilot_Quirks
         //    }
         //}
 
-        [HarmonyPatch(typeof(Shop), "PopulateInventory")]
-        public static class Criminal_Shops
-        {
-            public static void Prefix(Shop __instance, int max)
-            {
-                SimGameState Sim = Traverse.Create(__instance).Field("Sim").GetValue<SimGameState>();
-                if (Sim.CurSystem.Tags.Contains("planet_other_blackmarket"))
-                {
-                    foreach (Pilot pilot in Sim.PilotRoster)
-                    {
-                        if (pilot.pilotDef.PilotTags.Contains("pilot_criminal"))
-                        max = max + 2;
-                    }
-                }
+        //[HarmonyPatch(typeof(Shop), "PopulateInventory")]
+        //public static class Criminal_Shops
+        //{
+        //    public static void Prefix(Shop __instance, int max)
+        //    {
+        //        SimGameState Sim = Traverse.Create(__instance).Field("Sim").GetValue<SimGameState>();
+        //        if (Sim.CurSystem.Tags.Contains("planet_other_blackmarket"))
+        //        {
+        //            foreach (Pilot pilot in Sim.PilotRoster)
+        //            {
+        //                if (pilot.pilotDef.PilotTags.Contains("pilot_criminal"))
+        //                max = max + 2;
+        //            }
+        //        }
 
-                foreach (Pilot pilot in Sim.PilotRoster)
-                {
-                    if (pilot.pilotDef.PilotTags.Contains("pilot_comstar"))
-                    {
-                        max = max + 3;
-                    }
-                }
-            } 
-        }
+        //        foreach (Pilot pilot in Sim.PilotRoster)
+        //        {
+        //            if (pilot.pilotDef.PilotTags.Contains("pilot_comstar"))
+        //            {
+        //                max = max + 3;
+        //            }
+        //        }
+        //    } 
+        //}
 
 
         [HarmonyPatch(typeof(Pilot), "InjurePilot")]
