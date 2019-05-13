@@ -416,7 +416,7 @@ namespace Pilot_Quirks
         [HarmonyPatch(typeof(Pilot), "InjurePilot")]
         public static class Lucky_Pilot
         {
-            public static void Prefix(Pilot __instance, int dmg)
+            public static void Prefix(Pilot __instance, ref int dmg)
             {
                 var rng = new System.Random();
                 int Roll = rng.Next(1, 101);
@@ -430,7 +430,7 @@ namespace Pilot_Quirks
         [HarmonyPatch(typeof(AAR_UnitStatusWidget), "FillInData")]
         public static class Adjust_Pilot_XP
         {
-            public static void Prefix(AAR_UnitStatusWidget __instance, int xpEarned)
+            public static void Prefix(AAR_UnitStatusWidget __instance, ref int xpEarned)
             {
                 UnitResult unit = Traverse.Create(__instance).Field("UnitData").GetValue<UnitResult>();
                 if (unit.pilot.pilotDef.PilotTags.Contains("pilot_naive"))
@@ -837,7 +837,7 @@ namespace Pilot_Quirks
         [HarmonyPatch(typeof(Mech), "GetHitLocation", new Type[] { typeof(AbstractActor), typeof(float), typeof(int), typeof(float) })]
         public static class Assassin_Patch
         {
-            private static void Prefix(Mech __instance, AbstractActor attacker, float bonusMultiplier)
+            private static void Prefix(Mech __instance, AbstractActor attacker, ref float bonusMultiplier)
             {
                 Pilot pilot = attacker.GetPilot();
                 if (pilot.pilotDef.PilotTags.Contains("pilot_assassin"))
