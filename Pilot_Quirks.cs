@@ -964,6 +964,19 @@ namespace Pilot_Quirks
                 }
             }
         }
+
+        [HarmonyPatch(typeof(TagDataStructFetcher), "GetItem")]
+        public static class TagDataStructFetcher_GetItem_Patch
+        {
+            public static void Postfix(string id, TagDataStruct __result)
+            {
+                if (!settings.TagIDToDescription.ContainsKey(id))
+                    return;
+
+                __result.DescriptionTag = settings.TagIDToDescription[id];
+            }
+        }
+
         internal class ModSettings
         {
             public int pilot_tech_TechBonus = 100;
@@ -992,6 +1005,7 @@ namespace Pilot_Quirks
             public int pilot_honest_MoraleBonus = 1;
             public int pilot_dishonest_MoralePenalty = -1;
 
+            public Dictionary<string, string> TagIDToDescription = new Dictionary<string, string>();
 
             public bool IsSaveGame = false;
 
