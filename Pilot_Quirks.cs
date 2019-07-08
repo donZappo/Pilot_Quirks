@@ -52,7 +52,7 @@ namespace Pilot_Quirks
         //    }
         //}
 
-        public static void AddMorale(SimGameState __instance)
+        public static void StartGameAudit(SimGameState __instance)
         {
             foreach (Pilot pilot in __instance.PilotRoster)
             {
@@ -72,6 +72,20 @@ namespace Pilot_Quirks
                 {
                     stats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_dishonest_MoralePenalty, -1, true);
                 }
+                if (tags.Contains("pilot_military"))
+                {
+                    int newXP = pilot.UnspentXP + settings.pilot_military_XP;
+                    PilotDef pilotDef = pilot.ToPilotDef(false);
+                    pilotDef.SetUnspentExperience(newXP);
+                    pilot.FromPilotDef(pilotDef);
+                }
+                if (tags.Contains("pilot_mechwarrior"))
+                {
+                    int newXP = pilot.pilotDef.ExperienceUnspent + settings.pilot_mechwarrior_XP;
+                    PilotDef pilotDef = pilot.ToPilotDef(false);
+                    pilotDef.SetUnspentExperience(newXP);
+                    pilot.FromPilotDef(pilotDef);
+                }
             }
         }
 
@@ -83,7 +97,7 @@ namespace Pilot_Quirks
                 var codes = new List<CodeInstruction>(instructions);
                 var instructionsToInsert = new List<CodeInstruction>();
                 var index = codes.FindIndex(code => code.operand == (object) "Start Game");
-                var targetMethod = AccessTools.Method(typeof(Pre_Control), "AddMorale");
+                var targetMethod = AccessTools.Method(typeof(Pre_Control), "StartGameAudit");
                 
                 instructionsToInsert.Add(new CodeInstruction(OpCodes.Ldarg_0));
                 instructionsToInsert.Add(new CodeInstruction(OpCodes.Call, targetMethod));
@@ -96,6 +110,20 @@ namespace Pilot_Quirks
         [HarmonyPatch(typeof(SimGameState), "AddPilotToRoster", typeof(PilotDef), typeof(bool), typeof(bool))]
         public static class Pilot_Gained
         {
+            public static void Prefix(ref PilotDef def)
+            {
+                if (def.PilotTags.Contains("pilot_military"))
+                {
+                    int newXP = def.ExperienceUnspent + settings.pilot_military_XP;
+                    def.SetUnspentExperience(newXP);
+                }
+                if (def.PilotTags.Contains("pilot_mechwarrior"))
+                {
+                    int newXP = def.ExperienceUnspent + settings.pilot_mechwarrior_XP;
+                    def.SetUnspentExperience(newXP);
+                }
+            }
+
             public static void Postfix(SimGameState __instance, PilotDef def, bool updatePilotDiscardPile = false)
             {
                 if (updatePilotDiscardPile == true)
@@ -135,7 +163,6 @@ namespace Pilot_Quirks
                     {
                         __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_dishonest_MoralePenalty, -1, true);
                     }
-
                 }
 
             }
@@ -1004,6 +1031,8 @@ namespace Pilot_Quirks
             public int pilot_comstar_StoreBonus = 3;
             public int pilot_honest_MoraleBonus = 1;
             public int pilot_dishonest_MoralePenalty = -1;
+            public int pilot_military_XP = 2000;
+            public int pilot_mechwarrior_XP = 4000;
 
             public Dictionary<string, string> TagIDToDescription = new Dictionary<string, string>();
 
