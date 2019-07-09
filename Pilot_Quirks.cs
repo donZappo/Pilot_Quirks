@@ -72,20 +72,6 @@ namespace Pilot_Quirks
                 {
                     stats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_dishonest_MoralePenalty, -1, true);
                 }
-                if (tags.Contains("pilot_military"))
-                {
-                    int newXP = pilot.UnspentXP + settings.pilot_military_XP;
-                    PilotDef pilotDef = pilot.ToPilotDef(false);
-                    pilotDef.SetUnspentExperience(newXP);
-                    pilot.FromPilotDef(pilotDef);
-                }
-                if (tags.Contains("pilot_mechwarrior"))
-                {
-                    int newXP = pilot.pilotDef.ExperienceUnspent + settings.pilot_mechwarrior_XP;
-                    PilotDef pilotDef = pilot.ToPilotDef(false);
-                    pilotDef.SetUnspentExperience(newXP);
-                    pilot.FromPilotDef(pilotDef);
-                }
             }
         }
 
@@ -122,6 +108,31 @@ namespace Pilot_Quirks
                     int newXP = def.ExperienceUnspent + settings.pilot_mechwarrior_XP;
                     def.SetUnspentExperience(newXP);
                 }
+                //if (def.PilotTags.Contains("pilot_bookish"))
+                //{
+                //    Helper.Logger.LogLine(def.Description.Callsign);
+                //    int newTactics = def.BaseTactics + settings.pilot_bookish_Delta;
+                //    if (newTactics > 10)
+                //        newTactics = 10;
+                //    int newGunnery = def.BaseGunnery - settings.pilot_bookish_Delta;
+                //    if (newGunnery < 1)
+                //        newGunnery = 1;
+                //    int newPiloting = def.BasePiloting - settings.pilot_bookish_Delta;
+                //    if (newPiloting < 1)
+                //        newPiloting = 1;
+                //    int newGuts = def.BaseGuts - settings.pilot_bookish_Delta;
+                //    if (newGuts < 1)
+                //        newGuts = 1;
+                //    Traverse.Create(def).Property("BaseTactics").SetValue(newTactics);
+                //    Traverse.Create(def).Property("BaseGunnery").SetValue(newGunnery);
+                //    Traverse.Create(def).Property("BasePiloting").SetValue(newPiloting);
+                //    Traverse.Create(def).Property("BaseGuts").SetValue(newGuts);
+                //    Traverse.Create(def).Method("refreshAbilityDefs").GetValue();
+
+                //    int newXP = def.ExperienceUnspent + 20000;
+                //    def.SetUnspentExperience(newXP);
+                //}
+
             }
 
             public static void Postfix(SimGameState __instance, PilotDef def, bool updatePilotDiscardPile = false)
@@ -445,11 +456,14 @@ namespace Pilot_Quirks
         {
             public static void Prefix(Pilot __instance, ref int dmg)
             {
-                var rng = new System.Random();
-                int Roll = rng.Next(1, 101);
-                if (Roll <= settings.pilot_lucky_InjuryAvoidance)
+                if (__instance.pilotDef.PilotTags.Contains("pilot_lucky"))
                 {
-                    dmg = 0;
+                    var rng = new System.Random();
+                    int Roll = rng.Next(1, 101);
+                    if (Roll <= settings.pilot_lucky_InjuryAvoidance)
+                    {
+                        dmg = 0;
+                    }
                 }
             }
         }
@@ -1033,6 +1047,7 @@ namespace Pilot_Quirks
             public int pilot_dishonest_MoralePenalty = -1;
             public int pilot_military_XP = 2000;
             public int pilot_mechwarrior_XP = 4000;
+            public int pilot_bookish_Delta = 1;
 
             public Dictionary<string, string> TagIDToDescription = new Dictionary<string, string>();
 
