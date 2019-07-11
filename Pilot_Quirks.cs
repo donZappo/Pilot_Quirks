@@ -1022,8 +1022,6 @@ namespace Pilot_Quirks
             public int pilot_military_XP = 2000;
             public int pilot_mechwarrior_XP = 4000;
             public float pilot_bookish_change = 0.1f;
-            public int pilot_bookish_Multiplier = 10;
-            public float pilot_bookish_Exponent = 0.1f;
 
             public Dictionary<string, string> TagIDToDescription = new Dictionary<string, string>();
 
