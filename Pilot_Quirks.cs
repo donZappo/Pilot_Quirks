@@ -82,13 +82,13 @@ namespace Pilot_Quirks
             {
                 var codes = new List<CodeInstruction>(instructions);
                 var instructionsToInsert = new List<CodeInstruction>();
-                var index = codes.FindIndex(code => code.operand == (object) "Start Game");
+                var index = codes.FindIndex(code => code.operand == (object)"Start Game");
                 var targetMethod = AccessTools.Method(typeof(Pre_Control), "StartGameAudit");
-                
+
                 instructionsToInsert.Add(new CodeInstruction(OpCodes.Ldarg_0));
                 instructionsToInsert.Add(new CodeInstruction(OpCodes.Call, targetMethod));
                 codes.InsertRange(index + 2, instructionsToInsert);
-                
+
                 return codes.AsEnumerable();
             }
         }
@@ -96,7 +96,7 @@ namespace Pilot_Quirks
         [HarmonyPatch(typeof(SimGameState), "AddPilotToRoster", typeof(PilotDef), typeof(bool), typeof(bool))]
         public static class Pilot_Gained
         {
-            public static void Prefix(ref PilotDef def)
+            public static void Prefix(SimGameState __instance, ref PilotDef def)
             {
                 if (def.PilotTags.Contains("pilot_military"))
                 {
@@ -108,31 +108,6 @@ namespace Pilot_Quirks
                     int newXP = def.ExperienceUnspent + settings.pilot_mechwarrior_XP;
                     def.SetUnspentExperience(newXP);
                 }
-                //if (def.PilotTags.Contains("pilot_bookish"))
-                //{
-                //    Helper.Logger.LogLine(def.Description.Callsign);
-                //    int newTactics = def.BaseTactics + settings.pilot_bookish_Delta;
-                //    if (newTactics > 10)
-                //        newTactics = 10;
-                //    int newGunnery = def.BaseGunnery - settings.pilot_bookish_Delta;
-                //    if (newGunnery < 1)
-                //        newGunnery = 1;
-                //    int newPiloting = def.BasePiloting - settings.pilot_bookish_Delta;
-                //    if (newPiloting < 1)
-                //        newPiloting = 1;
-                //    int newGuts = def.BaseGuts - settings.pilot_bookish_Delta;
-                //    if (newGuts < 1)
-                //        newGuts = 1;
-                //    Traverse.Create(def).Property("BaseTactics").SetValue(newTactics);
-                //    Traverse.Create(def).Property("BaseGunnery").SetValue(newGunnery);
-                //    Traverse.Create(def).Property("BasePiloting").SetValue(newPiloting);
-                //    Traverse.Create(def).Property("BaseGuts").SetValue(newGuts);
-                //    Traverse.Create(def).Method("refreshAbilityDefs").GetValue();
-
-                //    int newXP = def.ExperienceUnspent + 20000;
-                //    def.SetUnspentExperience(newXP);
-                //}
-
             }
 
             public static void Postfix(SimGameState __instance, PilotDef def, bool updatePilotDiscardPile = false)
@@ -175,7 +150,6 @@ namespace Pilot_Quirks
                         __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_dishonest_MoralePenalty, -1, true);
                     }
                 }
-
             }
         }
 
@@ -1047,7 +1021,9 @@ namespace Pilot_Quirks
             public int pilot_dishonest_MoralePenalty = -1;
             public int pilot_military_XP = 2000;
             public int pilot_mechwarrior_XP = 4000;
-            public int pilot_bookish_Delta = 1;
+            public float pilot_bookish_change = 0.1f;
+            public int pilot_bookish_Multiplier = 10;
+            public float pilot_bookish_Exponent = 0.1f;
 
             public Dictionary<string, string> TagIDToDescription = new Dictionary<string, string>();
 

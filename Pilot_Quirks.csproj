@@ -78,6 +78,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExperienceAdjustments.cs" />
     <Compile Include="Pilot_Quirks.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
