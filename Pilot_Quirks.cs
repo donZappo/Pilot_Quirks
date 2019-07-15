@@ -1054,8 +1054,7 @@ namespace Pilot_Quirks
             public int pilot_dishonest_MoralePenalty = -1;
             public int pilot_military_XP = 2000;
             public int pilot_mechwarrior_XP = 4000;
-            public float pilot_bookish_change = 0.1f;
-            public float pilot_klutz_change = 0.1f;
+            public float pilot_XP_change = 0.1f;
             public int pilot_officer_BonusResolve = 5;
             public float pilot_command_BonusLanceXP = 5;
 
