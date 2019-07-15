@@ -22,6 +22,7 @@ namespace Pilot_Quirks
         public static float ExpHolder;
         public static float MultHolder;
         public static bool isBookish = false;
+        public static bool isKlutz = false;
         public static bool OnValueClick;
         public static SimGameState saveSimState;
         public static Pilot SavedPilot;
@@ -34,12 +35,17 @@ namespace Pilot_Quirks
             {
                 if (__result.PilotTags.Contains("pilot_bookish"))
                 {
-                    __result.ExperienceSpent = BookishCalculateExperience(__result, 1);
+                    __result.ExperienceSpent = CalculateExperience(__result, 1);
+                }
+                if (__result.PilotTags.Contains("pilot_klutz"))
+                {
+                    __result.ExperienceSpent = CalculateExperience(__result, 1);
                 }
             }
         }
 
-        public static int BookishCalculateExperience(PilotDef pilotdef, int minLevel)
+
+        public static int CalculateExperience(PilotDef pilotdef, int minLevel)
         {
             var sim = UnityGameInstance.BattleTechGame.Simulation;
             int TotalXP = 0;
@@ -52,7 +58,8 @@ namespace Pilot_Quirks
             }
             for (int i = pilotdef.SkillPiloting; i > 1; i--)
             {
-                TotalXP += Mathf.CeilToInt(Mathf.Pow((float)i, exp) * mult);
+                TotalXP += Mathf.CeilToInt(Mathf.Pow((float)i, (exp + exp * Pre_Control.settings.pilot_klutz_change))
+                    * (mult + mult * Pre_Control.settings.pilot_klutz_change));
             }
             for (int i = pilotdef.SkillGuts; i > 1; i--)
             {
@@ -77,33 +84,44 @@ namespace Pilot_Quirks
                     PilotDef pilotDef = pilot.pilotDef.CopyToSim();
                     isIncreased = false;
                     isDecreased = false;
-                    isBookish = false;
+                    isBookish = pilot.pilotDef.PilotTags.Contains("pilot_bookish");
+                    isKlutz = pilot.pilotDef.PilotTags.Contains("pilot_klutz");
+
                     int NewXP = 0;
-                    if (pilot.pilotDef.PilotTags.Contains("pilot_bookish"))
+
+                    if (isBookish || isKlutz)
                     {
-                        isBookish = true;
                         if (pilotDef.BonusPiloting > 0)
                         {
-                            isIncreased = false;
+                            if (isKlutz)
+                                isIncreased = true;
+                            else
+                                isIncreased = false;
                             isDecreased = false;
                             NewXP += __instance.GetLevelRangeCost(pilotDef.BasePiloting, pilotDef.SkillPiloting - 1);
                         }
                         if (pilotDef.BonusGunnery > 0)
                         {
-                            isIncreased = true;
+                            isIncreased = false;
                             isDecreased = false;
                             NewXP += __instance.GetLevelRangeCost(pilotDef.BaseGunnery, pilotDef.SkillGunnery - 1);
                         }
                         if (pilotDef.BonusGunnery > 0)
                         {
-                            isIncreased = true;
+                            if (isBookish)
+                                isIncreased = true;
+                            else
+                                isIncreased = false;
                             isDecreased = false;
                             NewXP += __instance.GetLevelRangeCost(pilotDef.BaseGunnery, pilotDef.SkillGunnery - 1);
                         }
                         if (pilotDef.BonusTactics > 0)
                         {
                             isIncreased = false;
-                            isDecreased = true;
+                            if (isBookish)
+                                isDecreased = true;
+                            else
+                                isDecreased = false;
                             NewXP += __instance.GetLevelRangeCost(pilotDef.BaseTactics, pilotDef.SkillTactics - 1);
                         }
                     }
@@ -127,15 +145,26 @@ namespace Pilot_Quirks
                     ExpHolder = __instance.Constants.Pilot.PilotLevelCostExponent;
                     MultHolder = __instance.Constants.Pilot.PilotLevelCostMultiplier;
 
-                    if (isIncreased)
+                    if (isIncreased && isBookish)
                     {
                         __instance.Constants.Pilot.PilotLevelCostExponent *= 1 + Pre_Control.settings.pilot_bookish_change;
                         __instance.Constants.Pilot.PilotLevelCostMultiplier *= 1 + Pre_Control.settings.pilot_bookish_change;
                     }
-                    if (isDecreased)
+                    if (isDecreased && isBookish)
                     {
                         __instance.Constants.Pilot.PilotLevelCostExponent *= 1 - Pre_Control.settings.pilot_bookish_change;
                         __instance.Constants.Pilot.PilotLevelCostMultiplier *= 1 - Pre_Control.settings.pilot_bookish_change;
+                    }
+
+                    if (isIncreased && isKlutz)
+                    {
+                        __instance.Constants.Pilot.PilotLevelCostExponent *= 1 + Pre_Control.settings.pilot_klutz_change;
+                        __instance.Constants.Pilot.PilotLevelCostMultiplier *= 1 + Pre_Control.settings.pilot_klutz_change;
+                    }
+                    if (isDecreased && isKlutz)
+                    {
+                        __instance.Constants.Pilot.PilotLevelCostExponent *= 1 - Pre_Control.settings.pilot_klutz_change;
+                        __instance.Constants.Pilot.PilotLevelCostMultiplier *= 1 - Pre_Control.settings.pilot_klutz_change;
                     }
                 }
                 catch (Exception e)
@@ -167,10 +196,15 @@ namespace Pilot_Quirks
                     isIncreased = false;
                     isDecreased = false;
                     isBookish = false;
+                    isKlutz = false;
                     OnValueClick = false;
                     if (__instance.curPilot.pilotDef.PilotTags.Contains("pilot_bookish"))
                     {
                         isBookish = true;
+                    }
+                    if (__instance.curPilot.pilotDef.PilotTags.Contains("pilot_klutz"))
+                    {
+                        isKlutz = true;
                     }
                 }
                 catch (Exception e)
@@ -188,6 +222,7 @@ namespace Pilot_Quirks
                 try
                 {
                     isBookish = false;
+                    isKlutz = false;
 
                     if (UseSavedPilot)
                         __instance.curPilot = SavedPilot;
@@ -198,6 +233,10 @@ namespace Pilot_Quirks
                     if (__instance.curPilot.pilotDef.PilotTags.Contains("pilot_bookish"))
                     {
                         isBookish = true;
+                    }
+                    if (__instance.curPilot.pilotDef.PilotTags.Contains("pilot_klutz"))
+                    {
+                        isKlutz = true;
                     }
                 }
                 catch (Exception e)
@@ -222,11 +261,15 @@ namespace Pilot_Quirks
                     {
                         isIncreased = false;
                         isDecreased = false;
-                        if (isBookish)
+                        if (isBookish || isKlutz)
                         {
                             if (type == "Piloting")
                             {
-                                isIncreased = false;
+                                if (isKlutz)
+                                    isIncreased = true;
+                                else
+                                    isIncreased = false;
+
                                 isDecreased = false;
                                 cost = sim.GetLevelCost(index);
                             }
@@ -239,14 +282,23 @@ namespace Pilot_Quirks
 
                             if (type == "Guts")
                             {
+                            if (isBookish)
                                 isIncreased = true;
+                            else
+                                isIncreased = false;
+
                                 isDecreased = false;
                                 cost = sim.GetLevelCost(index);
                             }
                             if (type == "Tactics")
                             {
                                 isIncreased = false;
+
+                            if (isBookish)
                                 isDecreased = true;
+                            else
+                                isDecreased = false;
+
                                 cost = sim.GetLevelCost(index);
                             }
                         }
@@ -269,12 +321,20 @@ namespace Pilot_Quirks
                         if (__instance.curPilot.pilotDef.PilotTags.Contains("pilot_bookish"))
                             isBookish = true;
 
-                        OnValueClick = true;
-                        if (isBookish)
+                    isKlutz = false;
+                    if (__instance.curPilot.pilotDef.PilotTags.Contains("pilot_klutz"))
+                        isKlutz = true;
+
+                    OnValueClick = true;
+                        if (isBookish || isKlutz)
                         {
                             if (type == "Piloting")
                             {
+                            if (isKlutz)
+                                isIncreased = true;
+                            else
                                 isIncreased = false;
+
                                 isDecreased = false;
                             }
                             if (type == "Gunnery")
@@ -284,13 +344,21 @@ namespace Pilot_Quirks
                             }
                             if (type == "Guts")
                             {
+                            if (isBookish)
                                 isIncreased = true;
+                            else
+                                isIncreased = false;
+
                                 isDecreased = false;
                             }
                             if (type == "Tactics")
                             {
                                 isIncreased = false;
+
+                            if (isBookish)
                                 isDecreased = true;
+                            else
+                                isDecreased = false;
                             }
                         }
                         else
@@ -323,15 +391,23 @@ namespace Pilot_Quirks
                         if (__instance.curPilot.pilotDef.PilotTags.Contains("pilot_bookish"))
                             isBookish = true;
 
-                        int twiddle = -1;
+                    isKlutz = false;
+                    if (__instance.curPilot.pilotDef.PilotTags.Contains("pilot_klutz"))
+                        isKlutz = true;
+
+                    int twiddle = -1;
                     if (OnValueClick)
                         twiddle = 1;
 
-                    if (isBookish)
+                    if (isBookish || isKlutz)
                         {
                             if (type == "Piloting")
                             {
+                            if (isKlutz)
+                                isIncreased = true;
+                            else
                                 isIncreased = false;
+
                                 isDecreased = false;
                                 expAmount = twiddle * sim.GetLevelCost(skill);
                             }
@@ -343,14 +419,22 @@ namespace Pilot_Quirks
                             }
                             if (type == "Guts")
                             {
+                            if (isBookish)
                                 isIncreased = true;
+                            else
+                                isIncreased = false;
+                            
                                 isDecreased = false;
                                 expAmount = twiddle * sim.GetLevelCost(skill);
                             }
                             if (type == "Tactics")
                             {
                                 isIncreased = false;
+                            if (isBookish)
                                 isDecreased = true;
+                            else
+                                isDecreased = false;
+
                                 expAmount = twiddle * sim.GetLevelCost(skill);
                             }
                         }
@@ -370,11 +454,14 @@ namespace Pilot_Quirks
                     try
                     {
                         isBookish = false;
+                    isKlutz = false;
                         if (__instance.curPilot == null)
                             return;
                         if (__instance.curPilot.pilotDef.PilotTags.Contains("pilot_bookish"))
                             isBookish = true;
-                    }
+                    if (__instance.curPilot.pilotDef.PilotTags.Contains("pilot_klutz"))
+                        isKlutz = true;
+                }
                     catch (Exception e)
                     {
                         Pre_Control.Helper.Logger.LogError(e);
@@ -392,17 +479,25 @@ namespace Pilot_Quirks
                         if (__instance.curPilot.pilotDef.PilotTags.Contains("pilot_bookish"))
                             isBookish = true;
 
-                        var sim = UnityGameInstance.BattleTechGame.Simulation;
+                    isKlutz = false;
+                    if (__instance.curPilot.pilotDef.PilotTags.Contains("pilot_klutz"))
+                        isKlutz = true;
+
+                    var sim = UnityGameInstance.BattleTechGame.Simulation;
                         if (__instance.curPilot == null)
                             return;
                         Pilot p = __instance.curPilot;
                         isIncreased = false;
                         isDecreased = false;
-                        if (isBookish)
+                        if (isBookish || isKlutz)
                         {
                             if (pips == __instance.pilotPips)
                             {
+                            if (isKlutz)
+                                isIncreased = true;
+                            else
                                 isIncreased = false;
+
                                 isDecreased = false;
                                 bool XPLevelCheck = p.UnspentXP < sim.GetLevelCost(idx);
                                 needsXP = XPLevelCheck && p.Piloting - 1 < idx;
@@ -416,7 +511,11 @@ namespace Pilot_Quirks
                             }
                             if (pips == __instance.gutPips)
                             {
+                            if (isBookish)
                                 isIncreased = true;
+                            else
+                                isIncreased = false;
+
                                 isDecreased = false;
                                 bool XPLevelCheck = p.UnspentXP < sim.GetLevelCost(idx);
                                 needsXP = XPLevelCheck && p.Guts - 1 < idx;
@@ -424,7 +523,12 @@ namespace Pilot_Quirks
                             if (pips == __instance.tacPips)
                             {
                                 isIncreased = false;
+
+                            if (isBookish)
                                 isDecreased = true;
+                            else
+                                isDecreased = false;
+
                                 bool XPLevelCheck = p.UnspentXP < sim.GetLevelCost(idx);
                                 needsXP = XPLevelCheck && p.Tactics - 1 < idx;
                             }
@@ -450,6 +554,12 @@ namespace Pilot_Quirks
                     {
                         isBookish = true;
                     }
+
+                isKlutz = false;
+                if (p.pilotDef.PilotTags.Contains("pilot_klutz"))
+                {
+                    isKlutz = true;
+                }
 
                 __instance.Initialize(saveSimState);
             }
