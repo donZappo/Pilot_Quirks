@@ -22,13 +22,27 @@ namespace Pilot_Quirks
         {
             public static void Prefix(Pilot p)
             {
-                Logger.LogLine("Details");
+                if (p.pilotDef.Description.Id.StartsWith("pilot_ronin") || p.pilotDef.Description.Id.StartsWith("pilot_backer"))
+                    p.Description.Details += "\n\n";
+
+                var sim = UnityGameInstance.BattleTechGame.Simulation;
                 foreach (var tag in p.pilotDef.PilotTags)
                 {
-                    if (Pre_Control.settings.TagIDToDescription.Keys.Contains(tag)) 
-                        p.Description.Details += "\n\n" + tag + "\n\n" + Pre_Control.settings.TagIDToDescription[tag];
+                    if (p.pilotDef.Description.Id.StartsWith("pilot_ronin") || p.pilotDef.Description.Id.StartsWith("pilot_backer"))
+                    {
+                        if (Pre_Control.settings.TagIDToDescription.Keys.Contains(tag))
+                        {
+                             p.Description.Details += "<b>" + Pre_Control.settings.TagIDToNames[tag] + ": </b>" +
+                                    Pre_Control.settings.TagIDToDescription[tag] + "\n\n";
+                        }
+                    }
+                    else
+                    {
+                        if (Pre_Control.settings.TagIDToDescription.Keys.Contains(tag))
+                            p.Description.Details += Pre_Control.settings.TagIDToNames[tag] + "\n\n" 
+                                    + Pre_Control.settings.TagIDToDescription[tag] + "\n\n";
+                    }
                 }
-
             }
         }
     }

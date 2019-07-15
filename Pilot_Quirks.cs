@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using Localize;
+using BattleTech.UI.Tooltips;
 
 namespace Pilot_Quirks
 {
@@ -988,7 +989,7 @@ namespace Pilot_Quirks
                 if (!settings.TagIDToDescription.ContainsKey(id))
                     return;
 
-                __result.DescriptionTag = settings.TagIDToDescription[id];
+                __result.DescriptionTag += "\n\n" + settings.TagIDToDescription[id];
             }
         }
 
@@ -1024,6 +1025,7 @@ namespace Pilot_Quirks
             public float pilot_bookish_change = 0.1f;
 
             public Dictionary<string, string> TagIDToDescription = new Dictionary<string, string>();
+            public Dictionary<string, string> TagIDToNames = new Dictionary<string, string>();
 
             public bool IsSaveGame = false;
 
