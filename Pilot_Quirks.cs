@@ -73,6 +73,8 @@ namespace Pilot_Quirks
                 {
                     stats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_dishonest_MoralePenalty, -1, true);
                 }
+                if (tags.Contains("pilot_tech"))
+                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
             }
         }
 
@@ -456,7 +458,29 @@ namespace Pilot_Quirks
                 }
             }
         }
-        
+
+        [HarmonyPatch(typeof(AAR_UnitsResult_Screen), "FillInData")]
+        public static class AAR_UnitsResult_Screen_FillInData_Patch
+        {
+            public static void Prefix(AAR_UnitsResult_Screen __instance, Contract ___theContract)
+            {
+                bool command = false;
+                for (int i = 0; i < 4; i++)
+                {
+                    if (__instance.UnitResults[i].pilot.pilotDef.PilotTags.Contains("pilot_command")
+                        && ___theContract.KilledPilots.Contains(__instance.UnitResults[i].pilot))
+                        command = true;
+                }
+                if (command)
+                {
+                    int XP = ___theContract.ExperienceEarned;
+                    XP += (int)(XP * settings.pilot_command_BonusLanceXP / 100);
+                    Traverse.Create(___theContract).Property("ExperienceEarned").SetValue(XP);
+                }
+            }
+        }
+
+
         [HarmonyPatch(typeof(Team), "CollectUnitBaseline")]
         public static class Rebellious_Area
         {
@@ -1030,6 +1054,7 @@ namespace Pilot_Quirks
             public int pilot_mechwarrior_XP = 4000;
             public float pilot_bookish_change = 0.1f;
             public int pilot_officer_BonusResolve = 5;
+            public float pilot_command_BonusLanceXP = 5;
 
             public Dictionary<string, string> TagIDToDescription = new Dictionary<string, string>();
             public Dictionary<string, string> TagIDToNames = new Dictionary<string, string>();
