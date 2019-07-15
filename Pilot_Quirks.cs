@@ -464,6 +464,7 @@ namespace Pilot_Quirks
             {
                 bool rebelpilot = false;
                 bool officer = false;
+                bool commander = false;
                 int edgecase = 0;
                 foreach (AbstractActor actor in __instance.units)
                 {
@@ -472,19 +473,24 @@ namespace Pilot_Quirks
                     {
                         rebelpilot = true;
                     }
-                    if (pilot.pilotDef.PilotTags.Contains("pilot_officer") || pilot.pilotDef.PilotTags.Contains("commander_player"))
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_officer"))
                     {
                         officer = true;
                     }
-                    if (rebelpilot && officer)
+                    if (pilot.pilotDef.PilotTags.Contains("commander_player"))
+                        commander = true;
+
+                    if (rebelpilot && (officer || commander))
                     {
                         edgecase = edgecase + 1;
                     }
-                    if (officer && rebelpilot && edgecase != 1)
-                    {
-                        __result = __result - 5;     
-                    }
                 }
+                if ((officer || commander) && rebelpilot && edgecase != 1)
+                {
+                    __result = __result - 5;
+                }
+                if (officer)
+                    __result += settings.pilot_officer_BonusResolve;
             }
         }
 
@@ -1023,6 +1029,7 @@ namespace Pilot_Quirks
             public int pilot_military_XP = 2000;
             public int pilot_mechwarrior_XP = 4000;
             public float pilot_bookish_change = 0.1f;
+            public int pilot_officer_BonusResolve = 5;
 
             public Dictionary<string, string> TagIDToDescription = new Dictionary<string, string>();
             public Dictionary<string, string> TagIDToNames = new Dictionary<string, string>();
