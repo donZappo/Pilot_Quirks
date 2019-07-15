@@ -462,20 +462,22 @@ namespace Pilot_Quirks
         [HarmonyPatch(typeof(AAR_UnitsResult_Screen), "FillInData")]
         public static class AAR_UnitsResult_Screen_FillInData_Patch
         {
-            public static void Prefix(AAR_UnitsResult_Screen __instance, Contract ___theContract)
+            public static void Prefix(AAR_UnitsResult_Screen __instance)
             {
                 bool command = false;
                 for (int i = 0; i < 4; i++)
                 {
-                    if (__instance.UnitResults[i].pilot.pilotDef.PilotTags.Contains("pilot_command")
-                        && ___theContract.KilledPilots.Contains(__instance.UnitResults[i].pilot))
-                        command = true;
+                    if (__instance.UnitResults[i] != null)
+                    {
+                        if (__instance.UnitResults[i].pilot.pilotDef.PilotTags.Contains("pilot_command")
+                          && !__instance.theContract.KilledPilots.Contains(__instance.UnitResults[i].pilot))
+                            command = true;
+                    }
                 }
-                if (command)
+                if (command) 
                 {
-                    int XP = ___theContract.ExperienceEarned;
-                    XP += (int)(XP * settings.pilot_command_BonusLanceXP / 100);
-                    Traverse.Create(___theContract).Property("ExperienceEarned").SetValue(XP);
+                    int XP = __instance.theContract.ExperienceEarned;
+                    __instance.theContract.ExperienceEarned += (int)(XP * settings.pilot_command_BonusLanceXP / 100);
                 }
             }
         }
