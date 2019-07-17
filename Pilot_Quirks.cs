@@ -306,25 +306,25 @@ namespace Pilot_Quirks
                     }
 
                 }
-                bool honest = false;
-                foreach (Pilot pilot in __instance.PilotRoster)
-                {
-                    if (pilot.pilotDef.PilotTags.Contains("pilot_honest"))
-                        honest = true;
-                }
+                //bool honest = false;
+                //foreach (Pilot pilot in __instance.PilotRoster)
+                //{
+                //    if (pilot.pilotDef.PilotTags.Contains("pilot_honest"))
+                //        honest = true;
+                //}
 
-                foreach (Pilot pilot in __instance.PilotRoster)
-                {
-                    if (pilot.pilotDef.PilotTags.Contains("pilot_criminal") && !honest)
-                    {
-                        var rng = new System.Random();
-                        int Roll = rng.Next(1, 101);
-                        if (Roll < settings.pilot_criminal_StealPercent)
-                        {
-                            __instance.AddFunds(settings.pilot_criminal_StealAmount, null, true);
-                        }
-                    }
-                }
+                //foreach (Pilot pilot in __instance.PilotRoster)
+                //{
+                //    if (pilot.pilotDef.PilotTags.Contains("pilot_criminal") && !honest)
+                //    {
+                //        var rng = new System.Random();
+                //        int Roll = rng.Next(1, 101);
+                //        if (Roll < settings.pilot_criminal_StealPercent)
+                //        {
+                //            __instance.AddFunds(settings.pilot_criminal_StealAmount, null, true);
+                //        }
+                //    }
+                //}
                 if (settings.IsSaveGame)
                 {
                     foreach (Pilot pilot in __instance.PilotRoster)
@@ -1223,8 +1223,8 @@ namespace Pilot_Quirks
             public int pilot_lostech_ToHitBonus = -1;
             public float pilot_naive_LessExperience = 0.1f;
             public float pilot_noble_IncreasedCost = 0.5f;
-            public int pilot_criminal_StealPercent = 5;
-            public int pilot_criminal_StealAmount = -1000;
+            public int pilot_criminal_StealPercent = 0;
+            public int pilot_criminal_StealAmount = 0;
             public float pilot_spacer_DecreasedCost = -0.5f;
             public int pilot_comstar_TechBonus = 200;
             public int pilot_comstar_StoreBonus = 3;
