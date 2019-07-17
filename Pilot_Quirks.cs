@@ -386,25 +386,20 @@ namespace Pilot_Quirks
         {
             static void Postfix(AAR_ContractObjectivesWidget __instance)
             {
-                if (__instance.theContract.Override.employerTeam.faction == Faction.AuriganPirates)
+                settings.CriminalCount = 0;
+                foreach (UnitResult unitresult in __instance.theContract.PlayerUnitResults)
+                {
+                    if (unitresult.pilot.pilotDef.PilotTags.Contains("pilot_criminal") && !__instance.theContract.KilledPilots.Contains(unitresult.pilot))
+                        settings.CriminalCount++;
+                }
+
+                if (__instance.theContract.Override.employerTeam.faction == Faction.AuriganPirates && settings.CriminalCount > 0)
                 {
                     var sim = UnityGameInstance.BattleTechGame.Simulation;
-                    float num3 = (float)__instance.theContract.InitialContractValue;
-                    num3 *= __instance.theContract.PercentageContractValue;
-                    num3 += (float)sim.GetScaledCBillValue((float)__instance.theContract.InitialContractValue, 0f);
-                    float num = 0;
-                    if ( __instance.theContract.State != Contract.ContractState.Complete)
-                    {
-                        if ( __instance.theContract.IsGoodFaithEffort)
-                        {
-                            num = sim.Constants.Finances.GoodFaithModifier;
-                        }
-                        else
-                        {
-                            num = sim.Constants.Finances.NoFaithModifier;
-                        }
-                    }
-                    int BonusMoney = (int)(num3 * num * ((float)settings.CriminalCount * settings.pilot_criminal_bonus / 100));
+                    float BonusMoney = (float)__instance.theContract.InitialContractValue;
+                    BonusMoney *= __instance.theContract.PercentageContractValue;
+                    BonusMoney += (float)sim.GetScaledCBillValue((float)__instance.theContract.InitialContractValue, 0f);
+                    BonusMoney *= (float)settings.CriminalCount * settings.pilot_criminal_bonus / 100;
                     string missionObjectiveResultString = $"BONUS FROM CRIMINALS: ¢{String.Format("{0:n0}", BonusMoney)}";
                     MissionObjectiveResult missionObjectiveResult = new MissionObjectiveResult(missionObjectiveResultString, "7facf07a-626d-4a3b-a1ec-b29a35ff1ac0", false, true, ObjectiveStatus.Succeeded, false);
                     Traverse.Create(__instance).Method("AddObjective", missionObjectiveResult).GetValue();
@@ -417,27 +412,22 @@ namespace Pilot_Quirks
         {
             static void Postfix(Contract __instance)
             {
-                var sim = UnityGameInstance.BattleTechGame.Simulation;
-                if (__instance.Override.employerTeam.faction == Faction.AuriganPirates)
+                settings.CriminalCount = 0;
+                foreach (UnitResult unitresult in __instance.PlayerUnitResults)
                 {
-                    float num3 = (float)__instance.InitialContractValue;
-                    num3 *= __instance.PercentageContractValue;
-                    num3 += (float)sim.GetScaledCBillValue((float)__instance.InitialContractValue, 0f);
-                    float num = 0;
-                    if (__instance.State != Contract.ContractState.Complete)
-                    {
-                        if (__instance.IsGoodFaithEffort)
-                        {
-                            num = sim.Constants.Finances.GoodFaithModifier;
-                        }
-                        else
-                        {
-                            num = sim.Constants.Finances.NoFaithModifier;
-                        }
-                    }
-                    int BonusMoney = (int)(num3 * num * ((float)settings.CriminalCount * settings.pilot_criminal_bonus / 100));
+                    if (unitresult.pilot.pilotDef.PilotTags.Contains("pilot_criminal") && !__instance.KilledPilots.Contains(unitresult.pilot))
+                        settings.CriminalCount++;
+                }
+
+                var sim = UnityGameInstance.BattleTechGame.Simulation;
+                if (__instance.Override.employerTeam.faction == Faction.AuriganPirates && settings.CriminalCount > 0)
+                {
+                    float BonusMoney = (float)__instance.InitialContractValue;
+                    BonusMoney *= __instance.PercentageContractValue;
+                    BonusMoney += (float)sim.GetScaledCBillValue((float)__instance.InitialContractValue, 0f);
+                    BonusMoney *= (float)settings.CriminalCount * settings.pilot_criminal_bonus / 100;
                     int newMoneyResults = Mathf.FloorToInt(__instance.MoneyResults + BonusMoney);
-                    Traverse.Create(__instance).Property("set_MoneyResults").SetValue(newMoneyResults);
+                    Traverse.Create(__instance).Property("MoneyResults").SetValue(newMoneyResults);
                 }
             }
         }
@@ -531,9 +521,6 @@ namespace Pilot_Quirks
                 {
                     if (__instance.UnitResults[i] != null)
                     {
-                        if (__instance.UnitResults[i].pilot.pilotDef.PilotTags.Contains("pilot_criminal")
-                            && !__instance.theContract.KilledPilots.Contains(__instance.UnitResults[i].pilot))
-                            settings.CriminalCount++;
                         if (__instance.UnitResults[i].pilot.pilotDef.PilotTags.Contains("pilot_command")
                           && !__instance.theContract.KilledPilots.Contains(__instance.UnitResults[i].pilot))
                             command = true;
