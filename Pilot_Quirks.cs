@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using Localize;
-using BattleTech.UI.Tooltips;
+using BattleTech.Framework;
 
 namespace Pilot_Quirks
 {
@@ -129,7 +129,7 @@ namespace Pilot_Quirks
                             if (def.PilotTags.Contains("pilot_tech"))
                                 TechCount = TechCount + 1;
                         }
-                        if(TechCount % settings.pilot_tech_TechsNeeded == 0)
+                        if (TechCount % settings.pilot_tech_TechsNeeded == 0)
                             __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
                     }
 
@@ -156,7 +156,7 @@ namespace Pilot_Quirks
             }
         }
 
-        [HarmonyPatch(typeof(SimGameState), "KillPilot", new Type[] { typeof(Pilot) , typeof(bool) , typeof(string) , typeof(string)})]
+        [HarmonyPatch(typeof(SimGameState), "KillPilot", new Type[] { typeof(Pilot), typeof(bool), typeof(string), typeof(string) })]
         public static class Pilot_Died
         {
             public static void Postfix(SimGameState __instance, Pilot p)
@@ -322,10 +322,10 @@ namespace Pilot_Quirks
                         if (Roll < settings.pilot_criminal_StealPercent)
                         {
                             __instance.AddFunds(settings.pilot_criminal_StealAmount, null, true);
-                        } 
+                        }
                     }
                 }
-                    if (settings.IsSaveGame)
+                if (settings.IsSaveGame)
                 {
                     foreach (Pilot pilot in __instance.PilotRoster)
                     {
@@ -342,7 +342,7 @@ namespace Pilot_Quirks
                                     TechCount = TechCount + 1;
                             }
                             int TechAdd = TechCount / settings.pilot_tech_TechsNeeded;
-                                __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
+                            __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
                         }
 
                         if (pilot.pilotDef.PilotTags.Contains("pilot_disgraced"))
@@ -370,14 +370,75 @@ namespace Pilot_Quirks
             public static void Postfix(SimGameState __instance, ref float __result)
             {
                 float MerchantCount = 0;
-                foreach(Pilot pilot in __instance.PilotRoster)
+                foreach (Pilot pilot in __instance.PilotRoster)
                 {
                     if (pilot.pilotDef.PilotTags.Contains("pilot_merchant"))
                     {
                         MerchantCount = MerchantCount + 1;
                     }
                 }
-                __result = __result - settings.pilot_merchant_ShopDiscount * MerchantCount/100;
+                __result = __result - settings.pilot_merchant_ShopDiscount * MerchantCount / 100;
+            }
+        }
+
+        [HarmonyPatch(typeof(AAR_ContractObjectivesWidget), "FillInObjectives")]
+        public static class AAR_ContractObjectivesWidget_FillInObjectives
+        {
+            static void Postfix(AAR_ContractObjectivesWidget __instance)
+            {
+                if (__instance.theContract.Override.employerTeam.faction == Faction.AuriganPirates)
+                {
+                    var sim = UnityGameInstance.BattleTechGame.Simulation;
+                    float num3 = (float)__instance.theContract.InitialContractValue;
+                    num3 *= __instance.theContract.PercentageContractValue;
+                    num3 += (float)sim.GetScaledCBillValue((float)__instance.theContract.InitialContractValue, 0f);
+                    float num = 0;
+                    if ( __instance.theContract.State != Contract.ContractState.Complete)
+                    {
+                        if ( __instance.theContract.IsGoodFaithEffort)
+                        {
+                            num = sim.Constants.Finances.GoodFaithModifier;
+                        }
+                        else
+                        {
+                            num = sim.Constants.Finances.NoFaithModifier;
+                        }
+                    }
+                    int BonusMoney = (int)(num3 * num * ((float)settings.CriminalCount * settings.pilot_criminal_bonus / 100));
+                    string missionObjectiveResultString = $"BONUS FROM CRIMINALS: ¢{String.Format("{0:n0}", BonusMoney)}";
+                    MissionObjectiveResult missionObjectiveResult = new MissionObjectiveResult(missionObjectiveResultString, "7facf07a-626d-4a3b-a1ec-b29a35ff1ac0", false, true, ObjectiveStatus.Succeeded, false);
+                    Traverse.Create(__instance).Method("AddObjective", missionObjectiveResult).GetValue();
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(Contract), "CompleteContract")]
+        public static class Contract_CompleteContract_Patch
+        {
+            static void Postfix(Contract __instance)
+            {
+                var sim = UnityGameInstance.BattleTechGame.Simulation;
+                if (__instance.Override.employerTeam.faction == Faction.AuriganPirates)
+                {
+                    float num3 = (float)__instance.InitialContractValue;
+                    num3 *= __instance.PercentageContractValue;
+                    num3 += (float)sim.GetScaledCBillValue((float)__instance.InitialContractValue, 0f);
+                    float num = 0;
+                    if (__instance.State != Contract.ContractState.Complete)
+                    {
+                        if (__instance.IsGoodFaithEffort)
+                        {
+                            num = sim.Constants.Finances.GoodFaithModifier;
+                        }
+                        else
+                        {
+                            num = sim.Constants.Finances.NoFaithModifier;
+                        }
+                    }
+                    int BonusMoney = (int)(num3 * num * ((float)settings.CriminalCount * settings.pilot_criminal_bonus / 100));
+                    int newMoneyResults = Mathf.FloorToInt(__instance.MoneyResults + BonusMoney);
+                    Traverse.Create(__instance).Property("set_MoneyResults").SetValue(newMoneyResults);
+                }
             }
         }
 
@@ -464,17 +525,21 @@ namespace Pilot_Quirks
         {
             public static void Prefix(AAR_UnitsResult_Screen __instance)
             {
+                settings.CriminalCount = 0;
                 bool command = false;
                 for (int i = 0; i < 4; i++)
                 {
                     if (__instance.UnitResults[i] != null)
                     {
+                        if (__instance.UnitResults[i].pilot.pilotDef.PilotTags.Contains("pilot_criminal")
+                            && !__instance.theContract.KilledPilots.Contains(__instance.UnitResults[i].pilot))
+                            settings.CriminalCount++;
                         if (__instance.UnitResults[i].pilot.pilotDef.PilotTags.Contains("pilot_command")
                           && !__instance.theContract.KilledPilots.Contains(__instance.UnitResults[i].pilot))
                             command = true;
                     }
                 }
-                if (command) 
+                if (command)
                 {
                     int XP = __instance.theContract.ExperienceEarned;
                     __instance.theContract.ExperienceEarned += (int)(XP * settings.pilot_command_BonusLanceXP / 100);
@@ -752,7 +817,7 @@ namespace Pilot_Quirks
                     CostPerMonth = 0;
 
                 __result = (int)CostPerMonth;
-                
+
                 if (def.PilotTags.Contains("pilot_wealthy"))
                 {
                     __result = 0;
@@ -874,7 +939,7 @@ namespace Pilot_Quirks
                 }
                 if (CostPerMonth < 0)
                     CostPerMonth = 0;
-                
+
 
                 __result = (int)CostPerMonth;
             }
@@ -1013,6 +1078,98 @@ namespace Pilot_Quirks
             }
         }
 
+        //These following four methods all are needed to change Argo upgrade costs.
+
+        [HarmonyPatch(typeof(SimGameState), "CancelArgoUpgrade")]
+        public static class SimGameState_CancelArgoUpgrade_Patch
+        {
+            public static void Prefix(SimGameState __instance, bool refund, ref int __state)
+            {
+                float TotalChange = 0;
+                foreach (Pilot pilot in __instance.PilotRoster)
+                {
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_comstar"))
+                        TotalChange += settings.pilot_comstar_ArgoDiscount;
+                }
+                if (refund)
+                {
+                    ShipModuleUpgrade shipModuleUpgrade = __instance.DataManager.ShipUpgradeDefs.Get(__instance.CurrentUpgradeEntry.upgradeID);
+                    __state = shipModuleUpgrade.PurchaseCost;
+                    shipModuleUpgrade.PurchaseCost = (int)((float)shipModuleUpgrade.PurchaseCost * (100 - TotalChange) / 100);
+
+
+                }
+            }
+            public static void Postfix(SimGameState __instance, bool refund, ref int __state)
+            {
+                if (refund)
+                {
+                    ShipModuleUpgrade shipModuleUpgrade = __instance.DataManager.ShipUpgradeDefs.Get(__instance.CurrentUpgradeEntry.upgradeID);
+                    shipModuleUpgrade.PurchaseCost = __state;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(SimGameState), "QueueArgoUpgrade")]
+        public static class SimGameState_QueueArgoUpgrade_Patch
+        {
+            public static void Prefix(SimGameState __instance, ShipModuleUpgrade requestedUpgrade, ref int __state)
+            {
+                float TotalChange = 0;
+                foreach (Pilot pilot in __instance.PilotRoster)
+                {
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_comstar"))
+                        TotalChange += settings.pilot_comstar_ArgoDiscount;
+                }
+                __state = requestedUpgrade.PurchaseCost;
+                requestedUpgrade.PurchaseCost = (int)((float)requestedUpgrade.PurchaseCost * (100 - TotalChange) / 100);
+            }
+            public static void Postfix(ShipModuleUpgrade requestedUpgrade, ref int __state)
+            {
+                requestedUpgrade.PurchaseCost = __state;
+            }
+        }
+
+        [HarmonyPatch(typeof(SGEngineeringScreen), "PurchaseSelectedUpgrade")]
+        public static class SGEngineeringScreen_PurchaseSelectedUpgrade_Patch
+        {
+            public static void Prefix(SGEngineeringScreen __instance, ref int __state)
+            {
+                float TotalChange = 0;
+                foreach (Pilot pilot in __instance.simState.PilotRoster)
+                {
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_comstar"))
+                        TotalChange += settings.pilot_comstar_ArgoDiscount;
+                }
+                __state = __instance.SelectedUpgrade.PurchaseCost;
+                __instance.SelectedUpgrade.PurchaseCost = (int)((float)__instance.SelectedUpgrade.PurchaseCost * (100 - TotalChange) / 100);
+            }
+            public static void Postfix(SGEngineeringScreen __instance, ref int __state)
+            {
+                __instance.SelectedUpgrade.PurchaseCost = __state;
+            }
+        }
+
+        [HarmonyPatch(typeof(SGShipModuleUpgradeViewPopulator), "Populate")]
+        public static class SGShipModuleUpgradeViewPopulator_Populate_Patch
+        {
+            public static void Prefix(SGShipModuleUpgradeViewPopulator __instance, ShipModuleUpgrade upgrade, ref int __state)
+            {
+                var sim = UnityGameInstance.BattleTechGame.Simulation;
+                float TotalChange = 0;
+                foreach (Pilot pilot in sim.PilotRoster)
+                {
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_comstar"))
+                        TotalChange += settings.pilot_comstar_ArgoDiscount;
+                }
+                __state = upgrade.PurchaseCost;
+                upgrade.PurchaseCost = (int)((float)upgrade.PurchaseCost * (100 - TotalChange) / 100);
+            }
+            public static void Postfix(ShipModuleUpgrade upgrade, ref int __state)
+            {
+                upgrade.PurchaseCost = __state;
+            }
+        }
         [HarmonyPatch(typeof(TagDataStructFetcher), "GetItem")]
         public static class TagDataStructFetcher_GetItem_Patch
         {
@@ -1024,6 +1181,27 @@ namespace Pilot_Quirks
                 __result.DescriptionTag += "\n\n" + settings.TagIDToDescription[id];
             }
         }
+
+        //[HarmonyPatch(typeof(ShipModuleUpgrade))]
+        //[HarmonyPatch("PurchaseCost", MethodType.Getter)]
+        //public static class ShipModuleUpgrade_PurchaseCost_Patch
+        //{
+        //    public static void Postfix(ref int __result)
+        //    {
+        //        Helper.Logger.LogLine("Is it even?");
+        //        var sim = UnityGameInstance.BattleTechGame.Simulation;
+        //        float TotalDiscount = 0;
+        //        foreach (Pilot pilot in sim.PilotRoster)
+        //        {
+        //            if (pilot.pilotDef.PilotTags.Contains("pilot_comstar"))
+        //                TotalDiscount += settings.pilot_comstar_ArgoDiscount;
+        //        }
+        //        Helper.Logger.LogLine("Original Cost: " + __result);
+        //        __result -= (int)(TotalDiscount / 100);
+        //        Helper.Logger.LogLine("New Cost: " + __result);
+        //    }
+        //}
+
 
         internal class ModSettings
         {
@@ -1050,6 +1228,7 @@ namespace Pilot_Quirks
             public float pilot_spacer_DecreasedCost = -0.5f;
             public int pilot_comstar_TechBonus = 200;
             public int pilot_comstar_StoreBonus = 3;
+            public float pilot_comstar_ArgoDiscount = 2.0f;
             public int pilot_honest_MoraleBonus = 1;
             public int pilot_dishonest_MoralePenalty = -1;
             public int pilot_military_XP = 2000;
@@ -1057,6 +1236,8 @@ namespace Pilot_Quirks
             public float pilot_XP_change = 0.1f;
             public int pilot_officer_BonusResolve = 5;
             public float pilot_command_BonusLanceXP = 5;
+            public int CriminalCount = 0;
+            public float pilot_criminal_bonus = 2.0f;
 
             public Dictionary<string, string> TagIDToDescription = new Dictionary<string, string>();
             public Dictionary<string, string> TagIDToNames = new Dictionary<string, string>();
