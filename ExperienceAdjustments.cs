@@ -93,11 +93,10 @@ namespace Pilot_Quirks
                     isBookish = pilot.pilotDef.PilotTags.Contains("pilot_bookish");
                     isKlutz = pilot.pilotDef.PilotTags.Contains("pilot_klutz");
                     isAssassin = pilot.pilotDef.PilotTags.Contains("pilot_assassin");
-
-                    int NewXP = 0;
-
+                    
                     if (isBookish || isKlutz || isAssassin)
                     {
+                        int NewXP = 0;
                         if (pilotDef.BonusPiloting > 0)
                         {
                             if (isKlutz)
@@ -134,13 +133,14 @@ namespace Pilot_Quirks
                                 isDecreased = false;
                             NewXP += __instance.GetLevelRangeCost(pilotDef.BaseTactics, pilotDef.SkillTactics - 1);
                         }
+                        int XPAdjust = NewXP - pilot.pilotDef.ExperienceUnspent;
+                        pilot.AddExperience(0, "Respec", XPAdjust);
                     }
-                    int XPAdjust = NewXP - pilot.pilotDef.ExperienceUnspent;
-                    pilot.AddExperience(0, "Respec", XPAdjust);
+                   
                 }
-                catch
+                catch (Exception e)
                 {
-
+                    Logger.LogError(e);
                 }
             }
         }
