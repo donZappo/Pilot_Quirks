@@ -766,7 +766,7 @@ namespace Pilot_Quirks
                 }
                 if (def.PilotTags.Contains("pilot_bookish"))
                 {
-                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                    
                 }
                 if (def.PilotTags.Contains("pilot_command"))
                 {
@@ -790,11 +790,11 @@ namespace Pilot_Quirks
                 }
                 if (def.PilotTags.Contains("pilot_criminal"))
                 {
-                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
                 if (def.PilotTags.Contains("pilot_comstar"))
                 {
-                    CostPerMonth = CostPerMonth + (float)1.0 * (__result);
+                    CostPerMonth = CostPerMonth + (float)0.2 * (__result);
                 }
                 if (def.PilotTags.Contains("pilot_dishonest"))
                 {
@@ -805,15 +805,16 @@ namespace Pilot_Quirks
 
                 __result = (int)CostPerMonth;
 
+                if (def.PilotTags.Contains("pilot_wealthy"))
+                {
+                    __result = (int)(__result + settings.pilot_wealthy_CostFactor * __result);
+                }
+
                 if (def.PilotTags.Contains("pilot_noble"))
                 {
                     __result = (int)(__result + settings.pilot_noble_IncreasedCost * __result);
                 }
 
-                if (def.PilotTags.Contains("pilot_spacer"))
-                {
-                    __result = (int)(__result + settings.pilot_spacer_DecreasedCost * __result);
-                }
             }
         }
 
@@ -881,7 +882,7 @@ namespace Pilot_Quirks
                 }
                 if (def.PilotTags.Contains("pilot_bookish"))
                 {
-                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                    
                 }
                 if (def.PilotTags.Contains("pilot_command"))
                 {
@@ -905,11 +906,11 @@ namespace Pilot_Quirks
                 }
                 if (def.PilotTags.Contains("pilot_criminal"))
                 {
-                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
                 if (def.PilotTags.Contains("pilot_comstar"))
                 {
-                    CostPerMonth = CostPerMonth + (float)1.0 * (__result);
+                    CostPerMonth = CostPerMonth + (float)0.2 * (__result);
                 }
                 if (def.PilotTags.Contains("pilot_dishonest"))
                 {
@@ -1237,6 +1238,7 @@ namespace Pilot_Quirks
             public int CriminalCount = 0;
             public float pilot_criminal_bonus = 2.0f;
             public float pilot_spacer_InjuryTimeReduction = 0.9f;
+            public float pilot_wealthy_CostFactor = 0.9f;
 
             public Dictionary<string, string> TagIDToDescription = new Dictionary<string, string>();
             public Dictionary<string, string> TagIDToNames = new Dictionary<string, string>();
