@@ -805,11 +805,6 @@ namespace Pilot_Quirks
 
                 __result = (int)CostPerMonth;
 
-                if (def.PilotTags.Contains("pilot_wealthy"))
-                {
-                    __result = 0;
-                }
-
                 if (def.PilotTags.Contains("pilot_noble"))
                 {
                     __result = (int)(__result + settings.pilot_noble_IncreasedCost * __result);
