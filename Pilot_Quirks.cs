@@ -1164,6 +1164,22 @@ namespace Pilot_Quirks
             }
         }
 
+        [HarmonyPatch(typeof(SimGameState), "GetInjuryCost")]
+        public static class SimGameState_GetInjuryCost_Patch
+        {
+            public static void Prefix(SimGameState __instance, Pilot p, int __state)
+            {
+                __state = __instance.Constants.Pilot.BaseInjuryDamageCost;
+                if (p.pilotDef.PilotTags.Contains("pilot_spacer"))
+                    __instance.Constants.Pilot.BaseInjuryDamageCost = (int)(__instance.Constants.Pilot.BaseInjuryDamageCost * settings.pilot_spacer_InjuryTimeReduction);
+            }
+
+            public static void Postfix(SimGameState __instance, int __state)
+            {
+                __instance.Constants.Pilot.BaseInjuryDamageCost = __state;
+            }
+        }
+
         //[HarmonyPatch(typeof(ShipModuleUpgrade))]
         //[HarmonyPatch("PurchaseCost", MethodType.Getter)]
         //public static class ShipModuleUpgrade_PurchaseCost_Patch
@@ -1185,7 +1201,7 @@ namespace Pilot_Quirks
         //}
 
 
-        internal class ModSettings
+            internal class ModSettings
         {
             public int pilot_tech_TechBonus = 100;
             public bool pilot_tech_vanillaTech = false;
@@ -1220,6 +1236,7 @@ namespace Pilot_Quirks
             public float pilot_command_BonusLanceXP = 5;
             public int CriminalCount = 0;
             public float pilot_criminal_bonus = 2.0f;
+            public float pilot_spacer_InjuryTimeReduction = 0.9f;
 
             public Dictionary<string, string> TagIDToDescription = new Dictionary<string, string>();
             public Dictionary<string, string> TagIDToNames = new Dictionary<string, string>();
