@@ -1168,16 +1168,21 @@ namespace Pilot_Quirks
         [HarmonyPatch(typeof(SimGameState), "GetInjuryCost")]
         public static class SimGameState_GetInjuryCost_Patch
         {
-            public static void Prefix(SimGameState __instance, Pilot p, int __state)
+            public static int DamageCostHolder;
+            public static bool Prefixed = false;
+            public static void Prefix(SimGameState __instance, Pilot p)
             {
-                __state = __instance.Constants.Pilot.BaseInjuryDamageCost;
+                Prefixed = true;
+                DamageCostHolder = __instance.Constants.Pilot.BaseInjuryDamageCost;
                 if (p.pilotDef.PilotTags.Contains("pilot_spacer"))
                     __instance.Constants.Pilot.BaseInjuryDamageCost = (int)(__instance.Constants.Pilot.BaseInjuryDamageCost * settings.pilot_spacer_InjuryTimeReduction);
             }
 
             public static void Postfix(SimGameState __instance, int __state)
             {
-                __instance.Constants.Pilot.BaseInjuryDamageCost = __state;
+                if (Prefixed)
+                    __instance.Constants.Pilot.BaseInjuryDamageCost = DamageCostHolder;
+                Prefixed = false;
             }
         }
 
