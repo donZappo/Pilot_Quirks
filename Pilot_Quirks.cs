@@ -1168,7 +1168,7 @@ namespace Pilot_Quirks
         [HarmonyPatch(typeof(SimGameState), "GetInjuryCost")]
         public static class SimGameState_GetInjuryCost_Patch
         {
-            public static int DamageCostHolder;
+            public static int DamageCostHolder = 0;
             public static bool Prefixed = false;
             public static void Prefix(SimGameState __instance, Pilot p)
             {
@@ -1178,7 +1178,7 @@ namespace Pilot_Quirks
                     __instance.Constants.Pilot.BaseInjuryDamageCost = (int)(__instance.Constants.Pilot.BaseInjuryDamageCost * settings.pilot_spacer_InjuryTimeReduction);
             }
 
-            public static void Postfix(SimGameState __instance, int __state)
+            public static void Postfix(SimGameState __instance)
             {
                 if (Prefixed)
                     __instance.Constants.Pilot.BaseInjuryDamageCost = DamageCostHolder;
@@ -1207,7 +1207,7 @@ namespace Pilot_Quirks
         //}
 
 
-            internal class ModSettings
+        internal class ModSettings
         {
             public int pilot_tech_TechBonus = 100;
             public bool pilot_tech_vanillaTech = false;
