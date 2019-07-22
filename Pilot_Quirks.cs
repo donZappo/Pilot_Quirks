@@ -565,7 +565,7 @@ namespace Pilot_Quirks
                 }
                 if ((officer || commander) && rebelpilot && edgecase != 1)
                 {
-                    __result = __result - 5;
+                    __result = __result - settings.pilot_rebellious_ResolveMalus;
                 }
                 if (officer)
                     __result += settings.pilot_officer_BonusResolve;
@@ -1244,6 +1244,7 @@ namespace Pilot_Quirks
             public float pilot_criminal_bonus = 2.0f;
             public float pilot_spacer_InjuryTimeReduction = 0.9f;
             public float pilot_wealthy_CostFactor = 0.9f;
+            public int pilot_rebellious_ResolveMalus = 1;
 
             public Dictionary<string, string> TagIDToDescription = new Dictionary<string, string>();
             public Dictionary<string, string> TagIDToNames = new Dictionary<string, string>();
