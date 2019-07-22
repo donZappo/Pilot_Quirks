@@ -567,7 +567,7 @@ namespace Pilot_Quirks
                 {
                     __result = __result - settings.pilot_rebellious_ResolveMalus;
                 }
-                if (officer)
+                if (officer || commander)
                     __result += settings.pilot_officer_BonusResolve;
             }
         }
