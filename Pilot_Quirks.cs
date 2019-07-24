@@ -591,15 +591,11 @@ namespace Pilot_Quirks
                     }
                     if (TargetPilot.pilotDef.PilotTags.Contains("pilot_cautious"))
                     {
-                        __result = __result + (float)settings.pilot_reckless_ToBeHitBonus;
+                        __result = __result + (float)settings.pilot_cautious_ToBeHitBonus;
                     }
                     if (TargetPilot.pilotDef.PilotTags.Contains("pilot_jinxed"))
                     {
                         __result = __result + (float)settings.pilot_jinxed_ToBeHitBonus;
-                    }
-                    if (TargetPilot.pilotDef.PilotTags.Contains("pilot_jinxed"))
-                    {
-                        __result = __result + (float)settings.pilot_reckless_ToBeHitBonus;
                     }
                 }
                 catch (Exception)
@@ -611,7 +607,7 @@ namespace Pilot_Quirks
                 }
                 if (pilot.pilotDef.PilotTags.Contains("pilot_cautious"))
                 {
-                    __result = __result + (float)settings.pilot_reckless_ToHitBonus;
+                    __result = __result + (float)settings.pilot_cautious_ToHitBonus;
                 }
                 if (pilot.pilotDef.PilotTags.Contains("pilot_drunk") && pilot.pilotDef.TimeoutRemaining > 0)
                 {
@@ -652,7 +648,7 @@ namespace Pilot_Quirks
 
                 if (pilot.pilotDef.PilotTags.Contains("pilot_jinxed"))
                 {
-                    __result = string.Format("{0}JINXED {1:+#;-#}; ", __result, settings.pilot_reckless_ToHitBonus);
+                    __result = string.Format("{0}JINXED {1:+#;-#}; ", __result, settings.pilot_jinxed_ToHitBonus);
                 }
             }
         }
