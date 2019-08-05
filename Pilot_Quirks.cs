@@ -1149,17 +1149,7 @@ namespace Pilot_Quirks
                 upgrade.PurchaseCost = __state;
             }
         }
-        [HarmonyPatch(typeof(TagDataStructFetcher), "GetItem")]
-        public static class TagDataStructFetcher_GetItem_Patch
-        {
-            public static void Postfix(string id, TagDataStruct __result)
-            {
-                if (!settings.TagIDToDescription.ContainsKey(id))
-                    return;
-
-                __result.DescriptionTag += "\n\n" + settings.TagIDToDescription[id];
-            }
-        }
+        
 
         [HarmonyPatch(typeof(SimGameState), "GetInjuryCost")]
         public static class SimGameState_GetInjuryCost_Patch

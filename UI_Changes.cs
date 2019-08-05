@@ -9,6 +9,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using BattleTech.UI.Tooltips;
+using HBS.Collections;
 
 namespace Pilot_Quirks
 {
@@ -67,12 +68,49 @@ namespace Pilot_Quirks
                         TagDesc += "<b>" + Pre_Control.settings.TagIDToNames[tag] + ": </b>" +
                                 Pre_Control.settings.TagIDToDescription[tag] + "\n\n";
                     }
+                    else if (tag == "test")
+                    {
+                        TagDesc += "<b>" + "Mech Pilot Mastery" + ": </b>" +
+                                "Dominate Some Mech" + "\n\n";
+                    }
                 }
 
                     var descriptionDef = new BaseDescriptionDef("Tags", p.Callsign,
                     TagDesc, null);
 
                 tooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(descriptionDef));
+            }
+        }
+
+        [HarmonyPatch(typeof(TagDataStructFetcher), "GetItem")]
+        public static class TagDataStructFetcher_GetItem_Patch
+        {
+            public static void Postfix(string id, TagDataStruct __result)
+            {
+                if (id == "HACK_GENCON_UNIT")
+                    __result.DescriptionTag += "Total Awesome Mech Bonuses";
+
+                if (!Pre_Control.settings.TagIDToDescription.ContainsKey(id))
+                    return;
+
+                __result.DescriptionTag += "\n\n" + Pre_Control.settings.TagIDToDescription[id];
+            }
+        }
+
+        [HarmonyPatch(typeof(HBSTagView), "Initialize")]
+        public static class HBSTagView_Initialize_Patch
+        {
+            public static void Postfix(HBSTagView __instance, TagSet tagSet, GameContext context)
+            {
+                if (tagSet.Contains("test"))
+                {
+                    var item = new TagDataStruct("HACK_GENCON_UNIT", true, true, "name", "friendlyName", "description");
+                    string contextItem = string.Format("{0}[{1}]", "TDSF", item.Tag);
+                    string friendlyName = item.FriendlyName;
+                    var itemTT = BattleTech.UI.Tooltips.TooltipUtilities.GetGameContextTooltipString(contextItem, friendlyName);
+
+                    __instance.AddTag(itemTT, item.FriendlyName);
+                }
             }
         }
     }

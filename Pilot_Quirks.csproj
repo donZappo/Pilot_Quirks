@@ -78,6 +78,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MechBonding.cs" />
+    <Compile Include="SaveHandling.cs" />
     <Compile Include="UI_Changes.cs" />
     <Compile Include="ExperienceAdjustments.cs" />
     <Compile Include="Pilot_Quirks.cs" />
