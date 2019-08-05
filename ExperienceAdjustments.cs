@@ -417,7 +417,7 @@ namespace Pilot_Quirks
                     if (__instance.curPilot.pilotDef.PilotTags.Contains("pilot_klutz"))
                         isKlutz = true;
 
-                    isKlutz = false;
+                    isAssassin = false;
                     if (__instance.curPilot.pilotDef.PilotTags.Contains("pilot_assassin"))
                         isAssassin = true;
 
@@ -516,7 +516,7 @@ namespace Pilot_Quirks
                     if (__instance.curPilot.pilotDef.PilotTags.Contains("pilot_klutz"))
                         isKlutz = true;
 
-                    isKlutz = false;
+                    isAssassin = false;
                     if (__instance.curPilot.pilotDef.PilotTags.Contains("pilot_assassin"))
                         isAssassin = true;
 
