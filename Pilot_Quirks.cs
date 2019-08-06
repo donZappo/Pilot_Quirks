@@ -1237,6 +1237,12 @@ namespace Pilot_Quirks
 
             public bool IsSaveGame = false;
 
+            //Tiers for Mech Mastery.
+            public int Tier1 = 5;
+            public int Tier2 = 10;
+            public int Tier3 = 15;
+            public int Tier4 = 20;
+
         }
     }
 }

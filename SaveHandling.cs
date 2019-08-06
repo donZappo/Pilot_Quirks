@@ -6,6 +6,8 @@ using Harmony;
 using Newtonsoft.Json;
 using UnityEngine;
 using BattleTech.Save;
+using System;
+using System.Collections.Generic;
 
 namespace Pilot_Quirks
 {
@@ -34,17 +36,25 @@ namespace Pilot_Quirks
         {
             static void Postfix(SimGameState __instance, GameInstanceSave gameInstanceSave)
             {
-                DeserializeXXX();
+                bool NewPQ = true;
+                foreach (string tag in __instance.CompanyTags)
+                {
+                    if (tag.StartsWith("PilotQuirksSave{"))
+                        NewPQ = false;
+                }
+                if (!NewPQ)
+                {
+                    DeserializePilotQuirks();
+                }
             }
         }
 
-        internal static void DeserializeXXX()
+        internal static void DeserializePilotQuirks()
         {
-            //var sim = UnityGameInstance.BattleTechGame.Simulation;
-
-            //Core.WarStatus = JsonConvert.DeserializeObject<WarStatus>(sim.CompanyTags.First(x => x.StartsWith("GalaxyAtWarSave{")).Substring(15));
-            //LogDebug(">>> Deserialization complete");
-            //LogDebug($"Size after load: {JsonConvert.SerializeObject(Core.WarStatus).Length / 1024}kb");
+            var sim = UnityGameInstance.BattleTechGame.Simulation;
+            if (sim.CompanyTags.First(x => x.StartsWith("PilotQuirksSave{")) != null)
+                MechBonding.PilotsAndMechs = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, int>>>(sim.CompanyTags.First(x => x.StartsWith("PilotQuirksSave{")).Substring(15));
+            
         }
 
         //What happens on game save.
@@ -53,16 +63,14 @@ namespace Pilot_Quirks
         {
             public static void Prefix()
             {
-                SerializeXXX();
+                SerializePilotQuirks();
             }
         }
-        internal static void SerializeXXX()
+        internal static void SerializePilotQuirks()
         {
-            //var sim = UnityGameInstance.BattleTechGame.Simulation;
-            //sim.CompanyTags.Where(tag => tag.StartsWith("GalaxyAtWar")).Do(x => sim.CompanyTags.Remove(x));
-            //sim.CompanyTags.Add("GalaxyAtWarSave" + JsonConvert.SerializeObject(Core.WarStatus));
-            //LogDebug($"Serializing object size: {JsonConvert.SerializeObject(Core.WarStatus).Length / 1024}kb");
-            //LogDebug(">>> Serialization complete");
+            var sim = UnityGameInstance.BattleTechGame.Simulation;
+            sim.CompanyTags.Where(tag => tag.StartsWith("PilotQuirks")).Do(x => sim.CompanyTags.Remove(x));
+            sim.CompanyTags.Add("PilotQuirksSave" + JsonConvert.SerializeObject(Pilot_Quirks.MechBonding.PilotsAndMechs));
         }
     }
 }

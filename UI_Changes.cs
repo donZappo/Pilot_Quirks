@@ -15,6 +15,8 @@ namespace Pilot_Quirks
 {
     class UI_Changes
     {
+        public static Pilot PilotHolder;
+
         [HarmonyPatch(typeof(SG_HiringHall_DetailPanel), "DisplayPilot")]
         public static class SG_HiringHall_DetailPanel_DisplayPilot_Patch
         {
@@ -68,16 +70,13 @@ namespace Pilot_Quirks
                         TagDesc += "<b>" + Pre_Control.settings.TagIDToNames[tag] + ": </b>" +
                                 Pre_Control.settings.TagIDToDescription[tag] + "\n\n";
                     }
-                    else if (tag == "test")
+                    else if (tag == "PQ_Mech_Mastery")
                     {
-                        TagDesc += "<b>" + "Mech Pilot Mastery" + ": </b>" +
-                                "Dominate Some Mech" + "\n\n";
+                        TagDesc = MechMasterTagDescription(__instance.pilot, TagDesc);
                     }
                 }
 
-                    var descriptionDef = new BaseDescriptionDef("Tags", p.Callsign,
-                    TagDesc, null);
-
+                var descriptionDef = new BaseDescriptionDef("Tags", p.Callsign, TagDesc, null);
                 tooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(descriptionDef));
             }
         }
@@ -88,7 +87,7 @@ namespace Pilot_Quirks
             public static void Postfix(string id, TagDataStruct __result)
             {
                 if (id == "HACK_GENCON_UNIT")
-                    __result.DescriptionTag += "Total Awesome Mech Bonuses";
+                    __result.DescriptionTag += MechMasterTagDescription(UI_Changes.PilotHolder, __result.DescriptionTag);
 
                 if (!Pre_Control.settings.TagIDToDescription.ContainsKey(id))
                     return;
@@ -102,16 +101,79 @@ namespace Pilot_Quirks
         {
             public static void Postfix(HBSTagView __instance, TagSet tagSet, GameContext context)
             {
-                if (tagSet.Contains("test"))
+                if (tagSet.Contains("PQ_Mech_Mastery"))
                 {
-                    var item = new TagDataStruct("HACK_GENCON_UNIT", true, true, "name", "friendlyName", "description");
+                    var MechExperience = MechBonding.PilotsAndMechs[UI_Changes.PilotHolder.Description.Id];
+                    var BondedMech = MechExperience.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
+                    string MasteryTier = "";
+                    if (MechExperience[BondedMech] >= Pre_Control.settings.Tier4)
+                        MasteryTier = "Elite ";
+                    else if (MechExperience[BondedMech] >= Pre_Control.settings.Tier3)
+                        MasteryTier = "Veteran ";
+                    else if (MechExperience[BondedMech] >= Pre_Control.settings.Tier2)
+                        MasteryTier = "Regular ";
+                    else if (MechExperience[BondedMech] >= Pre_Control.settings.Tier1)
+                        MasteryTier = "Green ";
+
+                    string DescriptionName = MasteryTier + BondedMech + " Pilot";
+
+                    var item = new TagDataStruct("HACK_GENCON_UNIT", true, true, "name", DescriptionName , "description");
                     string contextItem = string.Format("{0}[{1}]", "TDSF", item.Tag);
                     string friendlyName = item.FriendlyName;
-                    var itemTT = BattleTech.UI.Tooltips.TooltipUtilities.GetGameContextTooltipString(contextItem, friendlyName);
+                    var itemTT = TooltipUtilities.GetGameContextTooltipString(contextItem, friendlyName);
 
                     __instance.AddTag(itemTT, item.FriendlyName);
                 }
             }
+        }
+
+        public static string MechMasterTagDescription(Pilot pilot, string TagDesc)
+        {
+            var MechExperience = MechBonding.PilotsAndMechs[pilot.Description.Id];
+            var BondedMech = MechExperience.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
+            //string MasteryTier = "";
+            //if (MechExperience[BondedMech] >= Pre_Control.settings.Tier4)
+            //    MasteryTier = "Elite ";
+            //else if (MechExperience[BondedMech] >= Pre_Control.settings.Tier3)
+            //    MasteryTier = "Veteran ";
+            //else if (MechExperience[BondedMech] >= Pre_Control.settings.Tier2)
+            //    MasteryTier = "Regular ";
+            //else if (MechExperience[BondedMech] >= Pre_Control.settings.Tier1)
+            //    MasteryTier = "Green ";
+
+            //string DescriptionName = MasteryTier + BondedMech + " Pilot";
+            //TagDesc += "<b>" + DescriptionName + "</b>";
+
+            TagDesc += "<b>" + BondedMech + " Mastery:</b> Bonuses when piloting a " + BondedMech + ".";
+            if (MechExperience[BondedMech] >= Pre_Control.settings.Tier1)
+                TagDesc += "\n• Reduced Fatigue";
+            if (MechExperience[BondedMech] >= Pre_Control.settings.Tier2)
+                TagDesc += "\n• +1 Piloting Skill";
+            if (MechExperience[BondedMech] >= Pre_Control.settings.Tier3)
+                TagDesc += "\n• Increased Sensor and Spotting Range";
+            if (MechExperience[BondedMech] >= Pre_Control.settings.Tier4)
+                TagDesc += "\n• +1 Gunnery Skill";
+
+            return TagDesc;
+        }
+    }
+
+    //Hold Pilot for tag generation.
+    [HarmonyPatch(typeof(SGBarracksServicePanel), "SetPilot")]
+    public static class SGBarracksServicePanel_SetPilot_Patch
+    {
+        public static void Prefix(Pilot p)
+        {
+            UI_Changes.PilotHolder = p;
+        }
+    }
+
+    [HarmonyPatch(typeof(SGMemorialWallAdditionalDetailsPanel), "DisplayPilot")]
+    public static class SGMemorialWallAdditionalDetailsPanel_DisplayPilot_Patch
+    {
+        public static void Prefix(Pilot pilot)
+        {
+            UI_Changes.PilotHolder = pilot;
         }
     }
 }

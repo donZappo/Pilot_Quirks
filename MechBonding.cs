@@ -33,11 +33,27 @@ namespace Pilot_Quirks
                     foreach (AbstractActor actor in team.units)
                     {
                         Pilot pilot = actor.GetPilot();
+                        Logger.LogLine(pilot.Name);
+
+                        //Add to the counter for 'Mech piloting.
+                        if (!PilotsAndMechs.Keys.Contains(pilot.Description.Id))
+                        {
+                            Logger.LogLine(pilot.Description.Id.ToString());
+                            Logger.LogLine(actor.Description.Name);
+                            Dictionary<string, int> tempD = new Dictionary<string, int>();
+                            tempD.Add(actor.Description.Name, 1);
+                            PilotsAndMechs.Add(pilot.Description.Id, tempD);
+                        }
+                        else if (!PilotsAndMechs[pilot.Description.Id].Keys.Contains(actor.Description.Name))
+                            PilotsAndMechs[pilot.Description.Id].Add(actor.Description.Name, 1);
+                        else
+                            PilotsAndMechs[pilot.Description.Id][actor.Description.Name] += 1;
+
 
                         //Add tags based upon 'Mech experience for the pilot.
-                        if (PilotsAndMechs.Keys.Contains(pilot.GUID))
+                        if (PilotsAndMechs.Keys.Contains(pilot.Description.Id))
                         {
-                            var MechExperience = PilotsAndMechs[pilot.GUID];
+                            var MechExperience = PilotsAndMechs[pilot.Description.Id];
                             var BondedMech = MechExperience.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
                             if (BondedMech == actor.Description.Name)
                             {
@@ -51,30 +67,20 @@ namespace Pilot_Quirks
                                     pilot.pilotDef.PilotTags.Add("PQ_pilot_elite");
                             }
                         }
-
-                        //Add to the counter for 'Mech piloting.
-                        if (!PilotsAndMechs.Keys.Contains(pilot.GUID))
-                        {
-                            Dictionary<string, int> tempD = new Dictionary<string, int>();
-                            tempD.Add(actor.Description.Name, 1);
-                            PilotsAndMechs.Add(pilot.GUID, tempD);
-                        }
-                        else if (!PilotsAndMechs[pilot.GUID].Keys.Contains(actor.Description.Name))
-                            PilotsAndMechs[pilot.GUID].Add(actor.Description.Name, 1);
-                        else
-                            PilotsAndMechs[pilot.GUID][actor.Description.Name] += 1;
                     }
                 }
             }
         }
 
-        //Clear out them tags. 
+        //Clear out them tags and add the Mech Mastery Tag. PQ_pilot_green is processed in Pilot Fatigue and cleared there. 
         [HarmonyPatch(typeof(AAR_UnitStatusWidget), "FillInPilotData")]
         public static class AAR_UnitStatusWidget_FillInPilotData_Prefix
         {
             public static void Prefix(AAR_UnitStatusWidget __instance, SimGameState ___simState)
             {
                 UnitResult unitResult = Traverse.Create(__instance).Field("UnitData").GetValue<UnitResult>();
+                if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_green") && !unitResult.pilot.pilotDef.PilotTags.Contains("PQ_Mech_Mastery"))
+                    unitResult.pilot.pilotDef.PilotTags.Add("PQ_Mech_Mastery");
                 if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_regular"))
                     unitResult.pilot.pilotDef.PilotTags.Remove("PQ_pilot_regular");
                 if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_veteran"))
