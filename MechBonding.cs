@@ -34,6 +34,25 @@ namespace Pilot_Quirks
                     {
                         Pilot pilot = actor.GetPilot();
 
+                        //Add tags based upon 'Mech experience for the pilot.
+                        if (PilotsAndMechs.Keys.Contains(pilot.GUID))
+                        {
+                            var MechExperience = PilotsAndMechs[pilot.GUID];
+                            var BondedMech = MechExperience.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
+                            if (BondedMech == actor.Description.Name)
+                            {
+                                if (MechExperience[BondedMech] >= 5)
+                                    pilot.pilotDef.PilotTags.Add("PQ_pilot_green");
+                                if (MechExperience[BondedMech] >= 10)
+                                    pilot.pilotDef.PilotTags.Add("PQ_pilot_regular");
+                                if (MechExperience[BondedMech] >= 15)
+                                    pilot.pilotDef.PilotTags.Add("PQ_pilot_veteran");
+                                if (MechExperience[BondedMech] >= 20)
+                                    pilot.pilotDef.PilotTags.Add("PQ_pilot_elite");
+                            }
+                        }
+
+                        //Add to the counter for 'Mech piloting.
                         if (!PilotsAndMechs.Keys.Contains(pilot.GUID))
                         {
                             Dictionary<string, int> tempD = new Dictionary<string, int>();
@@ -49,9 +68,65 @@ namespace Pilot_Quirks
             }
         }
 
+        //Clear out them tags. 
+        [HarmonyPatch(typeof(AAR_UnitStatusWidget), "FillInPilotData")]
+        public static class AAR_UnitStatusWidget_FillInPilotData_Prefix
+        {
+            public static void Prefix(AAR_UnitStatusWidget __instance, SimGameState ___simState)
+            {
+                UnitResult unitResult = Traverse.Create(__instance).Field("UnitData").GetValue<UnitResult>();
+                if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_regular"))
+                    unitResult.pilot.pilotDef.PilotTags.Remove("PQ_pilot_regular");
+                if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_veteran"))
+                    unitResult.pilot.pilotDef.PilotTags.Remove("PQ_pilot_veteran");
+                if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_elite"))
+                    unitResult.pilot.pilotDef.PilotTags.Remove("PQ_pilot_elite");
+            }
+        }
 
+        //Adjust skills based upon mastery. 
+        [HarmonyPatch(typeof(Pilot))]
+        [HarmonyPatch("Piloting", MethodType.Getter)]
+        public class Pilot_Piloting_Patch
+        {
+            public static void Postfix(Pilot __instance, ref int __result)
+            {
+                if (__instance.pilotDef.PilotTags.Contains("PQ_pilot_regular"))
+                    __result += 1;
+            }
+        }
 
+        [HarmonyPatch(typeof(Pilot))]
+        [HarmonyPatch("Gunnery", MethodType.Getter)]
+        public class Pilot_Gunnery_Patch
+        {
+            public static void Postfix(Pilot __instance, ref int __result)
+            {
+                if (__instance.pilotDef.PilotTags.Contains("PQ_pilot_elite"))
+                    __result += 1;
+            }
+        }
 
+        [HarmonyPatch(typeof(LineOfSight), "GetAllSensorRangeAbsolutes")]
+        public static class LineOfSight_GetAllSensorRangeAbsolutes_Patch
+        {
+            public static void Postfix(AbstractActor source, ref float __result)
+            {
+                Pilot pilot = source.GetPilot();
+                if (pilot.pilotDef.PilotTags.Contains("PQ_pilot_veteran"))
+                    __result += pilot.Tactics * 5;
+            }
+        }
 
+        [HarmonyPatch(typeof(LineOfSight), "GetAllSpotterAbsolutes")]
+        public static class LineOfSight_GetAllSpotterAbsolutes_Patch
+        {
+            public static void Postfix(AbstractActor source, ref float __result)
+            {
+                Pilot pilot = source.GetPilot();
+                if (pilot.pilotDef.PilotTags.Contains("PQ_pilot_veteran"))
+                    __result += pilot.Tactics * 5;
+            }
+        }
     }
 }
