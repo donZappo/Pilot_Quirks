@@ -21,57 +21,6 @@ namespace Pilot_Quirks
         public static Dictionary<string, Dictionary<string, int>> PilotsAndMechs = new Dictionary<string, Dictionary<string, int>>();
 
 
-        //Track how many times the pilots drop with each 'Mech. 
-        [HarmonyPatch(typeof(TurnEventNotification), "ShowTeamNotification")]
-        public static class TurnEventNotification_Patch
-        {
-            public static void Prefix(TurnEventNotification __instance, Team team, bool ___hasBegunGame,
-                CombatGameState ___Combat)
-            {
-                if (!___hasBegunGame && ___Combat.TurnDirector.CurrentRound <= 1)
-                {
-                    foreach (AbstractActor actor in team.units)
-                    {
-                        Pilot pilot = actor.GetPilot();
-                        Logger.LogLine(pilot.Name);
-
-                        //Add to the counter for 'Mech piloting.
-                        if (!PilotsAndMechs.Keys.Contains(pilot.Description.Id))
-                        {
-                            Logger.LogLine(pilot.Description.Id.ToString());
-                            Logger.LogLine(actor.Description.Name);
-                            Dictionary<string, int> tempD = new Dictionary<string, int>();
-                            tempD.Add(actor.Description.Name, 1);
-                            PilotsAndMechs.Add(pilot.Description.Id, tempD);
-                        }
-                        else if (!PilotsAndMechs[pilot.Description.Id].Keys.Contains(actor.Description.Name))
-                            PilotsAndMechs[pilot.Description.Id].Add(actor.Description.Name, 1);
-                        else
-                            PilotsAndMechs[pilot.Description.Id][actor.Description.Name] += 1;
-
-
-                        //Add tags based upon 'Mech experience for the pilot.
-                        if (PilotsAndMechs.Keys.Contains(pilot.Description.Id))
-                        {
-                            var MechExperience = PilotsAndMechs[pilot.Description.Id];
-                            var BondedMech = MechExperience.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
-                            if (BondedMech == actor.Description.Name)
-                            {
-                                if (MechExperience[BondedMech] >= 5)
-                                    pilot.pilotDef.PilotTags.Add("PQ_pilot_green");
-                                if (MechExperience[BondedMech] >= 10)
-                                    pilot.pilotDef.PilotTags.Add("PQ_pilot_regular");
-                                if (MechExperience[BondedMech] >= 15)
-                                    pilot.pilotDef.PilotTags.Add("PQ_pilot_veteran");
-                                if (MechExperience[BondedMech] >= 20)
-                                    pilot.pilotDef.PilotTags.Add("PQ_pilot_elite");
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         //Clear out them tags and add the Mech Mastery Tag. PQ_pilot_green is processed in Pilot Fatigue and cleared there. 
         [HarmonyPatch(typeof(AAR_UnitStatusWidget), "FillInPilotData")]
         public static class AAR_UnitStatusWidget_FillInPilotData_Prefix
@@ -132,6 +81,45 @@ namespace Pilot_Quirks
                 Pilot pilot = source.GetPilot();
                 if (pilot.pilotDef.PilotTags.Contains("PQ_pilot_veteran"))
                     __result += pilot.Tactics * 5;
+            }
+        }
+
+        //Track how many times the pilots drop with each 'Mech. 
+        [HarmonyPatch(typeof(CombatHUDMWStatus), "InitForPilot")]
+        public static class CombatHUDMWStatus_InitForPilot_Patches
+        {
+            public static void Prefix(AbstractActor actor, Pilot pilot)
+            {
+                //Add to the counter for 'Mech piloting.
+                if (!PilotsAndMechs.Keys.Contains(pilot.Description.Id))
+                {
+                    Dictionary<string, int> tempD = new Dictionary<string, int>();
+                    tempD.Add(actor.Description.Name, 1);
+                    PilotsAndMechs.Add(pilot.Description.Id, tempD);
+                }
+                else if (!PilotsAndMechs[pilot.Description.Id].Keys.Contains(actor.Description.Name))
+                    PilotsAndMechs[pilot.Description.Id].Add(actor.Description.Name, 1);
+                else
+                    PilotsAndMechs[pilot.Description.Id][actor.Description.Name] += 1;
+
+
+                //Add tags based upon 'Mech experience for the pilot.
+                if (PilotsAndMechs.Keys.Contains(pilot.Description.Id))
+                {
+                    var MechExperience = PilotsAndMechs[pilot.Description.Id];
+                    var BondedMech = MechExperience.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
+                    if (BondedMech == actor.Description.Name)
+                    {
+                        if (MechExperience[BondedMech] >= Pre_Control.settings.Tier1)
+                            pilot.pilotDef.PilotTags.Add("PQ_pilot_green");
+                        if (MechExperience[BondedMech] >= Pre_Control.settings.Tier2)
+                            pilot.pilotDef.PilotTags.Add("PQ_pilot_regular");
+                        if (MechExperience[BondedMech] >= Pre_Control.settings.Tier3)
+                            pilot.pilotDef.PilotTags.Add("PQ_pilot_veteran");
+                        if (MechExperience[BondedMech] >= Pre_Control.settings.Tier4)
+                            pilot.pilotDef.PilotTags.Add("PQ_pilot_elite");
+                    }
+                }
             }
         }
     }

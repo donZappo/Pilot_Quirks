@@ -154,6 +154,16 @@ namespace Pilot_Quirks
             if (MechExperience[BondedMech] >= Pre_Control.settings.Tier4)
                 TagDesc += "\n• +1 Gunnery Skill";
 
+            TagDesc += "\n\nMech Experience - ";
+            int i = 0;
+            foreach (var MechXP in MechExperience.OrderByDescending(x => x.Value))
+            {
+                TagDesc += MechXP.Key + ": " + MechXP.Value + ", ";
+                i++;
+                if (i == 2) break;
+            }
+            char[] charsToTrim = { ' ' , ',' };
+            TagDesc = TagDesc.TrimEnd(charsToTrim);
             return TagDesc;
         }
     }
