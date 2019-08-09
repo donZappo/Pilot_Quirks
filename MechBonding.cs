@@ -268,7 +268,7 @@ namespace Pilot_Quirks
             public static void Prefix(AAR_UnitStatusWidget __instance, SimGameState ___simState)
             {
                 UnitResult unitResult = Traverse.Create(__instance).Field("UnitData").GetValue<UnitResult>();
-                if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_green") && !unitResult.pilot.pilotDef.PilotTags.Contains("PQ_Mech_Mastery"))
+                if (!unitResult.pilot.pilotDef.PilotTags.Contains("PQ_Mech_Mastery"))
                     unitResult.pilot.pilotDef.PilotTags.Add("PQ_Mech_Mastery");
                 if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_regular"))
                     unitResult.pilot.pilotDef.PilotTags.Remove("PQ_pilot_regular");

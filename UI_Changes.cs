@@ -63,6 +63,12 @@ namespace Pilot_Quirks
 
                 var p = __instance.Pilot;
                 string TagDesc = "";
+
+                if (p.pilotDef.PilotTags.Contains("pilot_fatigued"))
+                {
+                    TagDesc += "<b>***PILOT FATIGUED***</b>\nPilot will suffer from Low Spirits if used in combat. The lance will also experience reduced Resolve per turn during combat.\n\n";
+                }
+
                 foreach (var tag in p.pilotDef.PilotTags)
                 {
                     if (Pre_Control.settings.TagIDToDescription.Keys.Contains(tag))
