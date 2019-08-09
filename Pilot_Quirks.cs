@@ -1243,6 +1243,8 @@ namespace Pilot_Quirks
             public int Tier3 = 15;
             public int Tier4 = 20;
 
+            public int pilot_drops_for_8_pilot = 50;
+
         }
     }
 }

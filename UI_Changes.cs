@@ -144,7 +144,11 @@ namespace Pilot_Quirks
             //string DescriptionName = MasteryTier + BondedMech + " Pilot";
             //TagDesc += "<b>" + DescriptionName + "</b>";
 
-            TagDesc += "<b>" + BondedMech + " Mastery:</b> Bonuses when piloting a " + BondedMech + ".";
+            if (MechExperience[BondedMech] >= Pre_Control.settings.Tier1)
+                TagDesc += "<b>" + BondedMech + " Mastery:</b> Bonuses when piloting a " + BondedMech + ".";
+            else
+                TagDesc += "<b>No 'Mech mastery.</b>";
+
             if (MechExperience[BondedMech] >= Pre_Control.settings.Tier1)
                 TagDesc += "\n• Reduced Fatigue";
             if (MechExperience[BondedMech] >= Pre_Control.settings.Tier2)
