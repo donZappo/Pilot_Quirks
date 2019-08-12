@@ -344,19 +344,28 @@ namespace Pilot_Quirks
 
 
                 //Add tags based upon 'Mech experience for the pilot.
+                List<string> TopThreeMechs = new List<string>();
                 if (PilotsAndMechs.Keys.Contains(pilot.Description.Id))
                 {
                     var MechExperience = PilotsAndMechs[pilot.Description.Id];
-                    var BondedMech = MechExperience.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
-                    if (BondedMech == actor.Description.Name)
+                    int i = 0;
+                    foreach (var mech in MechExperience.OrderByDescending(x => x.Value))
                     {
-                        if (MechExperience[BondedMech] >= Pre_Control.settings.Tier1)
+                        TopThreeMechs.Add(mech.Key);
+                        i++;
+                        if (i == 2)
+                            break;
+                    }
+
+                    if (TopThreeMechs.Contains(actor.Description.Name))
+                    {
+                        if (MechExperience[actor.Description.Name] >= Pre_Control.settings.Tier1)
                             pilot.pilotDef.PilotTags.Add("PQ_pilot_green");
-                        if (MechExperience[BondedMech] >= Pre_Control.settings.Tier2)
+                        if (MechExperience[actor.Description.Name] >= Pre_Control.settings.Tier2)
                             pilot.pilotDef.PilotTags.Add("PQ_pilot_regular");
-                        if (MechExperience[BondedMech] >= Pre_Control.settings.Tier3)
+                        if (MechExperience[actor.Description.Name] >= Pre_Control.settings.Tier3)
                             pilot.pilotDef.PilotTags.Add("PQ_pilot_veteran");
-                        if (MechExperience[BondedMech] >= Pre_Control.settings.Tier4)
+                        if (MechExperience[actor.Description.Name] >= Pre_Control.settings.Tier4)
                             pilot.pilotDef.PilotTags.Add("PQ_pilot_elite");
                     }
                 }

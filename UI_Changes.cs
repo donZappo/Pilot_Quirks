@@ -121,7 +121,7 @@ namespace Pilot_Quirks
                     else if (MechExperience[BondedMech] >= Pre_Control.settings.Tier1)
                         MasteryTier = "Green ";
 
-                    string DescriptionName = MasteryTier + BondedMech + " Pilot";
+                    string DescriptionName = MasteryTier + " 'Mech Pilot";
 
                     var item = new TagDataStruct("HACK_GENCON_UNIT", true, true, "name", DescriptionName , "description");
                     string contextItem = string.Format("{0}[{1}]", "TDSF", item.Tag);
@@ -136,33 +136,66 @@ namespace Pilot_Quirks
         public static string MechMasterTagDescription(Pilot pilot, string TagDesc)
         {
             var MechExperience = MechBonding.PilotsAndMechs[pilot.Description.Id];
-            var BondedMech = MechExperience.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
-            //string MasteryTier = "";
-            //if (MechExperience[BondedMech] >= Pre_Control.settings.Tier4)
-            //    MasteryTier = "Elite ";
-            //else if (MechExperience[BondedMech] >= Pre_Control.settings.Tier3)
-            //    MasteryTier = "Veteran ";
-            //else if (MechExperience[BondedMech] >= Pre_Control.settings.Tier2)
-            //    MasteryTier = "Regular ";
-            //else if (MechExperience[BondedMech] >= Pre_Control.settings.Tier1)
-            //    MasteryTier = "Green ";
+           
+            string TierOneString = "\n• Reduced Fatigue\n\t(";
+            string TierTwoString = "\n• +1 Piloting Skill\n\t(";
+            string TierThreeString = "\n• Increased Sensor and Spotting Range\n\t(";
+            string TierFourString = "\n• +1 Gunnery Skill\n\t(";
+            bool TierOne = false;
+            bool TierTwo = false;
+            bool TierThree = false;
+            bool TierFour = false;
+            foreach (var BondedMech in MechExperience.OrderByDescending(x => x.Value))
+            {
+                if (MechExperience[BondedMech.Key] >= Pre_Control.settings.Tier1)
+                {
+                    TierOneString += BondedMech.Key + ", ";
+                    TierOne = true;
+                }
+                if (MechExperience[BondedMech.Key] >= Pre_Control.settings.Tier2)
+                {
+                    TierTwoString += BondedMech.Key + ", ";
+                    TierTwo = true;
+                }
+                if (MechExperience[BondedMech.Key] >= Pre_Control.settings.Tier3)
+                {
+                    TierThreeString += BondedMech.Key + ", ";
+                    TierThree = true;
+                }
+                if (MechExperience[BondedMech.Key] >= Pre_Control.settings.Tier4)
+                {
+                    TierFourString += BondedMech.Key + ", ";
+                    TierFour = true;
+                }
+            }
 
-            //string DescriptionName = MasteryTier + BondedMech + " Pilot";
-            //TagDesc += "<b>" + DescriptionName + "</b>";
+            char[] charsToTrim = { ' ', ',' };
 
-            if (MechExperience[BondedMech] >= Pre_Control.settings.Tier1)
-                TagDesc += "<b>" + BondedMech + " Mastery:</b> Bonuses when piloting a " + BondedMech + ".";
+            if (TierOne)
+            {
+                TagDesc += "<b>'Mech Mastery:</b> Bonuses when piloting 'Mechs.";
+                TierOneString = TierOneString.TrimEnd(charsToTrim) + ")";
+                TagDesc += TierOneString;
+            }
             else
+            {
                 TagDesc += "<b>No 'Mech mastery.</b>";
-
-            if (MechExperience[BondedMech] >= Pre_Control.settings.Tier1)
-                TagDesc += "\n• Reduced Fatigue";
-            if (MechExperience[BondedMech] >= Pre_Control.settings.Tier2)
-                TagDesc += "\n• +1 Piloting Skill";
-            if (MechExperience[BondedMech] >= Pre_Control.settings.Tier3)
-                TagDesc += "\n• Increased Sensor and Spotting Range";
-            if (MechExperience[BondedMech] >= Pre_Control.settings.Tier4)
-                TagDesc += "\n• +1 Gunnery Skill";
+            }
+            if (TierTwo)
+            {
+                TierTwoString = TierTwoString.TrimEnd(charsToTrim) + ")";
+                TagDesc += TierTwoString;
+            }
+            if (TierThree)
+            {
+                TierThreeString = TierThreeString.TrimEnd(charsToTrim) + ")";
+                TagDesc += TierThreeString;
+            }
+            if (TierFour)
+            {
+                TierFourString = TierFourString.TrimEnd(charsToTrim) + ")";
+                TagDesc += TierFourString;
+            }
 
             TagDesc += "\n\nMech Experience - ";
             int i = 0;
@@ -172,7 +205,6 @@ namespace Pilot_Quirks
                 i++;
                 if (i == 2) break;
             }
-            char[] charsToTrim = { ' ' , ',' };
             TagDesc = TagDesc.TrimEnd(charsToTrim);
             return TagDesc;
         }
