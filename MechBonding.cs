@@ -275,12 +275,16 @@ namespace Pilot_Quirks
             {
                 UnitResult unitResult = Traverse.Create(__instance).Field("UnitData").GetValue<UnitResult>();
                 if (!unitResult.pilot.pilotDef.PilotTags.Contains("PQ_Mech_Mastery"))
-                {
                     unitResult.pilot.pilotDef.PilotTags.Add("PQ_Mech_Mastery");
+
+                bool HasTattoo = unitResult.pilot.pilotDef.PilotTags.Any(x => x.StartsWith("PQ_Pilot_GUID"));
+                if (!HasTattoo)
+                {
                     string PilotTattoo = "PQ_Pilot_GUID_" + PQ_GUID;
                     unitResult.pilot.pilotDef.PilotTags.Add(PilotTattoo);
                     PQ_GUID++;
                 }
+
                 if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_regular"))
                     unitResult.pilot.pilotDef.PilotTags.Remove("PQ_pilot_regular");
                 if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_veteran"))
@@ -341,6 +345,10 @@ namespace Pilot_Quirks
         {
             public static void Prefix(AbstractActor actor, Pilot pilot)
             {
+                bool HasTattoo = pilot.pilotDef.PilotTags.Any(x => x.StartsWith("PQ_Pilot_GUID"));
+                if (!HasTattoo)
+                    pilot.pilotDef.PilotTags.Add("PQ_Pilot_GUID_" + MechBonding.PQ_GUID);
+
                 string PilotTattoo = pilot.pilotDef.PilotTags.First(x => x.StartsWith("PQ_Pilot_GUID"));
                 //Add to the counter for 'Mech piloting.
                 if (!PilotsAndMechs.Keys.Contains(PilotTattoo))
