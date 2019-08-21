@@ -74,8 +74,8 @@ namespace Pilot_Quirks
             }
             for (int i = pilotdef.SkillTactics; i > 1; i--)
             {
-                TotalXP += Mathf.CeilToInt(Mathf.Pow((float)i, (exp + exp - Pre_Control.settings.pilot_XP_change))
-                    * (mult - mult * Pre_Control.settings.pilot_XP_change));
+                TotalXP += Mathf.CeilToInt(Mathf.Pow((float)i, (exp + exp * Pre_Control.settings.pilot_XP_change))
+                    * (mult + mult * Pre_Control.settings.pilot_XP_change));
             }
             return TotalXP;
         }

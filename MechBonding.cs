@@ -20,6 +20,7 @@ namespace Pilot_Quirks
     class MechBonding
     {
         public static Dictionary<string, Dictionary<string, int>> PilotsAndMechs = new Dictionary<string, Dictionary<string, int>>();
+        public static int PQ_GUID = 0;
 
         //Add bonded mechs to generated pilots. 
         [HarmonyPatch(typeof(StarSystem), "GeneratePilots")]
@@ -34,8 +35,10 @@ namespace Pilot_Quirks
                         // 8-8-8-8 pilot = 56,000xp
                         int drops = ((pilot.ExperienceSpent + pilot.ExperienceUnspent) * Pre_Control.settings.pilot_drops_for_8_pilot / 56000);
 
-                        if (!pilot.PilotTags.Contains("PQ_Mech_Mastery"))
-                            pilot.PilotTags.Add("PQ_Mech_Mastery");
+                        pilot.PilotTags.Add("PQ_Mech_Mastery");
+                        string PilotTattoo = "PQ_Pilot_GUID_" + PQ_GUID;
+                        pilot.PilotTags.Add(PilotTattoo);
+                        PQ_GUID++;
                         
                         // Add training in a Chameleon if Inner sphere
                         if (pilot.PilotTags.Contains("pilot_davion") ||
@@ -51,11 +54,11 @@ namespace Pilot_Quirks
                             }
                             if (trainingDrops > 0)
                             {
-                                if (!PilotsAndMechs.Keys.Contains(pilot.Description.Id))
+                                if (!PilotsAndMechs.Keys.Contains(PilotTattoo))
                                 {
                                     Dictionary<string, int> tempD = new Dictionary<string, int>();
                                     tempD.Add("Chameleon", trainingDrops);
-                                    PilotsAndMechs.Add(pilot.Description.Id, tempD);
+                                    PilotsAndMechs.Add(PilotTattoo, tempD);
                                     drops -= trainingDrops;
                                 }
                             }
@@ -137,36 +140,36 @@ namespace Pilot_Quirks
                             {
                                 list.Shuffle<UnitDef_MDD>();
                                 mechName = dm.MechDefs.Get(list[0].UnitDefID).Description.Name;
-                                if (!PilotsAndMechs.Keys.Contains(pilot.Description.Id))
+                                if (!PilotsAndMechs.Keys.Contains(PilotTattoo))
                                 {
                                     Dictionary<string, int> tempD = new Dictionary<string, int>();
                                     tempD.Add(mechName, thisDrops3);
-                                    PilotsAndMechs.Add(pilot.Description.Id, tempD);
+                                    PilotsAndMechs.Add(PilotTattoo, tempD);
                                 }
-                                else if (PilotsAndMechs[pilot.Description.Id].ContainsKey(mechName))
+                                else if (PilotsAndMechs[PilotTattoo].ContainsKey(mechName))
                                 {
-                                    PilotsAndMechs[pilot.Description.Id][mechName] += thisDrops3;
+                                    PilotsAndMechs[PilotTattoo][mechName] += thisDrops3;
                                 }
                                 else
                                 {
-                                    PilotsAndMechs[pilot.Description.Id].Add(mechName, thisDrops3);
+                                    PilotsAndMechs[PilotTattoo].Add(mechName, thisDrops3);
                                 }
                             }
                             else
                             {
-                                if (!PilotsAndMechs.Keys.Contains(pilot.Description.Id))
+                                if (!PilotsAndMechs.Keys.Contains(PilotTattoo))
                                 {
                                     Dictionary<string, int> tempD = new Dictionary<string, int>();
                                     tempD.Add("Griffin", thisDrops3);
-                                    PilotsAndMechs.Add(pilot.Description.Id, tempD);
+                                    PilotsAndMechs.Add(PilotTattoo, tempD);
                                 }
-                                else if (PilotsAndMechs[pilot.Description.Id].ContainsKey("Griffin"))
+                                else if (PilotsAndMechs[PilotTattoo].ContainsKey("Griffin"))
                                 {
-                                    PilotsAndMechs[pilot.Description.Id]["Griffin"] += thisDrops3;
+                                    PilotsAndMechs[PilotTattoo]["Griffin"] += thisDrops3;
                                 }
                                 else
                                 {
-                                    PilotsAndMechs[pilot.Description.Id].Add("Griffin", thisDrops3);
+                                    PilotsAndMechs[PilotTattoo].Add("Griffin", thisDrops3);
                                 }
                             }
                             
@@ -177,24 +180,24 @@ namespace Pilot_Quirks
                             {
                                 list.Shuffle<UnitDef_MDD>();
                                 mechName = dm.MechDefs.Get(list[0].UnitDefID).Description.Name;
-                                if (PilotsAndMechs[pilot.Description.Id].ContainsKey(mechName))
+                                if (PilotsAndMechs[PilotTattoo].ContainsKey(mechName))
                                 {
-                                    PilotsAndMechs[pilot.Description.Id][mechName] += thisDrops2;
+                                    PilotsAndMechs[PilotTattoo][mechName] += thisDrops2;
                                 }
                                 else
                                 {
-                                    PilotsAndMechs[pilot.Description.Id].Add(mechName, thisDrops2);
+                                    PilotsAndMechs[PilotTattoo].Add(mechName, thisDrops2);
                                 }
                             }
                             else
                             {
-                                if (PilotsAndMechs[pilot.Description.Id].ContainsKey("Griffin"))
+                                if (PilotsAndMechs[PilotTattoo].ContainsKey("Griffin"))
                                 {
-                                    PilotsAndMechs[pilot.Description.Id]["Griffin"] += thisDrops2;
+                                    PilotsAndMechs[PilotTattoo]["Griffin"] += thisDrops2;
                                 }
                                 else
                                 {
-                                    PilotsAndMechs[pilot.Description.Id].Add("Griffin", thisDrops2);
+                                    PilotsAndMechs[PilotTattoo].Add("Griffin", thisDrops2);
                                 }
                             }
 
@@ -205,24 +208,24 @@ namespace Pilot_Quirks
                             {
                                 list.Shuffle<UnitDef_MDD>();
                                 mechName = dm.MechDefs.Get(list[0].UnitDefID).Description.Name;
-                                if (PilotsAndMechs[pilot.Description.Id].ContainsKey(mechName))
+                                if (PilotsAndMechs[PilotTattoo].ContainsKey(mechName))
                                 {
-                                    PilotsAndMechs[pilot.Description.Id][mechName] += thisDrops1;
+                                    PilotsAndMechs[PilotTattoo][mechName] += thisDrops1;
                                 }
                                 else
                                 {
-                                    PilotsAndMechs[pilot.Description.Id].Add(mechName, thisDrops1);
+                                    PilotsAndMechs[PilotTattoo].Add(mechName, thisDrops1);
                                 }
                             }
                             else
                             {
-                                if (PilotsAndMechs[pilot.Description.Id].ContainsKey("Griffin"))
+                                if (PilotsAndMechs[PilotTattoo].ContainsKey("Griffin"))
                                 {
-                                    PilotsAndMechs[pilot.Description.Id]["Griffin"] += thisDrops1;
+                                    PilotsAndMechs[PilotTattoo]["Griffin"] += thisDrops1;
                                 }
                                 else
                                 {
-                                    PilotsAndMechs[pilot.Description.Id].Add("Griffin", thisDrops1);
+                                    PilotsAndMechs[PilotTattoo].Add("Griffin", thisDrops1);
                                 }
                             }
                         }
@@ -240,17 +243,20 @@ namespace Pilot_Quirks
                     bool TrimPilot = true;
                     foreach (PilotDef pilotdef in __instance.AvailablePilots)
                     {
-                        if (pilotdef.Description.Id == pilot)
+                        string PilotTattoo = pilotdef.PilotTags.First(x => x.StartsWith("PQ_Pilot_GUID"));
+                        if (PilotTattoo == pilot)
                             TrimPilot = false;
                     }
                     foreach (Pilot hiredpilot in sim.PilotRoster)
                     {
-                        if (hiredpilot.pilotDef.Description.Id == pilot)
+                        string PilotTattoo = hiredpilot.pilotDef.PilotTags.First(x => x.StartsWith("PQ_Pilot_GUID"));
+                        if (PilotTattoo == pilot)
                             TrimPilot = false;
                     }
                     foreach (Pilot deadpilot in sim.Graveyard)
                     {
-                        if (deadpilot.pilotDef.Description.Id == pilot)
+                        string PilotTattoo = deadpilot.pilotDef.PilotTags.First(x => x.StartsWith("PQ_Pilot_GUID"));
+                        if (PilotTattoo == pilot)
                             TrimPilot = false;
                     }
                     if (TrimPilot)
@@ -269,7 +275,12 @@ namespace Pilot_Quirks
             {
                 UnitResult unitResult = Traverse.Create(__instance).Field("UnitData").GetValue<UnitResult>();
                 if (!unitResult.pilot.pilotDef.PilotTags.Contains("PQ_Mech_Mastery"))
+                {
                     unitResult.pilot.pilotDef.PilotTags.Add("PQ_Mech_Mastery");
+                    string PilotTattoo = "PQ_Pilot_GUID_" + PQ_GUID;
+                    unitResult.pilot.pilotDef.PilotTags.Add(PilotTattoo);
+                    PQ_GUID++;
+                }
                 if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_regular"))
                     unitResult.pilot.pilotDef.PilotTags.Remove("PQ_pilot_regular");
                 if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_veteran"))
@@ -330,24 +341,25 @@ namespace Pilot_Quirks
         {
             public static void Prefix(AbstractActor actor, Pilot pilot)
             {
+                string PilotTattoo = pilot.pilotDef.PilotTags.First(x => x.StartsWith("PQ_Pilot_GUID"));
                 //Add to the counter for 'Mech piloting.
-                if (!PilotsAndMechs.Keys.Contains(pilot.Description.Id))
+                if (!PilotsAndMechs.Keys.Contains(PilotTattoo))
                 {
                     Dictionary<string, int> tempD = new Dictionary<string, int>();
                     tempD.Add(actor.Description.Name, 1);
-                    PilotsAndMechs.Add(pilot.Description.Id, tempD);
+                    PilotsAndMechs.Add(PilotTattoo, tempD);
                 }
-                else if (!PilotsAndMechs[pilot.Description.Id].Keys.Contains(actor.Description.Name))
-                    PilotsAndMechs[pilot.Description.Id].Add(actor.Description.Name, 1);
+                else if (!PilotsAndMechs[PilotTattoo].Keys.Contains(actor.Description.Name))
+                    PilotsAndMechs[PilotTattoo].Add(actor.Description.Name, 1);
                 else
-                    PilotsAndMechs[pilot.Description.Id][actor.Description.Name] += 1;
+                    PilotsAndMechs[PilotTattoo][actor.Description.Name] += 1;
 
 
                 //Add tags based upon 'Mech experience for the pilot.
                 List<string> TopThreeMechs = new List<string>();
-                if (PilotsAndMechs.Keys.Contains(pilot.Description.Id))
+                if (PilotsAndMechs.Keys.Contains(PilotTattoo))
                 {
-                    var MechExperience = PilotsAndMechs[pilot.Description.Id];
+                    var MechExperience = PilotsAndMechs[PilotTattoo];
                     int i = 0;
                     foreach (var mech in MechExperience.OrderByDescending(x => x.Value))
                     {

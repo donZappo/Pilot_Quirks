@@ -109,7 +109,15 @@ namespace Pilot_Quirks
             {
                 if (tagSet.Contains("PQ_Mech_Mastery"))
                 {
-                    var MechExperience = MechBonding.PilotsAndMechs[UI_Changes.PilotHolder.Description.Id];
+                    bool HasTattoo = PilotHolder.pilotDef.PilotTags.Any(x => x.StartsWith("PQ_Pilot_GUID"));
+                    if (!HasTattoo)
+                        return;
+
+                    string PilotTattoo = PilotHolder.pilotDef.PilotTags.First(x => x.StartsWith("PQ_Pilot_GUID"));
+                    if (!MechBonding.PilotsAndMechs.Keys.Contains(PilotTattoo) || MechBonding.PilotsAndMechs[PilotTattoo].Count() == 0)
+                        return;
+
+                    var MechExperience = MechBonding.PilotsAndMechs[PilotTattoo];
                     var BondedMech = MechExperience.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
                     string MasteryTier = "";
                     if (MechExperience[BondedMech] >= Pre_Control.settings.Tier4)
@@ -135,7 +143,15 @@ namespace Pilot_Quirks
 
         public static string MechMasterTagDescription(Pilot pilot, string TagDesc)
         {
-            var MechExperience = MechBonding.PilotsAndMechs[pilot.Description.Id];
+            bool HasTattoo = pilot.pilotDef.PilotTags.Any(x => x.StartsWith("PQ_Pilot_GUID"));
+            if (!HasTattoo)
+                return "<b>No 'Mech mastery.</b>";
+
+            string PilotTattoo = pilot.pilotDef.PilotTags.First(x => x.StartsWith("PQ_Pilot_GUID"));
+            if (!MechBonding.PilotsAndMechs.Keys.Contains(PilotTattoo) || MechBonding.PilotsAndMechs[PilotTattoo].Count() == 0)
+                return "<b>No 'Mech mastery.</b>";
+
+            var MechExperience = MechBonding.PilotsAndMechs[PilotTattoo];
            
             string TierOneString = "\n• Reduced Fatigue\n\t(";
             string TierTwoString = "\n• +1 Piloting Skill\n\t(";
@@ -145,6 +161,7 @@ namespace Pilot_Quirks
             bool TierTwo = false;
             bool TierThree = false;
             bool TierFour = false;
+            int h = 0;
             foreach (var BondedMech in MechExperience.OrderByDescending(x => x.Value))
             {
                 if (MechExperience[BondedMech.Key] >= Pre_Control.settings.Tier1)
@@ -167,6 +184,9 @@ namespace Pilot_Quirks
                     TierFourString += BondedMech.Key + ", ";
                     TierFour = true;
                 }
+                h++;
+                if (h == 2)
+                    break;
             }
 
             char[] charsToTrim = { ' ', ',' };
