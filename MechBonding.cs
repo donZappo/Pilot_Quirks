@@ -330,43 +330,46 @@ namespace Pilot_Quirks
         {
             public static void Prefix(AbstractActor actor, Pilot pilot)
             {
-                //Add to the counter for 'Mech piloting.
-                if (!PilotsAndMechs.Keys.Contains(pilot.Description.Id))
+                if (actor is Mech ourMech)
                 {
-                    Dictionary<string, int> tempD = new Dictionary<string, int>();
-                    tempD.Add(actor.Description.Name, 1);
-                    PilotsAndMechs.Add(pilot.Description.Id, tempD);
-                }
-                else if (!PilotsAndMechs[pilot.Description.Id].Keys.Contains(actor.Description.Name))
-                    PilotsAndMechs[pilot.Description.Id].Add(actor.Description.Name, 1);
-                else
-                    PilotsAndMechs[pilot.Description.Id][actor.Description.Name] += 1;
-
-
-                //Add tags based upon 'Mech experience for the pilot.
-                List<string> TopThreeMechs = new List<string>();
-                if (PilotsAndMechs.Keys.Contains(pilot.Description.Id))
-                {
-                    var MechExperience = PilotsAndMechs[pilot.Description.Id];
-                    int i = 0;
-                    foreach (var mech in MechExperience.OrderByDescending(x => x.Value))
+                    //Add to the counter for 'Mech piloting.
+                    if (!PilotsAndMechs.Keys.Contains(pilot.Description.Id))
                     {
-                        TopThreeMechs.Add(mech.Key);
-                        i++;
-                        if (i == 2)
-                            break;
+                        Dictionary<string, int> tempD = new Dictionary<string, int>();
+                        tempD.Add(ourMech.MechDef.Description.Name, 1);
+                        PilotsAndMechs.Add(pilot.Description.Id, tempD);
                     }
+                    else if (!PilotsAndMechs[pilot.Description.Id].Keys.Contains(ourMech.MechDef.Description.Name))
+                        PilotsAndMechs[pilot.Description.Id].Add(ourMech.MechDef.Description.Name, 1);
+                    else
+                        PilotsAndMechs[pilot.Description.Id][ourMech.MechDef.Description.Name] += 1;
 
-                    if (TopThreeMechs.Contains(actor.Description.Name))
+
+                    //Add tags based upon 'Mech experience for the pilot.
+                    List<string> TopThreeMechs = new List<string>();
+                    if (PilotsAndMechs.Keys.Contains(pilot.Description.Id))
                     {
-                        if (MechExperience[actor.Description.Name] >= Pre_Control.settings.Tier1)
-                            pilot.pilotDef.PilotTags.Add("PQ_pilot_green");
-                        if (MechExperience[actor.Description.Name] >= Pre_Control.settings.Tier2)
-                            pilot.pilotDef.PilotTags.Add("PQ_pilot_regular");
-                        if (MechExperience[actor.Description.Name] >= Pre_Control.settings.Tier3)
-                            pilot.pilotDef.PilotTags.Add("PQ_pilot_veteran");
-                        if (MechExperience[actor.Description.Name] >= Pre_Control.settings.Tier4)
-                            pilot.pilotDef.PilotTags.Add("PQ_pilot_elite");
+                        var MechExperience = PilotsAndMechs[pilot.Description.Id];
+                        int i = 0;
+                        foreach (var mech in MechExperience.OrderByDescending(x => x.Value))
+                        {
+                            TopThreeMechs.Add(mech.Key);
+                            i++;
+                            if (i == 2)
+                                break;
+                        }
+
+                        if (TopThreeMechs.Contains(ourMech.MechDef.Description.Name))
+                        {
+                            if (MechExperience[ourMech.MechDef.Description.Name] >= Pre_Control.settings.Tier1)
+                                pilot.pilotDef.PilotTags.Add("PQ_pilot_green");
+                            if (MechExperience[ourMech.MechDef.Description.Name] >= Pre_Control.settings.Tier2)
+                                pilot.pilotDef.PilotTags.Add("PQ_pilot_regular");
+                            if (MechExperience[ourMech.MechDef.Description.Name] >= Pre_Control.settings.Tier3)
+                                pilot.pilotDef.PilotTags.Add("PQ_pilot_veteran");
+                            if (MechExperience[ourMech.MechDef.Description.Name] >= Pre_Control.settings.Tier4)
+                                pilot.pilotDef.PilotTags.Add("PQ_pilot_elite");
+                        }
                     }
                 }
             }
