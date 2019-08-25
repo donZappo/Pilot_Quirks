@@ -348,52 +348,61 @@ namespace Pilot_Quirks
                 //I've added a silent catch to deal with NPC pilots. 
                 try
                 {
-                    bool HasTattoo = pilot.pilotDef.PilotTags.Any(x => x.StartsWith("PQ_Pilot_GUID"));
-                    if (!HasTattoo)
-                        pilot.pilotDef.PilotTags.Add("PQ_Pilot_GUID_" + MechBonding.PQ_GUID);
-
-                    string PilotTattoo = pilot.pilotDef.PilotTags.First(x => x.StartsWith("PQ_Pilot_GUID"));
-                    //Add to the counter for 'Mech piloting.
-                    if (!PilotsAndMechs.Keys.Contains(PilotTattoo))
+                    if (actor is Mech ourMech)
                     {
-                        Dictionary<string, int> tempD = new Dictionary<string, int>();
-                        tempD.Add(actor.Description.Name, 1);
-                        PilotsAndMechs.Add(PilotTattoo, tempD);
-                    }
-                    else if (!PilotsAndMechs[PilotTattoo].Keys.Contains(actor.Description.Name))
-                        PilotsAndMechs[PilotTattoo].Add(actor.Description.Name, 1);
-                    else
-                        PilotsAndMechs[PilotTattoo][actor.Description.Name] += 1;
-
-
-                    //Add tags based upon 'Mech experience for the pilot.
-                    List<string> TopThreeMechs = new List<string>();
-                    if (PilotsAndMechs.Keys.Contains(PilotTattoo))
-                    {
-                        var MechExperience = PilotsAndMechs[PilotTattoo];
-                        int i = 0;
-                        foreach (var mech in MechExperience.OrderByDescending(x => x.Value))
+                        bool HasTattoo = pilot.pilotDef.PilotTags.Any(x => x.StartsWith("PQ_Pilot_GUID"));
+                        if (!HasTattoo)
                         {
-                            TopThreeMechs.Add(mech.Key);
-                            i++;
-                            if (i == 2)
-                                break;
+                            pilot.pilotDef.PilotTags.Add("PQ_Pilot_GUID_" + MechBonding.PQ_GUID);
+                            MechBonding.PQ_GUID++;
                         }
 
-                        if (TopThreeMechs.Contains(actor.Description.Name))
+                        string PilotTattoo = pilot.pilotDef.PilotTags.First(x => x.StartsWith("PQ_Pilot_GUID"));
+                        //Add to the counter for 'Mech piloting.
+                        if (!PilotsAndMechs.Keys.Contains(PilotTattoo))
                         {
-                            if (MechExperience[actor.Description.Name] >= Pre_Control.settings.Tier1)
-                                pilot.pilotDef.PilotTags.Add("PQ_pilot_green");
-                            if (MechExperience[actor.Description.Name] >= Pre_Control.settings.Tier2)
-                                pilot.pilotDef.PilotTags.Add("PQ_pilot_regular");
-                            if (MechExperience[actor.Description.Name] >= Pre_Control.settings.Tier3)
-                                pilot.pilotDef.PilotTags.Add("PQ_pilot_veteran");
-                            if (MechExperience[actor.Description.Name] >= Pre_Control.settings.Tier4)
-                                pilot.pilotDef.PilotTags.Add("PQ_pilot_elite");
+                            Dictionary<string, int> tempD = new Dictionary<string, int>();
+                            tempD.Add(ourMech.MechDef.Description.Name, 1);
+                            PilotsAndMechs.Add(PilotTattoo, tempD);
+                        }
+                        else if (!PilotsAndMechs[PilotTattoo].Keys.Contains(ourMech.MechDef.Description.Name))
+                            PilotsAndMechs[PilotTattoo].Add(ourMech.MechDef.Description.Name, 1);
+                        else
+                            PilotsAndMechs[PilotTattoo][ourMech.MechDef.Description.Name] += 1;
+
+
+                        //Add tags based upon 'Mech experience for the pilot.
+                        List<string> TopThreeMechs = new List<string>();
+                        if (PilotsAndMechs.Keys.Contains(PilotTattoo))
+                        {
+                            var MechExperience = PilotsAndMechs[PilotTattoo];
+                            int i = 0;
+                            foreach (var mech in MechExperience.OrderByDescending(x => x.Value))
+                            {
+                                TopThreeMechs.Add(mech.Key);
+                                i++;
+                                if (i == 2)
+                                    break;
+                            }
+
+                            if (TopThreeMechs.Contains(ourMech.MechDef.Description.Name))
+                            {
+                                if (MechExperience[ourMech.MechDef.Description.Name] >= Pre_Control.settings.Tier1)
+                                    pilot.pilotDef.PilotTags.Add("PQ_pilot_green");
+                                if (MechExperience[ourMech.MechDef.Description.Name] >= Pre_Control.settings.Tier2)
+                                    pilot.pilotDef.PilotTags.Add("PQ_pilot_regular");
+                                if (MechExperience[ourMech.MechDef.Description.Name] >= Pre_Control.settings.Tier3)
+                                    pilot.pilotDef.PilotTags.Add("PQ_pilot_veteran");
+                                if (MechExperience[ourMech.MechDef.Description.Name] >= Pre_Control.settings.Tier4)
+                                    pilot.pilotDef.PilotTags.Add("PQ_pilot_elite");
+                            }
                         }
                     }
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    Pre_Control.Helper.Logger.LogError(e);
+                }
             }
         }
     }

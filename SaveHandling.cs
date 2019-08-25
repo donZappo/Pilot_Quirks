@@ -45,6 +45,7 @@ namespace Pilot_Quirks
                 if (!NewPQ)
                 {
                     DeserializePilotQuirks();
+                    CheckForDuplicateTattoos();
                 }
             }
         }
@@ -121,6 +122,50 @@ namespace Pilot_Quirks
             sim.CompanyTags.Where(tag => tag.StartsWith("PilotQuirks")).Do(x => sim.CompanyTags.Remove(x));
             sim.CompanyTags.Add("PilotQuirksSave" + JsonConvert.SerializeObject(Pilot_Quirks.MechBonding.PilotsAndMechs));
             sim.CompanyTags.Add("PilotQuirksSave2" + JsonConvert.SerializeObject(MechBonding.PQ_GUID));
+        }
+
+        internal static void CheckForDuplicateTattoos()
+        {
+            List<string> PilotTattoos = new List<string>();
+            var sim = UnityGameInstance.BattleTechGame.Simulation;
+            foreach (Pilot hiredpilot in sim.PilotRoster)
+            {
+                foreach (string tag in hiredpilot.pilotDef.PilotTags)
+                {
+                    if (tag.StartsWith("PQ_Pilot_GUID_"))
+                    {
+                        if (!PilotTattoos.Contains(tag))
+                            PilotTattoos.Add(tag);
+                        else
+                        {
+                            hiredpilot.pilotDef.PilotTags.Remove(tag);
+                            string newTag = "PQ_Pilot_GUID_" + MechBonding.PQ_GUID;
+                            hiredpilot.pilotDef.PilotTags.Add(newTag);
+                            MechBonding.PQ_GUID++;
+                            MechBonding.PilotsAndMechs.Add(newTag, MechBonding.PilotsAndMechs[tag]);
+                        }
+                    }
+                }
+            }
+            foreach (Pilot deadpilot in sim.Graveyard)
+            {
+                foreach (string tag in deadpilot.pilotDef.PilotTags)
+                {
+                    if (tag.StartsWith("PQ_Pilot_GUID_"))
+                    {
+                        if (!PilotTattoos.Contains(tag))
+                            PilotTattoos.Add(tag);
+                        else
+                        {
+                            deadpilot.pilotDef.PilotTags.Remove(tag);
+                            string newTag = "PQ_Pilot_GUID_" + MechBonding.PQ_GUID;
+                            deadpilot.pilotDef.PilotTags.Add(newTag);
+                            MechBonding.PQ_GUID++;
+                            MechBonding.PilotsAndMechs.Add(newTag, MechBonding.PilotsAndMechs[tag]);
+                        }
+                    }
+                }
+            }
         }
     }
 }
