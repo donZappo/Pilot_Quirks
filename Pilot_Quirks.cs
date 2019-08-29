@@ -306,25 +306,29 @@ namespace Pilot_Quirks
                     }
 
                 }
-                //bool honest = false;
-                //foreach (Pilot pilot in __instance.PilotRoster)
-                //{
-                //    if (pilot.pilotDef.PilotTags.Contains("pilot_honest"))
-                //        honest = true;
-                //}
+                if (settings.RTCompatible)
+                {
+                    bool honest = false;
+                    foreach (Pilot pilot in __instance.PilotRoster)
+                    {
+                        if (pilot.pilotDef.PilotTags.Contains("pilot_honest"))
+                            honest = true;
+                    }
 
-                //foreach (Pilot pilot in __instance.PilotRoster)
-                //{
-                //    if (pilot.pilotDef.PilotTags.Contains("pilot_criminal") && !honest)
-                //    {
-                //        var rng = new System.Random();
-                //        int Roll = rng.Next(1, 101);
-                //        if (Roll < settings.pilot_criminal_StealPercent)
-                //        {
-                //            __instance.AddFunds(settings.pilot_criminal_StealAmount, null, true);
-                //        }
-                //    }
-                //}
+                    foreach (Pilot pilot in __instance.PilotRoster)
+                    {
+                        if (pilot.pilotDef.PilotTags.Contains("pilot_criminal") && !honest)
+                        {
+                            var rng = new System.Random();
+                            int Roll = rng.Next(1, 101);
+                            if (Roll < settings.pilot_criminal_StealPercent)
+                            {
+                                __instance.AddFunds(settings.pilot_criminal_StealAmount, null, true);
+                            }
+                        }
+                    }
+                }
+
                 if (settings.IsSaveGame)
                 {
                     foreach (Pilot pilot in __instance.PilotRoster)
@@ -386,6 +390,9 @@ namespace Pilot_Quirks
         {
             static void Postfix(AAR_ContractObjectivesWidget __instance)
             {
+                if (settings.RTCompatible)
+                    return;
+
                 settings.CriminalCount = 0;
                 foreach (UnitResult unitresult in __instance.theContract.PlayerUnitResults)
                 {
@@ -412,6 +419,9 @@ namespace Pilot_Quirks
         {
             static void Postfix(Contract __instance)
             {
+                if (settings.RTCompatible)
+                    return;
+
                 settings.CriminalCount = 0;
                 foreach (UnitResult unitresult in __instance.PlayerUnitResults)
                 {
@@ -784,10 +794,13 @@ namespace Pilot_Quirks
                 {
                     CostPerMonth = CostPerMonth - (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_criminal"))
+                if (def.PilotTags.Contains("pilot_criminal") && !settings.RTCompatible)
                 {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
+                else if (def.PilotTags.Contains("pilot_criminal"))
+                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+
                 if (def.PilotTags.Contains("pilot_comstar"))
                 {
                     CostPerMonth = CostPerMonth + (float)0.2 * (__result);
@@ -900,10 +913,15 @@ namespace Pilot_Quirks
                 {
                     CostPerMonth = CostPerMonth - (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_criminal"))
+                if (def.PilotTags.Contains("pilot_criminal") && !settings.RTCompatible)
                 {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
+                else if (def.PilotTags.Contains("pilot_criminal"))
+                {
+                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                }
+
                 if (def.PilotTags.Contains("pilot_comstar"))
                 {
                     CostPerMonth = CostPerMonth + (float)0.2 * (__result);
@@ -1236,6 +1254,7 @@ namespace Pilot_Quirks
             public Dictionary<string, string> TagIDToNames = new Dictionary<string, string>();
 
             public bool IsSaveGame = false;
+            public bool RTCompatible = false;
 
             //Tiers for Mech Mastery.
             public int Tier1 = 5;
@@ -1244,6 +1263,8 @@ namespace Pilot_Quirks
             public int Tier4 = 20;
 
             public int pilot_drops_for_8_pilot = 50;
+
+
 
         }
     }
