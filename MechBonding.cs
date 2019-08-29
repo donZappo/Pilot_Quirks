@@ -28,6 +28,9 @@ namespace Pilot_Quirks
         {
             public static void Postfix(StarSystem __instance)
             {
+                if (!Pre_Control.settings.MechBonding)
+                    return;
+
                 try
                 {
                     foreach (PilotDef pilot in __instance.AvailablePilots)
@@ -273,6 +276,9 @@ namespace Pilot_Quirks
         {
             public static void Prefix(AAR_UnitStatusWidget __instance, SimGameState ___simState)
             {
+                if (!Pre_Control.settings.MechBonding)
+                    return;
+
                 UnitResult unitResult = Traverse.Create(__instance).Field("UnitData").GetValue<UnitResult>();
                 if (!unitResult.pilot.pilotDef.PilotTags.Contains("PQ_Mech_Mastery"))
                     unitResult.pilot.pilotDef.PilotTags.Add("PQ_Mech_Mastery");
@@ -301,6 +307,9 @@ namespace Pilot_Quirks
         {
             public static void Postfix(Pilot __instance, ref int __result)
             {
+                if (!Pre_Control.settings.MechBonding)
+                    return;
+
                 if (__instance.pilotDef.PilotTags.Contains("PQ_pilot_regular"))
                     __result += 1;
             }
@@ -312,6 +321,9 @@ namespace Pilot_Quirks
         {
             public static void Postfix(Pilot __instance, ref int __result)
             {
+                if (!Pre_Control.settings.MechBonding)
+                    return;
+
                 if (__instance.pilotDef.PilotTags.Contains("PQ_pilot_elite"))
                     __result += 1;
             }
@@ -322,6 +334,9 @@ namespace Pilot_Quirks
         {
             public static void Postfix(AbstractActor source, ref float __result)
             {
+                if (!Pre_Control.settings.MechBonding)
+                    return;
+
                 Pilot pilot = source.GetPilot();
                 if (pilot.pilotDef.PilotTags.Contains("PQ_pilot_veteran"))
                     __result += pilot.Tactics * 5;
@@ -333,6 +348,9 @@ namespace Pilot_Quirks
         {
             public static void Postfix(AbstractActor source, ref float __result)
             {
+                if (!Pre_Control.settings.MechBonding)
+                    return;
+
                 Pilot pilot = source.GetPilot();
                 if (pilot.pilotDef.PilotTags.Contains("PQ_pilot_veteran"))
                     __result += pilot.Tactics * 5;
@@ -345,6 +363,9 @@ namespace Pilot_Quirks
         {
             public static void Prefix(AbstractActor actor, Pilot pilot)
             {
+                if (!Pre_Control.settings.MechBonding)
+                    return;
+
                 //I've added a silent catch to deal with NPC pilots. 
                 try
                 {

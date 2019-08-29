@@ -107,6 +107,9 @@ namespace Pilot_Quirks
         {
             public static void Postfix(HBSTagView __instance, TagSet tagSet, GameContext context)
             {
+                if (!Pre_Control.settings.MechBonding)
+                    return;
+
                 if (tagSet.Contains("PQ_Mech_Mastery"))
                 {
                     bool HasTattoo = PilotHolder.pilotDef.PilotTags.Any(x => x.StartsWith("PQ_Pilot_GUID"));
@@ -143,6 +146,9 @@ namespace Pilot_Quirks
 
         public static string MechMasterTagDescription(Pilot pilot, string TagDesc)
         {
+            if (!Pre_Control.settings.MechBonding)
+                return "";
+
             bool HasTattoo = pilot.pilotDef.PilotTags.Any(x => x.StartsWith("PQ_Pilot_GUID"));
             if (!HasTattoo)
                 return "<b>No 'Mech mastery.</b>";

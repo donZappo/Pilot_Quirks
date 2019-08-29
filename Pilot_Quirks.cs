@@ -463,6 +463,7 @@ namespace Pilot_Quirks
         //    }
         //}
 
+
         //[HarmonyPatch(typeof(Shop), "PopulateInventory")]
         //public static class Criminal_Shops
         //{
@@ -1255,6 +1256,7 @@ namespace Pilot_Quirks
 
             public bool IsSaveGame = false;
             public bool RTCompatible = false;
+            public bool MechBonding = true;
 
             //Tiers for Mech Mastery.
             public int Tier1 = 5;
