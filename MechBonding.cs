@@ -33,6 +33,10 @@ namespace Pilot_Quirks
 
                 try
                 {
+                    var Sim = UnityGameInstance.BattleTechGame.Simulation;
+                    if (Sim.IsCampaign && !Sim.CompanyTags.Contains("map_travel_1"))
+                        return;
+
                     foreach (PilotDef pilot in __instance.AvailablePilots)
                     {
                         // 8-8-8-8 pilot = 56,000xp
@@ -241,7 +245,8 @@ namespace Pilot_Quirks
 
                 //Trim out pilots that are no longer needed from the master list. 
                 var sim = UnityGameInstance.BattleTechGame.Simulation;
-                foreach (string pilot in PilotsAndMechs.Keys)
+                Dictionary<string, Dictionary<string, int>> PAM_Clone = new Dictionary<string, Dictionary<string, int>>(PilotsAndMechs);
+                foreach (string pilot in PAM_Clone.Keys)
                 {
                     bool TrimPilot = true;
                     foreach (PilotDef pilotdef in __instance.AvailablePilots)

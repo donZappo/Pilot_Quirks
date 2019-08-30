@@ -64,7 +64,7 @@ namespace Pilot_Quirks
                 MechBonding.PQ_GUID = JsonConvert.DeserializeObject<int>(sim.CompanyTags.First(x => x.StartsWith("PilotQuirksSave2")).Substring(16));
                 OldSave = false;
             }
-            if (OldSave)
+            if (OldSave && Pre_Control.settings.MechBonding)
             {
                 UpdateSavedGame();
             }
