@@ -251,19 +251,19 @@ namespace Pilot_Quirks
                     bool TrimPilot = true;
                     foreach (PilotDef pilotdef in __instance.AvailablePilots)
                     {
-                        string PilotTattoo = pilotdef.PilotTags.First(x => x.StartsWith("PQ_Pilot_GUID"));
+                        string PilotTattoo = pilotdef.PilotTags.FirstOrDefault(x => x.StartsWith("PQ_Pilot_GUID"));
                         if (PilotTattoo == pilot)
                             TrimPilot = false;
                     }
                     foreach (Pilot hiredpilot in sim.PilotRoster)
                     {
-                        string PilotTattoo = hiredpilot.pilotDef.PilotTags.First(x => x.StartsWith("PQ_Pilot_GUID"));
+                        string PilotTattoo = hiredpilot.pilotDef.PilotTags.FirstOrDefault(x => x.StartsWith("PQ_Pilot_GUID"));
                         if (PilotTattoo == pilot)
                             TrimPilot = false;
                     }
                     foreach (Pilot deadpilot in sim.Graveyard)
                     {
-                        string PilotTattoo = deadpilot.pilotDef.PilotTags.First(x => x.StartsWith("PQ_Pilot_GUID"));
+                        string PilotTattoo = deadpilot.pilotDef.PilotTags.FirstOrDefault(x => x.StartsWith("PQ_Pilot_GUID"));
                         if (PilotTattoo == pilot)
                             TrimPilot = false;
                     }
