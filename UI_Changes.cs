@@ -191,7 +191,7 @@ namespace Pilot_Quirks
                     TierFour = true;
                 }
                 h++;
-                if (h == 2)
+                if (h == 3)
                     break;
             }
 
@@ -229,7 +229,7 @@ namespace Pilot_Quirks
             {
                 TagDesc += MechXP.Key + ": " + MechXP.Value + ", ";
                 i++;
-                if (i == 2) break;
+                if (i == 3) break;
             }
             TagDesc = TagDesc.TrimEnd(charsToTrim);
             return TagDesc;
@@ -245,6 +245,7 @@ namespace Pilot_Quirks
             UI_Changes.PilotHolder = p;
         }
     }
+
 
     [HarmonyPatch(typeof(SGMemorialWallAdditionalDetailsPanel), "DisplayPilot")]
     public static class SGMemorialWallAdditionalDetailsPanel_DisplayPilot_Patch

@@ -407,7 +407,7 @@ namespace Pilot_Quirks
                             {
                                 TopThreeMechs.Add(mech.Key);
                                 i++;
-                                if (i == 2)
+                                if (i == 3)
                                     break;
                             }
 
