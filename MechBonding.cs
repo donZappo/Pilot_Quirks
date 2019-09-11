@@ -267,6 +267,10 @@ namespace Pilot_Quirks
                         if (PilotTattoo == pilot)
                             TrimPilot = false;
                     }
+                    string CommanderTattoo = sim.Commander.pilotDef.PilotTags.FirstOrDefault(x => x.StartsWith("PQ_Pilot_GUID"));
+                    if (CommanderTattoo == pilot)
+                        TrimPilot = false;
+
                     if (TrimPilot)
                         PilotsAndMechs.Remove(pilot);
                 }
