@@ -400,7 +400,7 @@ namespace Pilot_Quirks
                         settings.CriminalCount++;
                 }
 
-                if (__instance.theContract.Override.employerTeam.faction == Faction.AuriganPirates && settings.CriminalCount > 0)
+                if (__instance.theContract.Override.employerTeam.FactionValue.IsAuriganPirates && settings.CriminalCount > 0)
                 {
                     var sim = UnityGameInstance.BattleTechGame.Simulation;
                     float BonusMoney = (float)__instance.theContract.InitialContractValue;
@@ -428,9 +428,9 @@ namespace Pilot_Quirks
                     if (unitresult.pilot.pilotDef.PilotTags.Contains("pilot_criminal") && !__instance.KilledPilots.Contains(unitresult.pilot))
                         settings.CriminalCount++;
                 }
-
+                
                 var sim = UnityGameInstance.BattleTechGame.Simulation;
-                if (__instance.Override.employerTeam.faction == Faction.AuriganPirates && settings.CriminalCount > 0)
+                if (__instance.Override.employerTeam.FactionValue.IsAuriganPirates && settings.CriminalCount > 0)
                 {
                     float BonusMoney = (float)__instance.InitialContractValue;
                     BonusMoney *= __instance.PercentageContractValue;
@@ -528,19 +528,23 @@ namespace Pilot_Quirks
             {
                 settings.CriminalCount = 0;
                 bool command = false;
+                var unitResults = (List<UnitResult>) Traverse.Create(__instance).Field("UnitResults").GetValue();
+                var theContract = (Contract)Traverse.Create(__instance).Field("theContract").GetValue();
+                var experienceEarned = (int)Traverse.Create(theContract).Property("ExperienceEarned").GetValue();
+
                 for (int i = 0; i < 4; i++)
                 {
-                    if (__instance.UnitResults[i] != null)
+                    if (unitResults[i] != null)
                     {
-                        if (__instance.UnitResults[i].pilot.pilotDef.PilotTags.Contains("pilot_command")
-                          && !__instance.theContract.KilledPilots.Contains(__instance.UnitResults[i].pilot))
+                        if (unitResults[i].pilot.pilotDef.PilotTags.Contains("pilot_command")
+                          && !theContract.KilledPilots.Contains(unitResults[i].pilot))
                             command = true;
                     }
                 }
                 if (command)
                 {
-                    int XP = __instance.theContract.ExperienceEarned;
-                    __instance.theContract.ExperienceEarned += (int)(XP * settings.pilot_command_BonusLanceXP / 100);
+                    int XP = theContract.ExperienceEarned;
+                    experienceEarned += (int)(XP * settings.pilot_command_BonusLanceXP / 100);
                 }
             }
         }
@@ -970,9 +974,13 @@ namespace Pilot_Quirks
                     __result = new Text();
                     return false;
                 }
-                if (instance.localizedDetails != null && instance.detailsParsed)
+
+                var localizedDetails = (Text)Traverse.Create(instance).Field("localizedDetails").GetValue();
+                var detailsParsed = (bool)Traverse.Create(instance).Field("detailsParsed").GetValue();
+
+                if (localizedDetails != null && detailsParsed)
                 {
-                    __result = instance.localizedDetails;
+                    __result = localizedDetails;
                     return false;
                 }
                 Text text = new Text();
@@ -1016,8 +1024,8 @@ namespace Pilot_Quirks
                 {
                     text.Append(instance.Details, new object[0]);
                 }
-                instance.detailsParsed = true;
-                instance.localizedDetails = text;
+                detailsParsed = true;
+                localizedDetails = text;
                 __result = text;
                 return false;
             }
@@ -1025,23 +1033,23 @@ namespace Pilot_Quirks
 
         public static class Helper
         {
-            public static Settings LoadSettings()
-            {
-                Settings result;
-                try
-                {
-                    using (StreamReader streamReader = new StreamReader("Mods/Pilot_Quirks/settings.json"))
-                    {
-                        result = JsonConvert.DeserializeObject<Settings>(streamReader.ReadToEnd());
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogError(ex);
-                    result = null;
-                }
-                return result;
-            }
+            //public static Settings LoadSettings()
+            //{
+            //    Settings result;
+            //    try
+            //    {
+            //        using (StreamReader streamReader = new StreamReader("Mods/Pilot_Quirks/settings.json"))
+            //        {
+            //            result = JsonConvert.DeserializeObject<Settings>(streamReader.ReadToEnd());
+            //        }
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Logger.LogError(ex);
+            //        result = null;
+            //    }
+            //    return result;
+            //}
             public class Logger
             {
                 public static void LogError(Exception ex)
@@ -1083,6 +1091,9 @@ namespace Pilot_Quirks
         {
             public static void Prefix(SimGameState __instance, bool refund, ref int __state)
             {
+                ShipModuleUpgrade shipModuleUpgrade = __instance.DataManager.ShipUpgradeDefs.Get(__instance.CurrentUpgradeEntry.upgradeID);
+                var purchaseCost = (int)Traverse.Create(shipModuleUpgrade).Property("PurchaseCost").GetValue();
+
                 float TotalChange = 0;
                 foreach (Pilot pilot in __instance.PilotRoster)
                 {
@@ -1091,9 +1102,9 @@ namespace Pilot_Quirks
                 }
                 if (refund)
                 {
-                    ShipModuleUpgrade shipModuleUpgrade = __instance.DataManager.ShipUpgradeDefs.Get(__instance.CurrentUpgradeEntry.upgradeID);
+                    
                     __state = shipModuleUpgrade.PurchaseCost;
-                    shipModuleUpgrade.PurchaseCost = (int)((float)shipModuleUpgrade.PurchaseCost * (100 - TotalChange) / 100);
+                    purchaseCost = (int)((float)shipModuleUpgrade.PurchaseCost * (100 - TotalChange) / 100);
 
 
                 }
@@ -1103,7 +1114,9 @@ namespace Pilot_Quirks
                 if (refund)
                 {
                     ShipModuleUpgrade shipModuleUpgrade = __instance.DataManager.ShipUpgradeDefs.Get(__instance.CurrentUpgradeEntry.upgradeID);
-                    shipModuleUpgrade.PurchaseCost = __state;
+                    var purchaseCost = (int)Traverse.Create(shipModuleUpgrade).Property("PurchaseCost").GetValue();
+
+                    purchaseCost = __state;
                 }
             }
         }
@@ -1119,12 +1132,16 @@ namespace Pilot_Quirks
                     if (pilot.pilotDef.PilotTags.Contains("pilot_comstar"))
                         TotalChange += settings.pilot_comstar_ArgoDiscount;
                 }
+
                 __state = requestedUpgrade.PurchaseCost;
-                requestedUpgrade.PurchaseCost = (int)((float)requestedUpgrade.PurchaseCost * (100 - TotalChange) / 100);
+                var PurchaseCost = (int)Traverse.Create(requestedUpgrade).Property("PurchaseCost").GetValue();
+
+                PurchaseCost = (int)((float)requestedUpgrade.PurchaseCost * (100 - TotalChange) / 100);
             }
             public static void Postfix(ShipModuleUpgrade requestedUpgrade, ref int __state)
             {
-                requestedUpgrade.PurchaseCost = __state;
+                var PurchaseCost = (int)Traverse.Create(requestedUpgrade).Property("PurchaseCost").GetValue();
+                PurchaseCost = __state;
             }
         }
 
@@ -1134,17 +1151,25 @@ namespace Pilot_Quirks
             public static void Prefix(SGEngineeringScreen __instance, ref int __state)
             {
                 float TotalChange = 0;
-                foreach (Pilot pilot in __instance.simState.PilotRoster)
+                var sim = UnityGameInstance.BattleTechGame.Simulation;
+
+                foreach (Pilot pilot in sim.PilotRoster)
                 {
                     if (pilot.pilotDef.PilotTags.Contains("pilot_comstar"))
                         TotalChange += settings.pilot_comstar_ArgoDiscount;
                 }
-                __state = __instance.SelectedUpgrade.PurchaseCost;
-                __instance.SelectedUpgrade.PurchaseCost = (int)((float)__instance.SelectedUpgrade.PurchaseCost * (100 - TotalChange) / 100);
+
+                var SelectedUpgrade = (ShipModuleUpgrade)Traverse.Create(__instance).Property("SelectedUpgrade").GetValue();
+                var PurchaseCost = (int)Traverse.Create(SelectedUpgrade).Property("PurchaseCost").GetValue();
+
+                __state = SelectedUpgrade.PurchaseCost;
+                PurchaseCost = (int)((float)SelectedUpgrade.PurchaseCost * (100 - TotalChange) / 100);
             }
             public static void Postfix(SGEngineeringScreen __instance, ref int __state)
             {
-                __instance.SelectedUpgrade.PurchaseCost = __state;
+                var SelectedUpgrade = (ShipModuleUpgrade)Traverse.Create(__instance).Property("SelectedUpgrade").GetValue();
+                var PurchaseCost = (int)Traverse.Create(SelectedUpgrade).Property("PurchaseCost").GetValue();
+                PurchaseCost = __state;
             }
         }
 
@@ -1160,12 +1185,16 @@ namespace Pilot_Quirks
                     if (pilot.pilotDef.PilotTags.Contains("pilot_comstar"))
                         TotalChange += settings.pilot_comstar_ArgoDiscount;
                 }
-                __state = upgrade.PurchaseCost;
-                upgrade.PurchaseCost = (int)((float)upgrade.PurchaseCost * (100 - TotalChange) / 100);
+
+                var PurchaseCost = (int)Traverse.Create(upgrade).Property("PurchaseCost").GetValue();
+
+                __state = PurchaseCost;
+                PurchaseCost = (int)((float)upgrade.PurchaseCost * (100 - TotalChange) / 100);
             }
             public static void Postfix(ShipModuleUpgrade upgrade, ref int __state)
             {
-                upgrade.PurchaseCost = __state;
+                var PurchaseCost = (int)Traverse.Create(upgrade).Property("PurchaseCost").GetValue();
+                PurchaseCost = __state;
             }
         }
         
