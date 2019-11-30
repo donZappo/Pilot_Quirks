@@ -368,7 +368,7 @@ namespace Pilot_Quirks
                 }
             }
         }
-        [HarmonyPatch(typeof(SimGameState), "GetReputationShopAdjustment", new Type[] { typeof(Faction) })]
+        [HarmonyPatch(typeof(SimGameState), "GetReputationShopAdjustment", new Type[] { typeof(FactionValue) })]
         public static class Merchant_Bonus_Faction
         {
             public static void Postfix(SimGameState __instance, ref float __result)
