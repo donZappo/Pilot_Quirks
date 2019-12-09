@@ -146,7 +146,7 @@ namespace Pilot_Quirks
                             if (list.Count > 0)
                             {
                                 list.Shuffle<UnitDef_MDD>();
-                                mechName = dm.MechDefs.Get(list[0].UnitDefID).Description.Name;
+                                mechName = dm.MechDefs.Get(list[0].UnitDefID).Chassis.Description.UIName;
                                 if (!PilotsAndMechs.Keys.Contains(PilotTattoo))
                                 {
                                     Dictionary<string, int> tempD = new Dictionary<string, int>();
@@ -186,7 +186,7 @@ namespace Pilot_Quirks
                             if (list.Count > 0)
                             {
                                 list.Shuffle<UnitDef_MDD>();
-                                mechName = dm.MechDefs.Get(list[0].UnitDefID).Description.Name;
+                                mechName = dm.MechDefs.Get(list[0].UnitDefID).Chassis.Description.UIName;
                                 if (PilotsAndMechs[PilotTattoo].ContainsKey(mechName))
                                 {
                                     PilotsAndMechs[PilotTattoo][mechName] += thisDrops2;
@@ -214,7 +214,7 @@ namespace Pilot_Quirks
                             if (list.Count > 0)
                             {
                                 list.Shuffle<UnitDef_MDD>();
-                                mechName = dm.MechDefs.Get(list[0].UnitDefID).Description.Name;
+                                mechName = dm.MechDefs.Get(list[0].UnitDefID).Chassis.Description.UIName;
                                 if (PilotsAndMechs[PilotTattoo].ContainsKey(mechName))
                                 {
                                     PilotsAndMechs[PilotTattoo][mechName] += thisDrops1;
@@ -392,13 +392,13 @@ namespace Pilot_Quirks
                         if (!PilotsAndMechs.Keys.Contains(PilotTattoo))
                         {
                             Dictionary<string, int> tempD = new Dictionary<string, int>();
-                            tempD.Add(ourMech.MechDef.Description.Name, 1);
+                            tempD.Add(ourMech.MechDef.Chassis.Description.UIName, 1);
                             PilotsAndMechs.Add(PilotTattoo, tempD);
                         }
-                        else if (!PilotsAndMechs[PilotTattoo].Keys.Contains(ourMech.MechDef.Description.Name))
-                            PilotsAndMechs[PilotTattoo].Add(ourMech.MechDef.Description.Name, 1);
+                        else if (!PilotsAndMechs[PilotTattoo].Keys.Contains(ourMech.MechDef.Chassis.Description.UIName))
+                            PilotsAndMechs[PilotTattoo].Add(ourMech.MechDef.Chassis.Description.UIName, 1);
                         else
-                            PilotsAndMechs[PilotTattoo][ourMech.MechDef.Description.Name] += 1;
+                            PilotsAndMechs[PilotTattoo][ourMech.MechDef.Chassis.Description.UIName] += 1;
 
 
                         //Add tags based upon 'Mech experience for the pilot.
@@ -415,15 +415,15 @@ namespace Pilot_Quirks
                                     break;
                             }
 
-                            if (TopThreeMechs.Contains(ourMech.MechDef.Description.Name))
+                            if (TopThreeMechs.Contains(ourMech.MechDef.Chassis.Description.UIName))
                             {
-                                if (MechExperience[ourMech.MechDef.Description.Name] >= Pre_Control.settings.Tier1)
+                                if (MechExperience[ourMech.MechDef.Chassis.Description.UIName] >= Pre_Control.settings.Tier1)
                                     pilot.pilotDef.PilotTags.Add("PQ_pilot_green");
-                                if (MechExperience[ourMech.MechDef.Description.Name] >= Pre_Control.settings.Tier2)
+                                if (MechExperience[ourMech.MechDef.Chassis.Description.UIName] >= Pre_Control.settings.Tier2)
                                     pilot.pilotDef.PilotTags.Add("PQ_pilot_regular");
-                                if (MechExperience[ourMech.MechDef.Description.Name] >= Pre_Control.settings.Tier3)
+                                if (MechExperience[ourMech.MechDef.Chassis.Description.UIName] >= Pre_Control.settings.Tier3)
                                     pilot.pilotDef.PilotTags.Add("PQ_pilot_veteran");
-                                if (MechExperience[ourMech.MechDef.Description.Name] >= Pre_Control.settings.Tier4)
+                                if (MechExperience[ourMech.MechDef.Chassis.Description.UIName] >= Pre_Control.settings.Tier4)
                                     pilot.pilotDef.PilotTags.Add("PQ_pilot_elite");
                             }
                         }
