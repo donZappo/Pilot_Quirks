@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection.Emit;
 using Localize;
 using BattleTech.Framework;
+using HoudiniEngineUnity;
 
 namespace Pilot_Quirks
 {
