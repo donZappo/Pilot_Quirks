@@ -68,6 +68,8 @@ namespace Pilot_Quirks
                 {
                     TagDesc += "<b>***PILOT FATIGUED***</b>\nPilot will suffer from Low Spirits if used in combat. The lance will also experience reduced Resolve per turn during combat.\n\n";
                 }
+                else if (p.pilotDef.PilotTags.Contains("pilot_lightinjury"))
+                    TagDesc += "<b>***PILOT LIGHT INJURY***</b>\nPilot cannot drop into combat. This pilot requires rest after dropping too frequently while fatigued.\n\n";
 
                 foreach (var tag in p.pilotDef.PilotTags)
                 {

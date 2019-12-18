@@ -1093,7 +1093,7 @@ namespace Pilot_Quirks
             public static void Prefix(SimGameState __instance, bool refund, ref int __state)
             {
                 ShipModuleUpgrade shipModuleUpgrade = __instance.DataManager.ShipUpgradeDefs.Get(__instance.CurrentUpgradeEntry.upgradeID);
-                var purchaseCost = (int)Traverse.Create(shipModuleUpgrade).Property("PurchaseCost").GetValue();
+                var purchaseCost = shipModuleUpgrade.PurchaseCost;
 
                 float TotalChange = 0;
                 foreach (Pilot pilot in __instance.PilotRoster)
@@ -1105,9 +1105,8 @@ namespace Pilot_Quirks
                 {
                     
                     __state = shipModuleUpgrade.PurchaseCost;
-                    purchaseCost = (int)((float)shipModuleUpgrade.PurchaseCost * (100 - TotalChange) / 100);
-
-
+                    purchaseCost = (int)((float)purchaseCost * (100 - TotalChange) / 100);
+                    shipModuleUpgrade.PurchaseCost = purchaseCost;
                 }
             }
             public static void Postfix(SimGameState __instance, bool refund, ref int __state)
@@ -1115,36 +1114,11 @@ namespace Pilot_Quirks
                 if (refund)
                 {
                     ShipModuleUpgrade shipModuleUpgrade = __instance.DataManager.ShipUpgradeDefs.Get(__instance.CurrentUpgradeEntry.upgradeID);
-                    var purchaseCost = (int)Traverse.Create(shipModuleUpgrade).Property("PurchaseCost").GetValue();
-
-                    purchaseCost = __state;
+                    shipModuleUpgrade.PurchaseCost = __state;
                 }
             }
         }
 
-        [HarmonyPatch(typeof(SimGameState), "QueueArgoUpgrade")]
-        public static class SimGameState_QueueArgoUpgrade_Patch
-        {
-            public static void Prefix(SimGameState __instance, ShipModuleUpgrade requestedUpgrade, ref int __state)
-            {
-                float TotalChange = 0;
-                foreach (Pilot pilot in __instance.PilotRoster)
-                {
-                    if (pilot.pilotDef.PilotTags.Contains("pilot_comstar"))
-                        TotalChange += settings.pilot_comstar_ArgoDiscount;
-                }
-
-                __state = requestedUpgrade.PurchaseCost;
-                var PurchaseCost = (int)Traverse.Create(requestedUpgrade).Property("PurchaseCost").GetValue();
-
-                PurchaseCost = (int)((float)requestedUpgrade.PurchaseCost * (100 - TotalChange) / 100);
-            }
-            public static void Postfix(ShipModuleUpgrade requestedUpgrade, ref int __state)
-            {
-                var PurchaseCost = (int)Traverse.Create(requestedUpgrade).Property("PurchaseCost").GetValue();
-                PurchaseCost = __state;
-            }
-        }
 
         [HarmonyPatch(typeof(SGEngineeringScreen), "PurchaseSelectedUpgrade")]
         public static class SGEngineeringScreen_PurchaseSelectedUpgrade_Patch
@@ -1160,17 +1134,15 @@ namespace Pilot_Quirks
                         TotalChange += settings.pilot_comstar_ArgoDiscount;
                 }
 
-                var SelectedUpgrade = (ShipModuleUpgrade)Traverse.Create(__instance).Property("SelectedUpgrade").GetValue();
-                var PurchaseCost = (int)Traverse.Create(SelectedUpgrade).Property("PurchaseCost").GetValue();
+                var PurchaseCost = __instance.SelectedUpgrade.PurchaseCost;
 
-                __state = SelectedUpgrade.PurchaseCost;
-                PurchaseCost = (int)((float)SelectedUpgrade.PurchaseCost * (100 - TotalChange) / 100);
+                __state = PurchaseCost;
+                PurchaseCost = (int)((float)PurchaseCost * (100 - TotalChange) / 100);
+                __instance.SelectedUpgrade.PurchaseCost = PurchaseCost;
             }
             public static void Postfix(SGEngineeringScreen __instance, ref int __state)
             {
-                var SelectedUpgrade = (ShipModuleUpgrade)Traverse.Create(__instance).Property("SelectedUpgrade").GetValue();
-                var PurchaseCost = (int)Traverse.Create(SelectedUpgrade).Property("PurchaseCost").GetValue();
-                PurchaseCost = __state;
+                __instance.SelectedUpgrade.PurchaseCost = __state;
             }
         }
 
@@ -1187,18 +1159,17 @@ namespace Pilot_Quirks
                         TotalChange += settings.pilot_comstar_ArgoDiscount;
                 }
 
-                var PurchaseCost = (int)Traverse.Create(upgrade).Property("PurchaseCost").GetValue();
-
+                var PurchaseCost = upgrade.PurchaseCost;
                 __state = PurchaseCost;
-                PurchaseCost = (int)((float)upgrade.PurchaseCost * (100 - TotalChange) / 100);
+
+                PurchaseCost = (int)((float)PurchaseCost * (100 - TotalChange) / 100);
+                upgrade.PurchaseCost = PurchaseCost;
             }
             public static void Postfix(ShipModuleUpgrade upgrade, ref int __state)
             {
-                var PurchaseCost = (int)Traverse.Create(upgrade).Property("PurchaseCost").GetValue();
-                PurchaseCost = __state;
+                upgrade.PurchaseCost = __state;
             }
         }
-        
 
         [HarmonyPatch(typeof(SimGameState), "GetInjuryCost")]
         public static class SimGameState_GetInjuryCost_Patch
