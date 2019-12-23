@@ -306,6 +306,9 @@ namespace Pilot_Quirks
                     unitResult.pilot.pilotDef.PilotTags.Remove("PQ_pilot_veteran");
                 if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_elite"))
                     unitResult.pilot.pilotDef.PilotTags.Remove("PQ_pilot_elite");
+                if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_Pilot_MissionTattoo"))
+                    unitResult.pilot.pilotDef.PilotTags.Remove("PQ_Pilot_MissionTattoo");
+
             }
         }
 
@@ -381,6 +384,10 @@ namespace Pilot_Quirks
                     if (actor is Mech ourMech)
                     {
                         bool HasTattoo = pilot.pilotDef.PilotTags.Any(x => x.StartsWith("PQ_Pilot_GUID"));
+                        string TempTattoo = "PQ_Pilot_MissionTattoo";
+                        if (pilot.pilotDef.PilotTags.Contains(TempTattoo))
+                            return;
+
                         if (!HasTattoo)
                         {
                             pilot.pilotDef.PilotTags.Add("PQ_Pilot_GUID_" + MechBonding.PQ_GUID);
@@ -427,6 +434,7 @@ namespace Pilot_Quirks
                                     pilot.pilotDef.PilotTags.Add("PQ_pilot_elite");
                             }
                         }
+                        pilot.pilotDef.PilotTags.Add(TempTattoo);
                     }
                 }
                 catch (Exception e)
