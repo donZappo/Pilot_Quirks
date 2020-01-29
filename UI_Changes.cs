@@ -234,6 +234,7 @@ namespace Pilot_Quirks
                 if (i == 3) break;
             }
             TagDesc = TagDesc.TrimEnd(charsToTrim);
+            TagDesc = TagDesc + "\n\n";
             return TagDesc;
         }
     }
