@@ -1252,6 +1252,7 @@ namespace Pilot_Quirks
             public float pilot_wealthy_CostFactor = 0.9f;
             public int pilot_rebellious_ResolveMalus = 1;
 
+
             public Dictionary<string, string> TagIDToDescription = new Dictionary<string, string>();
             public Dictionary<string, string> TagIDToNames = new Dictionary<string, string>();
 
