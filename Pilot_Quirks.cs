@@ -162,6 +162,9 @@ namespace Pilot_Quirks
         {
             public static void Postfix(SimGameState __instance, Pilot p)
             {
+                if (p == null || !(__instance.PilotRoster.Contains(p) || __instance.Graveyard.Contains(p)))
+                    return;
+
                 if (p.pilotDef.PilotTags.Contains("pilot_tech") && !settings.pilot_tech_vanillaTech)
                 {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_tech_TechBonus, -1, true);
