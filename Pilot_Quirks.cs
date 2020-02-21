@@ -13,25 +13,20 @@ using Localize;
 using BattleTech.Framework;
 using HoudiniEngineUnity;
 
-namespace Pilot_Quirks
-{
-    public static class Pre_Control
-    {
+namespace Pilot_Quirks {
+    public static class Pre_Control {
         public const string ModName = "Pilot_Quirks";
         public const string ModId = "dZ.Zappo.Pilot_Quirks";
 
         internal static ModSettings settings;
         internal static string ModDirectory;
 
-        public static void Init(string directory, string modSettings)
-        {
+        public static void Init(string directory, string modSettings) {
             ModDirectory = directory;
-            try
-            {
+            try {
                 settings = JsonConvert.DeserializeObject<ModSettings>(modSettings);
             }
-            catch (Exception)
-            {
+            catch (Exception) {
                 settings = new ModSettings();
             }
 
@@ -60,18 +55,15 @@ namespace Pilot_Quirks
             {
                 var tags = pilot.pilotDef.PilotTags;
                 var stats = __instance.CompanyStats;
-                if (tags.Contains("pilot_disgraced"))
-                {
+                if (tags.Contains("pilot_disgraced")) {
                     stats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_disgraced_MoralePenalty, -1, true);
                 }
 
-                if (tags.Contains("pilot_honest"))
-                {
+                if (tags.Contains("pilot_honest")) {
                     stats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_honest_MoraleBonus, -1, true);
                 }
 
-                if (tags.Contains("pilot_dishonest"))
-                {
+                if (tags.Contains("pilot_dishonest")) {
                     stats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_dishonest_MoralePenalty, -1, true);
                 }
                 if (tags.Contains("pilot_tech"))
@@ -80,15 +72,12 @@ namespace Pilot_Quirks
         }
 
         [HarmonyPatch(typeof(SimGameState), "_OnAttachUXComplete")]
-        public static class PatchCampaignStartMorale
-        {
-            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-            {
+        public static class PatchCampaignStartMorale {
+            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
                 var codes = new List<CodeInstruction>(instructions);
                 var instructionsToInsert = new List<CodeInstruction>();
                 var index = codes.FindIndex(code => code.operand == (object)"Start Game");
                 var targetMethod = AccessTools.Method(typeof(Pre_Control), "StartGameAudit");
-
                 instructionsToInsert.Add(new CodeInstruction(OpCodes.Ldarg_0));
                 instructionsToInsert.Add(new CodeInstruction(OpCodes.Call, targetMethod));
                 codes.InsertRange(index + 2, instructionsToInsert);
@@ -122,11 +111,9 @@ namespace Pilot_Quirks
                     {
                         __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
                     }
-                    else if (def.PilotTags.Contains("pilot_tech") && settings.pilot_tech_vanillaTech)
-                    {
+                    else if (def.PilotTags.Contains("pilot_tech") && settings.pilot_tech_vanillaTech) {
                         int TechCount = 0;
-                        foreach (Pilot techpilot in __instance.PilotRoster)
-                        {
+                        foreach (Pilot techpilot in __instance.PilotRoster) {
                             if (def.PilotTags.Contains("pilot_tech"))
                                 TechCount = TechCount + 1;
                         }
@@ -134,23 +121,19 @@ namespace Pilot_Quirks
                             __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
                     }
 
-                    if (def.PilotTags.Contains("pilot_disgraced"))
-                    {
+                    if (def.PilotTags.Contains("pilot_disgraced")) {
                         __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_disgraced_MoralePenalty, -1, true);
                     }
 
-                    if (def.PilotTags.Contains("pilot_comstar"))
-                    {
+                    if (def.PilotTags.Contains("pilot_comstar")) {
                         __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_comstar_TechBonus, -1, true);
                     }
 
-                    if (def.PilotTags.Contains("pilot_honest"))
-                    {
+                    if (def.PilotTags.Contains("pilot_honest")) {
                         __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_honest_MoraleBonus, -1, true);
                     }
 
-                    if (def.PilotTags.Contains("pilot_dishonest"))
-                    {
+                    if (def.PilotTags.Contains("pilot_dishonest")) {
                         __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_dishonest_MoralePenalty, -1, true);
                     }
                 }
@@ -169,11 +152,9 @@ namespace Pilot_Quirks
                 {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_tech_TechBonus, -1, true);
                 }
-                else if (p.pilotDef.PilotTags.Contains("pilot_tech") && settings.pilot_tech_vanillaTech)
-                {
+                else if (p.pilotDef.PilotTags.Contains("pilot_tech") && settings.pilot_tech_vanillaTech) {
                     int TechCount = 0;
-                    foreach (Pilot techpilot in __instance.PilotRoster)
-                    {
+                    foreach (Pilot techpilot in __instance.PilotRoster) {
                         if (techpilot.pilotDef.PilotTags.Contains("pilot_tech"))
                             TechCount = TechCount + 1;
                     }
@@ -181,42 +162,33 @@ namespace Pilot_Quirks
                         __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_tech_TechBonus, -1, true);
                 }
 
-                if (p.pilotDef.PilotTags.Contains("pilot_disgraced"))
-                {
+                if (p.pilotDef.PilotTags.Contains("pilot_disgraced")) {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_disgraced_MoralePenalty, -1, true);
                 }
 
-                if (p.pilotDef.PilotTags.Contains("pilot_comstar"))
-                {
+                if (p.pilotDef.PilotTags.Contains("pilot_comstar")) {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_comstar_TechBonus, -1, true);
                 }
 
-                if (p.pilotDef.PilotTags.Contains("pilot_honest"))
-                {
+                if (p.pilotDef.PilotTags.Contains("pilot_honest")) {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_honest_MoraleBonus, -1, true);
                 }
 
-                if (p.pilotDef.PilotTags.Contains("pilot_dishonest"))
-                {
+                if (p.pilotDef.PilotTags.Contains("pilot_dishonest")) {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_dishonest_MoralePenalty, -1, true);
                 }
             }
         }
 
         [HarmonyPatch(typeof(SimGameState), "DismissPilot", new Type[] { typeof(Pilot) })]
-        public static class Pilot_Dismissed
-        {
-            public static void Prefix(SimGameState __instance, Pilot p)
-            {
-                if (p.pilotDef.PilotTags.Contains("pilot_tech") && !settings.pilot_tech_vanillaTech)
-                {
+        public static class Pilot_Dismissed {
+            public static void Prefix(SimGameState __instance, Pilot p) {
+                if (p.pilotDef.PilotTags.Contains("pilot_tech") && !settings.pilot_tech_vanillaTech) {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_tech_TechBonus, -1, true);
                 }
-                else if (p.pilotDef.PilotTags.Contains("pilot_tech") && settings.pilot_tech_vanillaTech)
-                {
+                else if (p.pilotDef.PilotTags.Contains("pilot_tech") && settings.pilot_tech_vanillaTech) {
                     int TechCount = 0;
-                    foreach (Pilot techpilot in __instance.PilotRoster)
-                    {
+                    foreach (Pilot techpilot in __instance.PilotRoster) {
                         if (techpilot.pilotDef.PilotTags.Contains("pilot_tech"))
                             TechCount = TechCount + 1;
                     }
@@ -224,23 +196,19 @@ namespace Pilot_Quirks
                         __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_tech_TechBonus, -1, true);
                 }
 
-                if (p.pilotDef.PilotTags.Contains("pilot_disgraced"))
-                {
+                if (p.pilotDef.PilotTags.Contains("pilot_disgraced")) {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_disgraced_MoralePenalty, -1, true);
                 }
 
-                if (p.pilotDef.PilotTags.Contains("pilot_comstar"))
-                {
+                if (p.pilotDef.PilotTags.Contains("pilot_comstar")) {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Subtract, settings.pilot_comstar_TechBonus, -1, true);
                 }
 
-                if (p.pilotDef.PilotTags.Contains("pilot_honest"))
-                {
+                if (p.pilotDef.PilotTags.Contains("pilot_honest")) {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_honest_MoraleBonus, -1, true);
                 }
 
-                if (p.pilotDef.PilotTags.Contains("pilot_dishonest"))
-                {
+                if (p.pilotDef.PilotTags.Contains("pilot_dishonest")) {
                     __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Subtract, settings.pilot_dishonest_MoralePenalty, -1, true);
                 }
             }
@@ -282,28 +250,21 @@ namespace Pilot_Quirks
         //}
 
         [HarmonyPatch(typeof(SimGameState), "OnDayPassed")]
-        public static class DayPasser
-        {
-            public static void Postfix(SimGameState __instance)
-            {
-                foreach (Pilot pilot in __instance.PilotRoster)
-                {
+        public static class DayPasser {
+            public static void Postfix(SimGameState __instance) {
+                foreach (Pilot pilot in __instance.PilotRoster) {
                     var rng = new System.Random();
                     int Roll = rng.Next(1, 100);
-                    if (pilot.pilotDef.PilotTags.Contains("pilot_unstable"))
-                    {
-                        if (Roll <= 33)
-                        {
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_unstable")) {
+                        if (Roll <= 33) {
                             pilot.pilotDef.PilotTags.Add("pilot_morale_high");
                             pilot.pilotDef.PilotTags.Remove("pilot_morale_low");
                         }
-                        else if (Roll > 33 && Roll <= 66)
-                        {
+                        else if (Roll > 33 && Roll <= 66) {
                             pilot.pilotDef.PilotTags.Add("pilot_morale_low");
                             pilot.pilotDef.PilotTags.Remove("pilot_morale_high");
                         }
-                        else
-                        {
+                        else {
                             pilot.pilotDef.PilotTags.Remove("pilot_morale_low");
                             pilot.pilotDef.PilotTags.Remove("pilot_morale_high");
                         }
@@ -341,11 +302,9 @@ namespace Pilot_Quirks
                         {
                             __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
                         }
-                        else if (settings.pilot_tech_vanillaTech)
-                        {
+                        else if (settings.pilot_tech_vanillaTech) {
                             int TechCount = 0;
-                            foreach (Pilot techpilot in __instance.PilotRoster)
-                            {
+                            foreach (Pilot techpilot in __instance.PilotRoster) {
                                 if (pilot.pilotDef.PilotTags.Contains("pilot_tech"))
                                     TechCount = TechCount + 1;
                             }
@@ -353,19 +312,16 @@ namespace Pilot_Quirks
                             __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
                         }
 
-                        if (pilot.pilotDef.PilotTags.Contains("pilot_disgraced"))
-                        {
+                        if (pilot.pilotDef.PilotTags.Contains("pilot_disgraced")) {
                             __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_disgraced_MoralePenalty, -1, true);
                         }
 
 
-                        if (pilot.pilotDef.PilotTags.Contains("pilot_honest"))
-                        {
+                        if (pilot.pilotDef.PilotTags.Contains("pilot_honest")) {
                             __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_honest_MoraleBonus, -1, true);
                         }
 
-                        if (pilot.pilotDef.PilotTags.Contains("pilot_dishonest"))
-                        {
+                        if (pilot.pilotDef.PilotTags.Contains("pilot_dishonest")) {
                             __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "Morale", StatCollection.StatOperation.Int_Add, settings.pilot_dishonest_MoralePenalty, -1, true);
                         }
                     }
@@ -411,7 +367,7 @@ namespace Pilot_Quirks
                     BonusMoney *= __instance.theContract.PercentageContractValue;
                     BonusMoney += (float)sim.GetScaledCBillValue((float)__instance.theContract.InitialContractValue, 0f);
                     BonusMoney *= (float)settings.CriminalCount * settings.pilot_criminal_bonus / 100;
-                    string missionObjectiveResultString = $"BONUS FROM CRIMINALS: ¢{String.Format("{0:n0}", BonusMoney)}";
+                    string missionObjectiveResultString = $"BONUS FROM CRIMINALS: ï¿½{String.Format("{0:n0}", BonusMoney)}";
                     MissionObjectiveResult missionObjectiveResult = new MissionObjectiveResult(missionObjectiveResultString, "7facf07a-626d-4a3b-a1ec-b29a35ff1ac0", false, true, ObjectiveStatus.Succeeded, false);
                     Traverse.Create(__instance).Method("AddObjective", missionObjectiveResult).GetValue();
                 }
@@ -467,7 +423,6 @@ namespace Pilot_Quirks
         //    }
         //}
 
-
         //[HarmonyPatch(typeof(Shop), "PopulateInventory")]
         //public static class Criminal_Shops
         //{
@@ -517,8 +472,7 @@ namespace Pilot_Quirks
             public static void Prefix(AAR_UnitStatusWidget __instance, ref int xpEarned)
             {
                 UnitResult unit = Traverse.Create(__instance).Field("UnitData").GetValue<UnitResult>();
-                if (unit.pilot.pilotDef.PilotTags.Contains("pilot_naive"))
-                {
+                if (unit.pilot.pilotDef.PilotTags.Contains("pilot_naive")) {
                     float XPModifier = 1 - settings.pilot_naive_LessExperience;
                     xpEarned = (int)(XPModifier * (float)xpEarned);
                 }
@@ -555,19 +509,15 @@ namespace Pilot_Quirks
 
 
         [HarmonyPatch(typeof(Team), "CollectUnitBaseline")]
-        public static class Rebellious_Area
-        {
-            private static void Postfix(Team __instance, ref int __result)
-            {
+        public static class Rebellious_Area {
+            private static void Postfix(Team __instance, ref int __result) {
                 bool rebelpilot = false;
                 bool officer = false;
                 bool commander = false;
                 int edgecase = 0;
-                foreach (AbstractActor actor in __instance.units)
-                {
+                foreach (AbstractActor actor in __instance.units) {
                     Pilot pilot = actor.GetPilot();
-                    if (pilot.pilotDef.PilotTags.Contains("pilot_rebellious"))
-                    {
+                    if (pilot.pilotDef.PilotTags.Contains("pilot_rebellious")) {
                         rebelpilot = true;
                     }
                     if (pilot.pilotDef.PilotTags.Contains("pilot_officer"))
@@ -596,72 +546,57 @@ namespace Pilot_Quirks
         /// </summary>
 
         [HarmonyPatch(typeof(ToHit), "GetAllModifiers")]
-        public static class ToHit_GetAllModifiers_Patch
-        {
-            private static void Postfix(ToHit __instance, ref float __result, AbstractActor attacker, Weapon weapon, ICombatant target, Vector3 attackPosition, Vector3 targetPosition, LineOfFireLevel lofLevel, bool isCalledShot)
-            {
+        public static class ToHit_GetAllModifiers_Patch {
+            private static void Postfix(ToHit __instance, ref float __result, AbstractActor attacker, Weapon weapon, ICombatant target, Vector3 attackPosition, Vector3 targetPosition, LineOfFireLevel lofLevel, bool isCalledShot) {
                 Pilot pilot = attacker.GetPilot();
-                try
-                {
+                try {
                     Pilot TargetPilot = target.GetPilot();
-                    if (TargetPilot.pilotDef.PilotTags.Contains("pilot_reckless"))
-                    {
+                    if (TargetPilot.pilotDef.PilotTags.Contains("pilot_reckless")) {
                         __result = __result + (float)settings.pilot_reckless_ToBeHitBonus;
                     }
                     if (TargetPilot.pilotDef.PilotTags.Contains("pilot_cautious"))
                     {
                         __result = __result + (float)settings.pilot_cautious_ToBeHitBonus;
                     }
-                    if (TargetPilot.pilotDef.PilotTags.Contains("pilot_jinxed"))
-                    {
+                    if (TargetPilot.pilotDef.PilotTags.Contains("pilot_jinxed")) {
                         __result = __result + (float)settings.pilot_jinxed_ToBeHitBonus;
                     }
                 }
-                catch (Exception)
-                {
+                catch (Exception) {
                 }
-                if (pilot.pilotDef.PilotTags.Contains("pilot_reckless"))
-                {
+                if (pilot.pilotDef.PilotTags.Contains("pilot_reckless")) {
                     __result = __result + (float)settings.pilot_reckless_ToHitBonus;
                 }
                 if (pilot.pilotDef.PilotTags.Contains("pilot_cautious"))
                 {
                     __result = __result + (float)settings.pilot_cautious_ToHitBonus;
                 }
-                if (pilot.pilotDef.PilotTags.Contains("pilot_drunk") && pilot.pilotDef.TimeoutRemaining > 0)
-                {
+                if (pilot.pilotDef.PilotTags.Contains("pilot_drunk") && pilot.pilotDef.TimeoutRemaining > 0) {
                     __result = __result + (float)settings.pilot_drunk_ToHitBonus;
                 }
-                if (pilot.pilotDef.PilotTags.Contains("pilot_lostech") && weapon.componentDef.ComponentTags.Contains("component_type_lostech"))
-                {
+                if (pilot.pilotDef.PilotTags.Contains("pilot_lostech") && weapon.componentDef.ComponentTags.Contains("component_type_lostech")) {
                     __result = __result + (float)settings.pilot_lostech_ToHitBonus;
                 }
             }
         }
 
         [HarmonyPatch(typeof(ToHit), "GetAllModifiersDescription")]
-        public static class ToHit_GetAllModifiersDescription_Patch
-        {
-            private static void Postfix(ToHit __instance, ref string __result, AbstractActor attacker, Weapon weapon, ICombatant target, Vector3 attackPosition, Vector3 targetPosition, LineOfFireLevel lofLevel, bool isCalledShot)
-            {
+        public static class ToHit_GetAllModifiersDescription_Patch {
+            private static void Postfix(ToHit __instance, ref string __result, AbstractActor attacker, Weapon weapon, ICombatant target, Vector3 attackPosition, Vector3 targetPosition, LineOfFireLevel lofLevel, bool isCalledShot) {
                 Pilot pilot = attacker.GetPilot();
-                if (pilot.pilotDef.PilotTags.Contains("pilot_reckless"))
-                {
+                if (pilot.pilotDef.PilotTags.Contains("pilot_reckless")) {
                     __result = string.Format("{0}RECKLESS {1:+#;-#}; ", __result, settings.pilot_reckless_ToHitBonus);
                 }
 
-                if (pilot.pilotDef.PilotTags.Contains("pilot_cautious"))
-                {
+                if (pilot.pilotDef.PilotTags.Contains("pilot_cautious")) {
                     __result = string.Format("{0}CAUTIOUS {1:+#;-#}; ", __result, settings.pilot_cautious_ToHitBonus);
                 }
 
-                if (pilot.pilotDef.PilotTags.Contains("pilot_drunk") && pilot.pilotDef.TimeoutRemaining > 0)
-                {
+                if (pilot.pilotDef.PilotTags.Contains("pilot_drunk") && pilot.pilotDef.TimeoutRemaining > 0) {
                     __result = string.Format("{0}DRUNK {1:+#;-#}; ", __result, settings.pilot_drunk_ToHitBonus);
                 }
 
-                if (pilot.pilotDef.PilotTags.Contains("pilot_lostech") && weapon.componentDef.ComponentTags.Contains("component_type_lostech"))
-                {
+                if (pilot.pilotDef.PilotTags.Contains("pilot_lostech") && weapon.componentDef.ComponentTags.Contains("component_type_lostech")) {
                     __result = string.Format("{0}LOSTECH TECHNICIAN {1:+#;-#}; ", __result, settings.pilot_lostech_ToHitBonus);
                 }
 
@@ -673,134 +608,104 @@ namespace Pilot_Quirks
         }
 
         [HarmonyPatch(typeof(CombatHUDWeaponSlot), "SetHitChance", new Type[] { typeof(ICombatant) })]
-        public static class CombatHUDWeaponSlot_SetHitChance_Patch
-        {
-            private static void Postfix(CombatHUDWeaponSlot __instance, ICombatant target)
-            {
+        public static class CombatHUDWeaponSlot_SetHitChance_Patch {
+            private static void Postfix(CombatHUDWeaponSlot __instance, ICombatant target) {
                 AbstractActor actor = __instance.DisplayedWeapon.parent;
                 var _this = Traverse.Create(__instance);
                 Pilot pilot = actor.GetPilot();
-                if (pilot.pilotDef.PilotTags.Contains("pilot_reckless"))
-                {
+                if (pilot.pilotDef.PilotTags.Contains("pilot_reckless")) {
                     _this.Method("AddToolTipDetail", "RECKLESS", settings.pilot_reckless_ToHitBonus).GetValue();
                 }
 
-                if (pilot.pilotDef.PilotTags.Contains("pilot_cautious"))
-                {
+                if (pilot.pilotDef.PilotTags.Contains("pilot_cautious")) {
                     _this.Method("AddToolTipDetail", "CAUTIOUS", settings.pilot_cautious_ToHitBonus).GetValue();
                 }
 
-                if (pilot.pilotDef.PilotTags.Contains("pilot_drunk") && pilot.pilotDef.TimeoutRemaining > 0)
-                {
+                if (pilot.pilotDef.PilotTags.Contains("pilot_drunk") && pilot.pilotDef.TimeoutRemaining > 0) {
                     _this.Method("AddToolTipDetail", "DRUNK", settings.pilot_drunk_ToHitBonus).GetValue();
                 }
 
-                if (__instance.tag.Contains("component_type_lostech") && pilot.pilotDef.PilotTags.Contains("pilot_lostech"))
-                {
+                if (__instance.tag.Contains("component_type_lostech") && pilot.pilotDef.PilotTags.Contains("pilot_lostech")) {
                     _this.Method("AddToolTipDetail", "LOSTECH TECH", settings.pilot_lostech_ToHitBonus).GetValue();
                 }
 
-                if (pilot.pilotDef.PilotTags.Contains("pilot_jinxed"))
-                {
+                if (pilot.pilotDef.PilotTags.Contains("pilot_jinxed")) {
                     _this.Method("AddToolTipDetail", "JINXED", settings.pilot_jinxed_ToHitBonus).GetValue();
                 }
             }
         }
 
         [HarmonyPatch(typeof(Mech), "GetEvasivePipsResult")]
-        public static class Drunk_Evasive_Malus
-        {
-            private static void Postfix(Mech __instance, ref int __result)
-            {
+        public static class Drunk_Evasive_Malus {
+            private static void Postfix(Mech __instance, ref int __result) {
                 if (__instance.pilot.pilotDef.PilotTags.Contains("pilot_drunk") && __instance.pilot.pilotDef.TimeoutRemaining > 0)
                     __result = __result - 1;
             }
         }
 
         [HarmonyPatch(typeof(SimGameState), "GetMechWarriorValue")]
-        public static class Change_Pilot_Cost
-        {
-            public static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
-            {
+        public static class Change_Pilot_Cost {
+            public static void Postfix(SimGameState __instance, PilotDef def, ref int __result) {
                 float CostPerMonth = __result;
-                if (def.PilotTags.Contains("pilot_tech"))
-                {
+                if (def.PilotTags.Contains("pilot_tech")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_dependable"))
-                {
+                if (def.PilotTags.Contains("pilot_dependable")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_merchant"))
-                {
+                if (def.PilotTags.Contains("pilot_merchant")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_brave"))
-                {
+                if (def.PilotTags.Contains("pilot_brave")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_assassin"))
-                {
+                if (def.PilotTags.Contains("pilot_assassin")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_athletic"))
-                {
+                if (def.PilotTags.Contains("pilot_athletic")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_gladiator"))
-                {
+                if (def.PilotTags.Contains("pilot_gladiator")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_lucky"))
-                {
+                if (def.PilotTags.Contains("pilot_lucky")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_drunk"))
-                {
+                if (def.PilotTags.Contains("pilot_drunk")) {
                     CostPerMonth = CostPerMonth - (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_lostech"))
-                {
+                if (def.PilotTags.Contains("pilot_lostech")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_disgraced"))
-                {
+                if (def.PilotTags.Contains("pilot_disgraced")) {
                     CostPerMonth = CostPerMonth - (float)0.2 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_naive"))
-                {
+                if (def.PilotTags.Contains("pilot_naive")) {
                     CostPerMonth = CostPerMonth - (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_military"))
-                {
+                if (def.PilotTags.Contains("pilot_military")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_mechwarrior"))
-                {
+                if (def.PilotTags.Contains("pilot_mechwarrior")) {
                     CostPerMonth = CostPerMonth + (float)0.2 * (__result);
                 }
                 if (def.PilotTags.Contains("pilot_bookish"))
                 {
-                    
+                   
                 }
-                if (def.PilotTags.Contains("pilot_command"))
-                {
+                if (def.PilotTags.Contains("pilot_command")) {
                     CostPerMonth = CostPerMonth + (float)0.2 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_officer"))
-                {
+                if (def.PilotTags.Contains("pilot_officer")) {
                     CostPerMonth = CostPerMonth + (float)0.3 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_unstable"))
-                {
+                if (def.PilotTags.Contains("pilot_unstable")) {
                     CostPerMonth = CostPerMonth - (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_jinxed"))
-                {
+                if (def.PilotTags.Contains("pilot_jinxed")) {
                     CostPerMonth = CostPerMonth - (float)0.2 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_klutz"))
-                {
+                if (def.PilotTags.Contains("pilot_klutz")) {
                     CostPerMonth = CostPerMonth - (float)0.1 * (__result);
                 }
                 if (def.PilotTags.Contains("pilot_criminal") && !settings.RTCompatible)
@@ -814,8 +719,7 @@ namespace Pilot_Quirks
                 {
                     CostPerMonth = CostPerMonth + (float)0.2 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_dishonest"))
-                {
+                if (def.PilotTags.Contains("pilot_dishonest")) {
                     CostPerMonth = CostPerMonth - (float)0.1 * (__result);
                 }
                 if (CostPerMonth < 0)
@@ -828,98 +732,75 @@ namespace Pilot_Quirks
                     __result = (int)(__result + settings.pilot_wealthy_CostFactor * __result);
                 }
 
-                if (def.PilotTags.Contains("pilot_noble"))
-                {
+                if (def.PilotTags.Contains("pilot_noble")) {
                     __result = (int)(__result + settings.pilot_noble_IncreasedCost * __result);
                 }
-
             }
         }
 
         [HarmonyPatch(typeof(SimGameState), "GetMechWarriorHiringCost")]
-        public static class Change_Pilot_Hiring_Cost
-        {
-            public static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
-            {
+        public static class Change_Pilot_Hiring_Cost {
+            public static void Postfix(SimGameState __instance, PilotDef def, ref int __result) {
                 float CostPerMonth = __result;
-                if (def.PilotTags.Contains("pilot_tech"))
-                {
+                if (def.PilotTags.Contains("pilot_tech")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_dependable"))
-                {
+                if (def.PilotTags.Contains("pilot_dependable")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_merchant"))
-                {
+                if (def.PilotTags.Contains("pilot_merchant")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_brave"))
-                {
+                if (def.PilotTags.Contains("pilot_brave")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_assassin"))
-                {
+                if (def.PilotTags.Contains("pilot_assassin")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_athletic"))
-                {
+                if (def.PilotTags.Contains("pilot_athletic")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_gladiator"))
-                {
+                if (def.PilotTags.Contains("pilot_gladiator")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_lucky"))
-                {
+                if (def.PilotTags.Contains("pilot_lucky")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_drunk"))
-                {
+                if (def.PilotTags.Contains("pilot_drunk")) {
                     CostPerMonth = CostPerMonth - (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_lostech"))
-                {
+                if (def.PilotTags.Contains("pilot_lostech")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_disgraced"))
-                {
+                if (def.PilotTags.Contains("pilot_disgraced")) {
                     CostPerMonth = CostPerMonth - (float)0.2 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_naive"))
-                {
+                if (def.PilotTags.Contains("pilot_naive")) {
                     CostPerMonth = CostPerMonth - (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_military"))
-                {
+                if (def.PilotTags.Contains("pilot_military")) {
                     CostPerMonth = CostPerMonth + (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_mechwarrior"))
-                {
+                if (def.PilotTags.Contains("pilot_mechwarrior")) {
                     CostPerMonth = CostPerMonth + (float)0.2 * (__result);
                 }
                 if (def.PilotTags.Contains("pilot_bookish"))
                 {
-                    
+                   
                 }
-                if (def.PilotTags.Contains("pilot_command"))
-                {
+                if (def.PilotTags.Contains("pilot_command")) {
                     CostPerMonth = CostPerMonth + (float)0.2 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_officer"))
-                {
+                if (def.PilotTags.Contains("pilot_officer")) {
                     CostPerMonth = CostPerMonth + (float)0.3 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_unstable"))
-                {
+                if (def.PilotTags.Contains("pilot_unstable")) {
                     CostPerMonth = CostPerMonth - (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_jinxed"))
-                {
+                if (def.PilotTags.Contains("pilot_jinxed")) {
                     CostPerMonth = CostPerMonth - (float)0.2 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_klutz"))
-                {
+                if (def.PilotTags.Contains("pilot_klutz")) {
                     CostPerMonth = CostPerMonth - (float)0.1 * (__result);
                 }
                 if (def.PilotTags.Contains("pilot_criminal") && !settings.RTCompatible)
@@ -935,12 +816,10 @@ namespace Pilot_Quirks
                 {
                     CostPerMonth = CostPerMonth + (float)0.2 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_dishonest"))
-                {
+                if (def.PilotTags.Contains("pilot_dishonest")) {
                     CostPerMonth = CostPerMonth - (float)0.1 * (__result);
                 }
-                if (def.PilotTags.Contains("pilot_noble"))
-                {
+                if (def.PilotTags.Contains("pilot_noble")) {
                     CostPerMonth = CostPerMonth + (float)0.5 * (__result);
                 }
                 if (CostPerMonth < 0)
@@ -959,8 +838,7 @@ namespace Pilot_Quirks
             private static void Prefix(Mech __instance, AbstractActor attacker, ref float bonusMultiplier)
             {
                 Pilot pilot = attacker.GetPilot();
-                if (pilot.pilotDef.PilotTags.Contains("pilot_assassin"))
-                {
+                if (pilot.pilotDef.PilotTags.Contains("pilot_assassin")) {
                     bonusMultiplier = bonusMultiplier + settings.pilot_assassin_CalledShotBonus;
                 }
             }
@@ -968,17 +846,13 @@ namespace Pilot_Quirks
 
         // hacked from decompile
         [HarmonyPatch(typeof(HumanDescriptionDef), nameof(HumanDescriptionDef.GetLocalizedDetails), MethodType.Normal)]
-        public static class GetLocalizedDetailsPatch
-        {
-            public static bool Prefix(HumanDescriptionDef __instance, ref Text __result)
-            {
+        public static class GetLocalizedDetailsPatch {
+            public static bool Prefix(HumanDescriptionDef __instance, ref Text __result) {
                 var instance = __instance;
-                if (instance.Details == null)
-                {
+                if (instance.Details == null) {
                     __result = new Text();
                     return false;
                 }
-
                 var localizedDetails = (Text)Traverse.Create(instance).Field("localizedDetails").GetValue();
                 var detailsParsed = (bool)Traverse.Create(instance).Field("detailsParsed").GetValue();
 
@@ -988,8 +862,7 @@ namespace Pilot_Quirks
                     return false;
                 }
                 Text text = new Text();
-                if (instance.isGenerated)
-                {
+                if (instance.isGenerated) {
                     string[] strArray = instance.Details.Split(new string[4]
                     {
                 Environment.NewLine,
@@ -998,13 +871,11 @@ namespace Pilot_Quirks
                 "\n\n"
                     }, StringSplitOptions.RemoveEmptyEntries);
                     // pad the array length to make it even
-                    if (strArray.Length % 2 != 0)
-                    {
+                    if (strArray.Length % 2 != 0) {
                         Array.Resize(ref strArray, strArray.Length + 1);
                     }
                     int index = 0;
-                    while (index < strArray.Length)
-                    {
+                    while (index < strArray.Length) {
                         text.Append("<b>{0}:</b> {1}\n\n", (object[])new string[2]
                         {
                     strArray[index],
@@ -1013,19 +884,16 @@ namespace Pilot_Quirks
                         index += 2;
                     }
                 }
-                else if (instance.isCommander)
-                {
+                else if (instance.isCommander) {
                     string details = instance.Details;
                     string[] separator = new string[1]
                         {Environment.NewLine};
                     int num = 1;
-                    foreach (object obj in details.Split(separator, (StringSplitOptions)num))
-                    {
+                    foreach (object obj in details.Split(separator, (StringSplitOptions)num)) {
                         text.Append("{0} \n\n", obj);
                     }
                 }
-                else
-                {
+                else {
                     text.Append(instance.Details, new object[0]);
                 }
                 detailsParsed = true;
@@ -1076,11 +944,9 @@ namespace Pilot_Quirks
                     }
                 }
 
-                public static void LogLine(string line)
-                {
+                public static void LogLine(string line) {
                     string path = "Mods/Pilot_Quirks/Log.txt";
-                    using (StreamWriter streamWriter = new StreamWriter(path, true))
-                    {
+                    using (StreamWriter streamWriter = new StreamWriter(path, true)) {
                         streamWriter.WriteLine(line + Environment.NewLine + "Date :" + DateTime.Now.ToString());
                         streamWriter.WriteLine(Environment.NewLine + "-----------------------------------------------------------------------------" + Environment.NewLine);
                     }
