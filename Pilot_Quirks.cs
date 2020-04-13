@@ -713,7 +713,10 @@ namespace Pilot_Quirks
             private static void Postfix(Mech __instance, ref int __result)
             {
                 if (__instance.pilot.pilotDef.PilotTags.Contains("pilot_drunk") && __instance.pilot.pilotDef.TimeoutRemaining > 0)
-                    __result = __result - 1;
+                    __result = __result - settings.pilot_drunk_EP_Loss;
+
+                if (__result < 0)
+                    __result = 0;
             }
         }
 
@@ -723,116 +726,103 @@ namespace Pilot_Quirks
             public static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
             {
                 float CostPerMonth = __result;
-                if (def.PilotTags.Contains("pilot_tech"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_dependable"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_merchant"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_brave"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
+
+                //Increased costs
+
                 if (def.PilotTags.Contains("pilot_assassin"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_assassin"] * settings.CostAdjustment * (__result);
+
                 if (def.PilotTags.Contains("pilot_athletic"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_gladiator"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_lucky"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_drunk"))
-                {
-                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_lostech"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_disgraced"))
-                {
-                    CostPerMonth = CostPerMonth - (float)0.2 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_naive"))
-                {
-                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_military"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_mechwarrior"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.2 * (__result);
-                }
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_athletic"] * settings.CostAdjustment * (__result);
+
                 if (def.PilotTags.Contains("pilot_bookish"))
-                {
-                    
-                }
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_bookish"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_brave"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_brave"] * settings.CostAdjustment * (__result);
+
                 if (def.PilotTags.Contains("pilot_command"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.2 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_officer"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.3 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_unstable"))
-                {
-                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_jinxed"))
-                {
-                    CostPerMonth = CostPerMonth - (float)0.2 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_klutz"))
-                {
-                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_criminal") && !settings.RTCompatible)
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
-                else if (def.PilotTags.Contains("pilot_criminal"))
-                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_command"] * settings.CostAdjustment * (__result);
 
                 if (def.PilotTags.Contains("pilot_comstar"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.2 * (__result);
-                }
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_comstar"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_criminal") && !settings.RTCompatible)
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_criminal"] * settings.CostAdjustment * (__result);
+                else if (def.PilotTags.Contains("pilot_criminal"))
+                    CostPerMonth = CostPerMonth - settings.QuirkTier["pilot_criminal"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_dependable"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_dependable"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_gladiator"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_gladiator"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_honest"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_honest"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_lostech"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_lostech"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_lucky"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_lucky"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_mechwarrior"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_mechwarrior"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_merchant"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_merchant"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_military"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_military"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_officer"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_officer"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_spacer"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_spacer"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_tech"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_tech"] * settings.CostAdjustment * (__result);
+
+                //Decreased costs
+
+                if (def.PilotTags.Contains("pilot_disgraced"))
+                    CostPerMonth = CostPerMonth - settings.QuirkTier["pilot_disgraced"] * settings.CostAdjustment * (__result);
+
                 if (def.PilotTags.Contains("pilot_dishonest"))
-                {
-                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
-                }
+                    CostPerMonth = CostPerMonth - settings.QuirkTier["pilot_dishonest"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_drunk"))
+                    CostPerMonth = CostPerMonth - settings.QuirkTier["pilot_drunk"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_jinxed"))
+                    CostPerMonth = CostPerMonth - settings.QuirkTier["pilot_jinxed"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_klutz"))
+                    CostPerMonth = CostPerMonth - settings.QuirkTier["pilot_klutz"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_naive"))
+                    CostPerMonth = CostPerMonth - settings.QuirkTier["pilot_naive"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_rebellious"))
+                    CostPerMonth = CostPerMonth - settings.QuirkTier["pilot_rebellious"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_unstable"))
+                    CostPerMonth = CostPerMonth - settings.QuirkTier["pilot_unstable"] * settings.CostAdjustment * (__result);
+
                 if (CostPerMonth < 0)
                     CostPerMonth = 0;
 
                 __result = (int)CostPerMonth;
 
-                if (def.PilotTags.Contains("pilot_wealthy"))
-                {
-                    __result = (int)(__result + settings.pilot_wealthy_CostFactor * __result);
-                }
+                //Global change in value after other quirks applied
 
                 if (def.PilotTags.Contains("pilot_noble"))
-                {
-                    __result = (int)(__result + settings.pilot_noble_IncreasedCost * __result);
-                }
+                    __result *= (int)(settings.pilot_noble_IncreasedCost);
 
+                if (def.PilotTags.Contains("pilot_wealthy"))
+                    __result = (int)(__result - settings.pilot_wealthy_CostFactor);
             }
         }
 
@@ -842,112 +832,103 @@ namespace Pilot_Quirks
             public static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
             {
                 float CostPerMonth = __result;
-                if (def.PilotTags.Contains("pilot_tech"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_dependable"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_merchant"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_brave"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
+
+                //Increased cost
+
                 if (def.PilotTags.Contains("pilot_assassin"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_assassin"] * settings.CostAdjustment * (__result);
+
                 if (def.PilotTags.Contains("pilot_athletic"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_gladiator"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_lucky"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_drunk"))
-                {
-                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_lostech"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_disgraced"))
-                {
-                    CostPerMonth = CostPerMonth - (float)0.2 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_naive"))
-                {
-                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_military"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_mechwarrior"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.2 * (__result);
-                }
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_athletic"] * settings.CostAdjustment * (__result);
+
                 if (def.PilotTags.Contains("pilot_bookish"))
-                {
-                    
-                }
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_bookish"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_brave"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_brave"] * settings.CostAdjustment * (__result);
+
                 if (def.PilotTags.Contains("pilot_command"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.2 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_officer"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.3 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_unstable"))
-                {
-                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_jinxed"))
-                {
-                    CostPerMonth = CostPerMonth - (float)0.2 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_klutz"))
-                {
-                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_criminal") && !settings.RTCompatible)
-                {
-                    CostPerMonth = CostPerMonth + (float)0.1 * (__result);
-                }
-                else if (def.PilotTags.Contains("pilot_criminal"))
-                {
-                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
-                }
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_command"] * settings.CostAdjustment * (__result);
 
                 if (def.PilotTags.Contains("pilot_comstar"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.2 * (__result);
-                }
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_comstar"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_criminal") && !settings.RTCompatible)
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_criminal"] * settings.CostAdjustment * (__result);
+                else if (def.PilotTags.Contains("pilot_criminal"))
+                    CostPerMonth = CostPerMonth - settings.QuirkTier["pilot_criminal"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_dependable"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_dependable"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_gladiator"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_gladiator"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_honest"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_honest"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_lostech"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_lostech"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_lucky"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_lucky"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_mechwarrior"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_mechwarrior"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_merchant"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_merchant"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_military"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_military"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_officer"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_officer"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_spacer"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_spacer"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_tech"))
+                    CostPerMonth = CostPerMonth + settings.QuirkTier["pilot_tech"] * settings.CostAdjustment * (__result);
+
+                //Decreased cost
+
+                if (def.PilotTags.Contains("pilot_disgraced"))
+                    CostPerMonth = CostPerMonth - settings.QuirkTier["pilot_disgraced"] * settings.CostAdjustment * (__result);
+
                 if (def.PilotTags.Contains("pilot_dishonest"))
-                {
-                    CostPerMonth = CostPerMonth - (float)0.1 * (__result);
-                }
-                if (def.PilotTags.Contains("pilot_noble"))
-                {
-                    CostPerMonth = CostPerMonth + (float)0.5 * (__result);
-                }
+                    CostPerMonth = CostPerMonth - settings.QuirkTier["pilot_dishonest"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_drunk"))
+                    CostPerMonth = CostPerMonth - settings.QuirkTier["pilot_drunk"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_jinxed"))
+                    CostPerMonth = CostPerMonth - settings.QuirkTier["pilot_jinxed"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_klutz"))
+                    CostPerMonth = CostPerMonth - settings.QuirkTier["pilot_klutz"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_naive"))
+                    CostPerMonth = CostPerMonth - settings.QuirkTier["pilot_naive"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_rebellious"))
+                    CostPerMonth = CostPerMonth - settings.QuirkTier["pilot_rebellious"] * settings.CostAdjustment * (__result);
+
+                if (def.PilotTags.Contains("pilot_unstable"))
+                    CostPerMonth = CostPerMonth - settings.QuirkTier["pilot_unstable"] * settings.CostAdjustment * (__result);
+
                 if (CostPerMonth < 0)
                     CostPerMonth = 0;
 
-
                 __result = (int)CostPerMonth;
+
+                //Global change in value after other quirks applied
+
+                if (def.PilotTags.Contains("pilot_noble"))
+                    __result *= (int)(settings.pilot_noble_IncreasedCost);
+
+                if (def.PilotTags.Contains("pilot_wealthy"))
+                    __result *= (int)(settings.pilot_wealthy_CostFactor);
             }
         }
 
@@ -1218,6 +1199,9 @@ namespace Pilot_Quirks
 
         internal class ModSettings
         {
+            public float CostAdjustment = 1.0f;
+            public Dictionary<string, float> QuirkTier = new Dictionary<string, float>();
+
             public int pilot_tech_TechBonus = 100;
             public bool pilot_tech_vanillaTech = false;
             public int pilot_tech_TechsNeeded = 3;
@@ -1233,6 +1217,7 @@ namespace Pilot_Quirks
             public int pilot_jinxed_ToBeHitBonus = -1;
 
             public int pilot_drunk_ToHitBonus = 1;
+            public int pilot_drunk_EP_Loss = 1;
             public int pilot_lostech_ToHitBonus = -1;
             public float pilot_naive_LessExperience = 0.1f;
             public float pilot_noble_IncreasedCost = 0.5f;
