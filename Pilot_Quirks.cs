@@ -347,6 +347,8 @@ namespace Pilot_Quirks
                             {
                                 pilot.pilotDef.PilotTags.Add(potentialTags[0]);
                                 pilot.pilotDef.PilotTags.Add("PQ_Quirk1_Added");
+                                if (potentialTags[0] == "pilot_tech" && !settings.pilot_tech_vanillaTech)
+                                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
                             }
                         }
                         Roll = rng.Next(0, 100);
@@ -357,6 +359,8 @@ namespace Pilot_Quirks
                             {
                                 pilot.pilotDef.PilotTags.Add(potentialTags[0]);
                                 pilot.pilotDef.PilotTags.Add("PQ_Quirk2_Added");
+                                if (potentialTags[0] == "pilot_tech" && !settings.pilot_tech_vanillaTech)
+                                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
                             }
                         }
                     }
