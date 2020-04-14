@@ -286,6 +286,33 @@ namespace Pilot_Quirks
         {
             public static void Postfix(SimGameState __instance)
             {
+                List<string> potentialTags = new List<string>();
+                bool hasTM1 = false;
+                bool hasTM3 = false;
+
+                if (settings.ArgoUpgradesAddQuirks && __instance.DayRemainingInQuarter == 30)
+                {
+                    if (__instance.shipUpgrades.Any(u => u.Tags.Any(t => t.Contains("argoUpgrade_rec_gym"))))
+                        potentialTags.Add("pilot_athletic");
+                    if (__instance.shipUpgrades.Any(u => u.Tags.Any(t => t.Contains("argoUpgrade_rec_library1"))))
+                    {
+                        potentialTags.Add("pilot_tech");
+                        potentialTags.Add("pilot_merchant");
+                    }
+                    if (__instance.shipUpgrades.Any(u => u.Tags.Any(t => t.Contains("argoUpgrade_rec_library2"))))
+                        potentialTags.Add("pilot_lostech");
+                    if (__instance.shipUpgrades.Any(u => u.Tags.Any(t => t.Contains("argoUpgrade_trainingModule1"))))
+                        hasTM1 = true;
+                    if (__instance.shipUpgrades.Any(u => u.Tags.Any(t => t.Contains("argoUpgrade_trainingModule2"))))
+                    {
+                        potentialTags.Add("pilot_dependable");
+                        potentialTags.Add("pilot_brave");
+                    }
+                    if (__instance.shipUpgrades.Any(u => u.Tags.Any(t => t.Contains("argoUpgrade_trainingModule3"))))
+                        hasTM3 = true;
+                }
+
+
                 foreach (Pilot pilot in __instance.PilotRoster)
                 {
                     var rng = new System.Random();
@@ -309,7 +336,36 @@ namespace Pilot_Quirks
                         }
                     }
 
+                    //Section for adding quirks due to Argo Upgrades.
+                    if (settings.ArgoUpgradesAddQuirks && __instance.DayRemainingInQuarter == 30)
+                    {
+                        Roll = rng.Next(0, 100);
+                        if (!pilot.pilotDef.PilotTags.Contains("PQ_Quirk1_Added") && hasTM1 && potentialTags.Count() != 0 && Roll == 0)
+                        {
+                            potentialTags.Shuffle();
+                            if (!pilot.pilotDef.PilotTags.Contains(potentialTags[0]))
+                            {
+                                pilot.pilotDef.PilotTags.Add(potentialTags[0]);
+                                pilot.pilotDef.PilotTags.Add("PQ_Quirk1_Added");
+                            }
+                        }
+                        Roll = rng.Next(0, 100);
+                        if (!pilot.pilotDef.PilotTags.Contains("PQ_Quirk2_Added") && hasTM3 && potentialTags.Count() != 0 && Roll == 0)
+                        {
+                            potentialTags.Shuffle();
+                            if (!pilot.pilotDef.PilotTags.Contains(potentialTags[0]))
+                            {
+                                pilot.pilotDef.PilotTags.Add(potentialTags[0]);
+                                pilot.pilotDef.PilotTags.Add("PQ_Quirk2_Added");
+                            }
+                        }
+                    }
+
                 }
+
+
+
+
                 if (settings.RTCompatible)
                 {
                     bool honest = false;
@@ -1202,6 +1258,7 @@ namespace Pilot_Quirks
             public float CostAdjustment = 1.0f;
             public Dictionary<string, float> QuirkTier = new Dictionary<string, float>();
 
+            public bool ArgoUpgradesAddQuirks = false;
             public int pilot_tech_TechBonus = 100;
             public bool pilot_tech_vanillaTech = false;
             public int pilot_tech_TechsNeeded = 3;
