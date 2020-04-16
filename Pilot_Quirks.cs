@@ -879,10 +879,10 @@ namespace Pilot_Quirks
                 //Global change in value after other quirks applied
 
                 if (def.PilotTags.Contains("pilot_noble"))
-                    __result *= (int)(settings.pilot_noble_IncreasedCost);
+                    __result += (int)(__result * (settings.pilot_noble_IncreasedCost - 1));
 
                 if (def.PilotTags.Contains("pilot_wealthy"))
-                    __result = (int)(__result - settings.pilot_wealthy_CostFactor);
+                    __result -= (int)(__result * (1 - settings.pilot_wealthy_CostFactor));
             }
         }
 
@@ -985,10 +985,10 @@ namespace Pilot_Quirks
                 //Global change in value after other quirks applied
 
                 if (def.PilotTags.Contains("pilot_noble"))
-                    __result *= (int)(settings.pilot_noble_IncreasedCost);
+                    __result += (int)(__result * (settings.pilot_noble_IncreasedCost - 1));
 
                 if (def.PilotTags.Contains("pilot_wealthy"))
-                    __result *= (int)(settings.pilot_wealthy_CostFactor);
+                    __result -= (int)(__result * (1 - settings.pilot_wealthy_CostFactor));
             }
         }
 
