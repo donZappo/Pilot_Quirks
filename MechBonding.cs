@@ -47,193 +47,31 @@ namespace Pilot_Quirks
                         pilot.PilotTags.Add(PilotTattoo);
                         PQ_GUID++;
                         
-                        // Add training in a Chameleon if Inner sphere
-                        //if (pilot.PilotTags.Contains("pilot_davion") ||
-                        //    pilot.PilotTags.Contains("pilot_liao") ||
-                        //    pilot.PilotTags.Contains("pilot_kurita") ||
-                        //    pilot.PilotTags.Contains("pilot_steiner") ||
-                        //    pilot.PilotTags.Contains("pilot_marik"))
-                        //{
-                        //    int trainingDrops = UnityEngine.Random.Range(0, 4);
-                        //    if (trainingDrops > drops)
-                        //    {
-                        //        trainingDrops = drops;
-                        //    }
-                        //    if (trainingDrops > 0)
-                        //    {
-                        //        if (!PilotsAndMechs.Keys.Contains(PilotTattoo))
-                        //        {
-                        //            Dictionary<string, int> tempD = new Dictionary<string, int>();
-                        //            tempD.Add("Light Mech", trainingDrops);
-                        //            PilotsAndMechs.Add(PilotTattoo, tempD);
-                        //            drops -= trainingDrops;
-                        //        }
-                        //    }
-                        //}
-                        
                         if (drops > 0)
                         {
-                            int thisDrops1 = UnityEngine.Random.Range(1, drops);
-                            int thisDrops2 = 0;
-                            int thisDrops3 = 0;
+                            int thisDrops1 = UnityEngine.Random.Range(0, drops);
 
-                            drops -= thisDrops1;
-                            if (drops > 0)
+                            var rand = new System.Random();
+                            if (!PilotsAndMechs.Keys.Contains(PilotTattoo))
                             {
-                                thisDrops2 = UnityEngine.Random.Range(1, drops);
-                                drops -= thisDrops2;
+                                Dictionary<string, int> tempD = new Dictionary<string, int>();
+                                tempD.Add("LIGHT", 0);
+                                tempD.Add("MEDIUM", 0);
+                                tempD.Add("HEAVY", 0);
+                                tempD.Add("ASSAULT", 0);
+                                PilotsAndMechs.Add(PilotTattoo, tempD);
                             }
-                            if (drops > 0)
+                            for (int i = 0; i < thisDrops1; i++)
                             {
-                                thisDrops3 = drops;
-                            }
-                            
-                            List<string> includes = new List<string>();
-                            List<string> excludes = new List<string>();
-
-                            string team = "";
-
-                            if (pilot.PilotTags.Contains("pilot_davion"))
-                            {
-                                team = "Davion";
-                            }
-                            else if (pilot.PilotTags.Contains("pilot_kurita"))
-                            {
-                                team = "Kurita";
-                            }
-                            else if (pilot.PilotTags.Contains("pilot_liao"))
-                            {
-                                team = "Liao";
-                            }
-                            else if (pilot.PilotTags.Contains("pilot_marik"))
-                            {
-                                team = "Marik";
-                            }
-                            else if (pilot.PilotTags.Contains("pilot_steiner"))
-                            {
-                                team = "Steiner";
-                            }
-                            else
-                            {
-                                team = "AuriganMercenaries";
-                            }
-                            
-                            includes.Add("unit_mech");
-
-                            excludes.Add($"unit_very_rare_{team}");
-                            excludes.Add($"unit_ext_rare_{team}");
-                            excludes.Add($"unit_none_{team}");
-                            excludes.Add($"unit_hero_{team}");
-                            excludes.Add("unit_LosTech");
-                            excludes.Add("unit_era_2900");
-                            excludes.Add("unit_clan");
-                            if (drops < 20)
-                            {
-                                excludes.Add("unit_assault");
-                            }
-                            if (drops < 10)
-                            {
-                                excludes.Add("unit_heavy");
-                            }
-                            
-                            TagSet unitTagSet = new TagSet(includes);
-                            TagSet unitExcludedTagSet = new TagSet(excludes);
-
-                            DataManager dm = __instance.Sim.DataManager;
-                            List<UnitDef_MDD> list = MetadataDatabase.Instance.GetMatchingUnitDefs(unitTagSet, unitExcludedTagSet, true, __instance.Sim.CurrentDate, __instance.Sim.CompanyTags);
-                            
-                            string mechName = "";
-                            if (list.Count > 0)
-                            {
-                                list.Shuffle<UnitDef_MDD>();
-                                mechName = dm.MechDefs.Get(list[0].UnitDefID).Chassis.Description.UIName;
-                                if (!PilotsAndMechs.Keys.Contains(PilotTattoo))
-                                {
-                                    Dictionary<string, int> tempD = new Dictionary<string, int>();
-                                    tempD.Add(mechName, thisDrops3);
-                                    PilotsAndMechs.Add(PilotTattoo, tempD);
-                                }
-                                else if (PilotsAndMechs[PilotTattoo].ContainsKey(mechName))
-                                {
-                                    PilotsAndMechs[PilotTattoo][mechName] += thisDrops3;
-                                }
+                                var chance = rand.NextDouble();
+                                if (chance < 0.5)
+                                    PilotsAndMechs[PilotTattoo]["LIGHT"]++;
+                                else if (chance < 0.75)
+                                    PilotsAndMechs[PilotTattoo]["MEDIUM"]++;
+                                else if (chance < 0.90)
+                                    PilotsAndMechs[PilotTattoo]["HEAVY"]++;
                                 else
-                                {
-                                    PilotsAndMechs[PilotTattoo].Add(mechName, thisDrops3);
-                                }
-                            }
-                            else
-                            {
-                                if (!PilotsAndMechs.Keys.Contains(PilotTattoo))
-                                {
-                                    Dictionary<string, int> tempD = new Dictionary<string, int>();
-                                    tempD.Add("Griffin", thisDrops3);
-                                    PilotsAndMechs.Add(PilotTattoo, tempD);
-                                }
-                                else if (PilotsAndMechs[PilotTattoo].ContainsKey("Griffin"))
-                                {
-                                    PilotsAndMechs[PilotTattoo]["Griffin"] += thisDrops3;
-                                }
-                                else
-                                {
-                                    PilotsAndMechs[PilotTattoo].Add("Griffin", thisDrops3);
-                                }
-                            }
-                            
-                            excludes.Add($"unit_rare_{team}");
-                            list = MetadataDatabase.Instance.GetMatchingUnitDefs(unitTagSet, unitExcludedTagSet, true, __instance.Sim.CurrentDate, __instance.Sim.CompanyTags);
-
-                            if (list.Count > 0)
-                            {
-                                list.Shuffle<UnitDef_MDD>();
-                                mechName = dm.MechDefs.Get(list[0].UnitDefID).Chassis.Description.UIName;
-                                if (PilotsAndMechs[PilotTattoo].ContainsKey(mechName))
-                                {
-                                    PilotsAndMechs[PilotTattoo][mechName] += thisDrops2;
-                                }
-                                else
-                                {
-                                    PilotsAndMechs[PilotTattoo].Add(mechName, thisDrops2);
-                                }
-                            }
-                            else
-                            {
-                                if (PilotsAndMechs[PilotTattoo].ContainsKey("Griffin"))
-                                {
-                                    PilotsAndMechs[PilotTattoo]["Griffin"] += thisDrops2;
-                                }
-                                else
-                                {
-                                    PilotsAndMechs[PilotTattoo].Add("Griffin", thisDrops2);
-                                }
-                            }
-
-                            excludes.Add($"unit_uncommon_{team}");
-                            list = MetadataDatabase.Instance.GetMatchingUnitDefs(unitTagSet, unitExcludedTagSet, true, __instance.Sim.CurrentDate, __instance.Sim.CompanyTags);
-
-                            if (list.Count > 0)
-                            {
-                                list.Shuffle<UnitDef_MDD>();
-                                mechName = dm.MechDefs.Get(list[0].UnitDefID).Chassis.Description.UIName;
-                                if (PilotsAndMechs[PilotTattoo].ContainsKey(mechName))
-                                {
-                                    PilotsAndMechs[PilotTattoo][mechName] += thisDrops1;
-                                }
-                                else
-                                {
-                                    PilotsAndMechs[PilotTattoo].Add(mechName, thisDrops1);
-                                }
-                            }
-                            else
-                            {
-                                if (PilotsAndMechs[PilotTattoo].ContainsKey("Griffin"))
-                                {
-                                    PilotsAndMechs[PilotTattoo]["Griffin"] += thisDrops1;
-                                }
-                                else
-                                {
-                                    PilotsAndMechs[PilotTattoo].Add("Griffin", thisDrops1);
-                                }
+                                    PilotsAndMechs[PilotTattoo]["ASSAULT"]++;
                             }
                         }
                     }
@@ -424,13 +262,13 @@ namespace Pilot_Quirks
 
                             if (TopThreeMechs.Contains(ourMech.MechDef.Chassis.weightClass.ToString()))
                             {
-                                if (MechExperience[ourMech.MechDef.Chassis.Description.UIName] >= Pre_Control.settings.Tier1)
+                                if (MechExperience[ourMech.MechDef.Chassis.weightClass.ToString()] >= Pre_Control.settings.Tier1)
                                     pilot.pilotDef.PilotTags.Add("PQ_pilot_green");
-                                if (MechExperience[ourMech.MechDef.Chassis.Description.UIName] >= Pre_Control.settings.Tier2)
+                                if (MechExperience[ourMech.MechDef.Chassis.weightClass.ToString()] >= Pre_Control.settings.Tier2)
                                     pilot.pilotDef.PilotTags.Add("PQ_pilot_regular");
-                                if (MechExperience[ourMech.MechDef.Chassis.Description.UIName] >= Pre_Control.settings.Tier3)
+                                if (MechExperience[ourMech.MechDef.Chassis.weightClass.ToString()] >= Pre_Control.settings.Tier3)
                                     pilot.pilotDef.PilotTags.Add("PQ_pilot_veteran");
-                                if (MechExperience[ourMech.MechDef.Chassis.Description.UIName] >= Pre_Control.settings.Tier4)
+                                if (MechExperience[ourMech.MechDef.Chassis.weightClass.ToString()] >= Pre_Control.settings.Tier4)
                                     pilot.pilotDef.PilotTags.Add("PQ_pilot_elite");
                             }
                         }

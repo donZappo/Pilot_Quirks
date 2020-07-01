@@ -164,8 +164,7 @@ namespace Pilot_Quirks
             string TierOneString = "\n• Reduced Fatigue\n\t(";
             string TierTwoString = "\n• +1 Piloting Skill\n\t(";
             string TierThreeString = "\n• +1 Gunnery Skill\n\t(";
-            string TierFourString = "" +
-                "";
+            string TierFourString = "";
             bool TierOne = false;
             bool TierTwo = false;
             bool TierThree = false;
@@ -175,22 +174,22 @@ namespace Pilot_Quirks
             {
                 if (MechExperience[BondedMech.Key] >= Pre_Control.settings.Tier1)
                 {
-                    TierOneString += BondedMech.Key + ", ";
+                    TierOneString += char.ToUpper((BondedMech.Key.ToLowerInvariant()[0])) + ", ";
                     TierOne = true;
                 }
                 if (MechExperience[BondedMech.Key] >= Pre_Control.settings.Tier2)
                 {
-                    TierTwoString += BondedMech.Key + ", ";
+                    TierTwoString += char.ToUpper((BondedMech.Key.ToLowerInvariant()[0])) + ", ";
                     TierTwo = true;
                 }
                 if (MechExperience[BondedMech.Key] >= Pre_Control.settings.Tier3)
                 {
-                    TierThreeString += BondedMech.Key + ", ";
+                    TierThreeString += char.ToUpper((BondedMech.Key.ToLowerInvariant()[0])) + ", ";
                     TierThree = true;
                 }
                 if (MechExperience[BondedMech.Key] >= Pre_Control.settings.Tier4)
                 {
-                    var weightClass = BondedMech.Key;
+                    var weightClass = char.ToUpper((BondedMech.Key.ToLowerInvariant()[0])).ToString();
                     if (weightClass == "LIGHT")
                         TierFourString += "\n• Light 'Mechs Have Damage Reduction\n\t(";
                     if (weightClass == "MEDIUM")
@@ -199,7 +198,7 @@ namespace Pilot_Quirks
                         TierFourString += "\n• Heavy 'Mechs Ignore Rough Terrain\n\t(";
                     if (weightClass == "ASSAULT")
                         TierFourString += "\n• Assault 'Mechs Have Pilot Protection\n\t(";
-                    TierFourString += BondedMech.Key + ", ";
+                    TierFourString += char.ToUpper((BondedMech.Key.ToLowerInvariant()[0])).ToString() + ", ";
                     TierFour = true;
                 }
                 h++;
@@ -239,7 +238,7 @@ namespace Pilot_Quirks
             int i = 0;
             foreach (var MechXP in MechExperience.OrderByDescending(x => x.Value))
             {
-                TagDesc += MechXP.Key + ": " + MechXP.Value + ", ";
+                TagDesc += char.ToUpper(MechXP.Key.ToLowerInvariant()[0]) + ": " + MechXP.Value + ", ";
                 i++;
                 if (i == 3) break;
             }
