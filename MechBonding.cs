@@ -73,6 +73,14 @@ namespace Pilot_Quirks
                                 else
                                     PilotsAndMechs[PilotTattoo]["ASSAULT"]++;
                             }
+                            if (Pre_Control.settings.MechBondingTesting)
+                            {
+                                PilotsAndMechs[PilotTattoo]["LIGHT"] = 100;
+                                PilotsAndMechs[PilotTattoo]["MEDIUM"] = 100;
+                                PilotsAndMechs[PilotTattoo]["HEAVY"] = 100;
+                                PilotsAndMechs[PilotTattoo]["ASSAULT"] = 100;
+                            }
+
                         }
                     }
                 }
@@ -299,7 +307,7 @@ namespace Pilot_Quirks
         }
 
         //Heavy mech mastery allows for non-hindered movement.
-        [HarmonyPatch(typeof(PathNodeGrid), "GetTerrainCost")]
+        [HarmonyPatch(typeof(PathNodeGrid), "GetTerrainCost", typeof(MapTerrainDataCell), typeof(AbstractActor), typeof(MoveType))]
         public static class PathNodeGrid_GetTerrainCost_Patches
         {
             public static void Postfix(PathNodeGrid __instance, MapTerrainDataCell cell, AbstractActor unit, MoveType moveType, ref float __result)

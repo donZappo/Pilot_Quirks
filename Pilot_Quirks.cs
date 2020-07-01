@@ -1308,6 +1308,7 @@ namespace Pilot_Quirks
             public bool IsSaveGame = false;
             public bool RTCompatible = false;
             public bool MechBonding = true;
+            public bool MechBondingTesting = false;
 
             //Tiers for Mech Mastery.
             public int Tier1 = 5;

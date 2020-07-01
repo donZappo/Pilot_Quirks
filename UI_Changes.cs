@@ -191,14 +191,13 @@ namespace Pilot_Quirks
                 {
                     var weightClass = BondedMech.Key;
                     if (weightClass == "LIGHT")
-                        TierFourString += "\n• Light 'Mechs Have Damage Reduction\n\t(";
+                        TierFourString += "\n• Light 'Mechs Have Damage Reduction";
                     if (weightClass == "MEDIUM")
-                        TierFourString += "\n• Medium 'Mechs Move After Melee\n\t(";
+                        TierFourString += "\n• Medium 'Mechs Move After Melee";
                     if (weightClass == "HEAVY")
-                        TierFourString += "\n• Heavy 'Mechs Ignore Rough Terrain\n\t(";
+                        TierFourString += "\n• Heavy 'Mechs Ignore Rough Terrain";
                     if (weightClass == "ASSAULT")
-                        TierFourString += "\n• Assault 'Mechs Have Pilot Protection\n\t(";
-                    TierFourString += BondedMech.Key + ", ";
+                        TierFourString += "\n• Assault 'Mechs Have Pilot Protection";
                     TierFour = true;
                 }
                 h++;
@@ -211,7 +210,7 @@ namespace Pilot_Quirks
             if (TierOne)
             {
                 TagDesc += "<b>'Mech Mastery:</b> Bonuses when piloting 'Mechs.";
-                TierOneString = TierOneString.TrimEnd(charsToTrim) + ")";
+                TierOneString = TierOneString.TrimEnd(charsToTrim);
                 TagDesc += TierOneString;
             }
             else
@@ -220,17 +219,17 @@ namespace Pilot_Quirks
             }
             if (TierTwo)
             {
-                TierTwoString = TierTwoString.TrimEnd(charsToTrim) + ")";
+                TierTwoString = TierTwoString.TrimEnd(charsToTrim);
                 TagDesc += TierTwoString;
             }
             if (TierThree)
             {
-                TierThreeString = TierThreeString.TrimEnd(charsToTrim) + ")";
+                TierThreeString = TierThreeString.TrimEnd(charsToTrim);
                 TagDesc += TierThreeString;
             }
             if (TierFour)
             {
-                TierFourString = TierFourString.TrimEnd(charsToTrim) + ")";
+                TierFourString = TierFourString.TrimEnd(charsToTrim);
                 TagDesc += TierFourString;
             }
 
