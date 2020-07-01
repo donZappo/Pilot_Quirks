@@ -48,28 +48,28 @@ namespace Pilot_Quirks
                         PQ_GUID++;
                         
                         // Add training in a Chameleon if Inner sphere
-                        if (pilot.PilotTags.Contains("pilot_davion") ||
-                            pilot.PilotTags.Contains("pilot_liao") ||
-                            pilot.PilotTags.Contains("pilot_kurita") ||
-                            pilot.PilotTags.Contains("pilot_steiner") ||
-                            pilot.PilotTags.Contains("pilot_marik"))
-                        {
-                            int trainingDrops = UnityEngine.Random.Range(0, 4);
-                            if (trainingDrops > drops)
-                            {
-                                trainingDrops = drops;
-                            }
-                            if (trainingDrops > 0)
-                            {
-                                if (!PilotsAndMechs.Keys.Contains(PilotTattoo))
-                                {
-                                    Dictionary<string, int> tempD = new Dictionary<string, int>();
-                                    tempD.Add("Chameleon", trainingDrops);
-                                    PilotsAndMechs.Add(PilotTattoo, tempD);
-                                    drops -= trainingDrops;
-                                }
-                            }
-                        }
+                        //if (pilot.PilotTags.Contains("pilot_davion") ||
+                        //    pilot.PilotTags.Contains("pilot_liao") ||
+                        //    pilot.PilotTags.Contains("pilot_kurita") ||
+                        //    pilot.PilotTags.Contains("pilot_steiner") ||
+                        //    pilot.PilotTags.Contains("pilot_marik"))
+                        //{
+                        //    int trainingDrops = UnityEngine.Random.Range(0, 4);
+                        //    if (trainingDrops > drops)
+                        //    {
+                        //        trainingDrops = drops;
+                        //    }
+                        //    if (trainingDrops > 0)
+                        //    {
+                        //        if (!PilotsAndMechs.Keys.Contains(PilotTattoo))
+                        //        {
+                        //            Dictionary<string, int> tempD = new Dictionary<string, int>();
+                        //            tempD.Add("Light Mech", trainingDrops);
+                        //            PilotsAndMechs.Add(PilotTattoo, tempD);
+                        //            drops -= trainingDrops;
+                        //        }
+                        //    }
+                        //}
                         
                         if (drops > 0)
                         {
@@ -336,38 +336,38 @@ namespace Pilot_Quirks
                 if (!Pre_Control.settings.MechBonding)
                     return;
 
-                if (__instance.pilotDef.PilotTags.Contains("PQ_pilot_elite"))
+                if (__instance.pilotDef.PilotTags.Contains("PQ_pilot_veteran"))
                     __result += 1;
             }
         }
 
-        [HarmonyPatch(typeof(LineOfSight), "GetAllSensorRangeAbsolutes")]
-        public static class LineOfSight_GetAllSensorRangeAbsolutes_Patch
-        {
-            public static void Postfix(AbstractActor source, ref float __result)
-            {
-                if (!Pre_Control.settings.MechBonding)
-                    return;
+        //[HarmonyPatch(typeof(LineOfSight), "GetAllSensorRangeAbsolutes")]
+        //public static class LineOfSight_GetAllSensorRangeAbsolutes_Patch
+        //{
+        //    public static void Postfix(AbstractActor source, ref float __result)
+        //    {
+        //        if (!Pre_Control.settings.MechBonding)
+        //            return;
 
-                Pilot pilot = source.GetPilot();
-                if (pilot.pilotDef.PilotTags.Contains("PQ_pilot_veteran"))
-                    __result += pilot.Tactics * 5;
-            }
-        }
+        //        Pilot pilot = source.GetPilot();
+        //        if (pilot.pilotDef.PilotTags.Contains("PQ_pilot_veteran"))
+        //            __result += pilot.Tactics * 5;
+        //    }
+        //}
 
-        [HarmonyPatch(typeof(LineOfSight), "GetAllSpotterAbsolutes")]
-        public static class LineOfSight_GetAllSpotterAbsolutes_Patch
-        {
-            public static void Postfix(AbstractActor source, ref float __result)
-            {
-                if (!Pre_Control.settings.MechBonding)
-                    return;
+        //[HarmonyPatch(typeof(LineOfSight), "GetAllSpotterAbsolutes")]
+        //public static class LineOfSight_GetAllSpotterAbsolutes_Patch
+        //{
+        //    public static void Postfix(AbstractActor source, ref float __result)
+        //    {
+        //        if (!Pre_Control.settings.MechBonding)
+        //            return;
 
-                Pilot pilot = source.GetPilot();
-                if (pilot.pilotDef.PilotTags.Contains("PQ_pilot_veteran"))
-                    __result += pilot.Tactics * 5;
-            }
-        }
+        //        Pilot pilot = source.GetPilot();
+        //        if (pilot.pilotDef.PilotTags.Contains("PQ_pilot_veteran"))
+        //            __result += pilot.Tactics * 5;
+        //    }
+        //}
 
         //Track how many times the pilots drop with each 'Mech. 
         [HarmonyPatch(typeof(CombatHUDMWStatus), "InitForPilot")]
@@ -399,13 +399,13 @@ namespace Pilot_Quirks
                         if (!PilotsAndMechs.Keys.Contains(PilotTattoo))
                         {
                             Dictionary<string, int> tempD = new Dictionary<string, int>();
-                            tempD.Add(ourMech.MechDef.Chassis.Description.UIName, 1);
+                            tempD.Add(ourMech.MechDef.Chassis.weightClass.ToString(), 1);
                             PilotsAndMechs.Add(PilotTattoo, tempD);
                         }
-                        else if (!PilotsAndMechs[PilotTattoo].Keys.Contains(ourMech.MechDef.Chassis.Description.UIName))
-                            PilotsAndMechs[PilotTattoo].Add(ourMech.MechDef.Chassis.Description.UIName, 1);
+                        else if (!PilotsAndMechs[PilotTattoo].Keys.Contains(ourMech.MechDef.Chassis.weightClass.ToString()))
+                            PilotsAndMechs[PilotTattoo].Add(ourMech.MechDef.Chassis.weightClass.ToString(), 1);
                         else
-                            PilotsAndMechs[PilotTattoo][ourMech.MechDef.Chassis.Description.UIName] += 1;
+                            PilotsAndMechs[PilotTattoo][ourMech.MechDef.Chassis.weightClass.ToString()] += 1;
 
 
                         //Add tags based upon 'Mech experience for the pilot.
@@ -422,7 +422,7 @@ namespace Pilot_Quirks
                                     break;
                             }
 
-                            if (TopThreeMechs.Contains(ourMech.MechDef.Chassis.Description.UIName))
+                            if (TopThreeMechs.Contains(ourMech.MechDef.Chassis.weightClass.ToString()))
                             {
                                 if (MechExperience[ourMech.MechDef.Chassis.Description.UIName] >= Pre_Control.settings.Tier1)
                                     pilot.pilotDef.PilotTags.Add("PQ_pilot_green");

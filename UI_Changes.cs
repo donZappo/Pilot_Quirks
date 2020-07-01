@@ -163,8 +163,9 @@ namespace Pilot_Quirks
            
             string TierOneString = "\n• Reduced Fatigue\n\t(";
             string TierTwoString = "\n• +1 Piloting Skill\n\t(";
-            string TierThreeString = "\n• Increased Sensor and Spotting Range\n\t(";
-            string TierFourString = "\n• +1 Gunnery Skill\n\t(";
+            string TierThreeString = "\n• +1 Gunnery Skill\n\t(";
+            string TierFourString = "" +
+                "";
             bool TierOne = false;
             bool TierTwo = false;
             bool TierThree = false;
@@ -189,6 +190,15 @@ namespace Pilot_Quirks
                 }
                 if (MechExperience[BondedMech.Key] >= Pre_Control.settings.Tier4)
                 {
+                    var weightClass = BondedMech.Key;
+                    if (weightClass == "LIGHT")
+                        TierFourString += "\n• Light 'Mechs Have Damage Reduction\n\t(";
+                    if (weightClass == "MEDIUM")
+                        TierFourString += "\n• Medium 'Mechs Move After Melee\n\t(";
+                    if (weightClass == "HEAVY")
+                        TierFourString += "\n• Heavy 'Mechs Ignore Rough Terrain\n\t(";
+                    if (weightClass == "ASSAULT")
+                        TierFourString += "\n• Assault 'Mechs Have Pilot Protection\n\t(";
                     TierFourString += BondedMech.Key + ", ";
                     TierFour = true;
                 }
