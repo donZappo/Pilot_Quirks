@@ -210,7 +210,7 @@ namespace Pilot_Quirks
             if (TierOne)
             {
                 TagDesc += "<b>'Mech Mastery:</b> Bonuses when piloting 'Mechs.";
-                TierOneString = TierOneString.TrimEnd(charsToTrim);
+                TierOneString = TierOneString.TrimEnd(charsToTrim) + ")";
                 TagDesc += TierOneString;
             }
             else
@@ -219,12 +219,12 @@ namespace Pilot_Quirks
             }
             if (TierTwo)
             {
-                TierTwoString = TierTwoString.TrimEnd(charsToTrim);
+                TierTwoString = TierTwoString.TrimEnd(charsToTrim) + ")";
                 TagDesc += TierTwoString;
             }
             if (TierThree)
             {
-                TierThreeString = TierThreeString.TrimEnd(charsToTrim);
+                TierThreeString = TierThreeString.TrimEnd(charsToTrim) + ")";
                 TagDesc += TierThreeString;
             }
             if (TierFour)
