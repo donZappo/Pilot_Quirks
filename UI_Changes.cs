@@ -174,22 +174,22 @@ namespace Pilot_Quirks
             {
                 if (MechExperience[BondedMech.Key] >= Pre_Control.settings.Tier1)
                 {
-                    TierOneString += char.ToUpper((BondedMech.Key.ToLowerInvariant()[0])) + ", ";
+                    TierOneString += BondedMech.Key + ", ";
                     TierOne = true;
                 }
                 if (MechExperience[BondedMech.Key] >= Pre_Control.settings.Tier2)
                 {
-                    TierTwoString += char.ToUpper((BondedMech.Key.ToLowerInvariant()[0])) + ", ";
+                    TierTwoString += BondedMech.Key + ", ";
                     TierTwo = true;
                 }
                 if (MechExperience[BondedMech.Key] >= Pre_Control.settings.Tier3)
                 {
-                    TierThreeString += char.ToUpper((BondedMech.Key.ToLowerInvariant()[0])) + ", ";
+                    TierThreeString += BondedMech.Key + ", ";
                     TierThree = true;
                 }
                 if (MechExperience[BondedMech.Key] >= Pre_Control.settings.Tier4)
                 {
-                    var weightClass = char.ToUpper((BondedMech.Key.ToLowerInvariant()[0])).ToString();
+                    var weightClass = BondedMech.Key;
                     if (weightClass == "LIGHT")
                         TierFourString += "\n• Light 'Mechs Have Damage Reduction\n\t(";
                     if (weightClass == "MEDIUM")
@@ -198,7 +198,7 @@ namespace Pilot_Quirks
                         TierFourString += "\n• Heavy 'Mechs Ignore Rough Terrain\n\t(";
                     if (weightClass == "ASSAULT")
                         TierFourString += "\n• Assault 'Mechs Have Pilot Protection\n\t(";
-                    TierFourString += char.ToUpper((BondedMech.Key.ToLowerInvariant()[0])).ToString() + ", ";
+                    TierFourString += BondedMech.Key + ", ";
                     TierFour = true;
                 }
                 h++;
@@ -234,11 +234,11 @@ namespace Pilot_Quirks
                 TagDesc += TierFourString;
             }
 
-            TagDesc += "\n\nMech Experience - ";
+            TagDesc += "\n\nMech XP - ";
             int i = 0;
             foreach (var MechXP in MechExperience.OrderByDescending(x => x.Value))
             {
-                TagDesc += char.ToUpper(MechXP.Key.ToLowerInvariant()[0]) + ": " + MechXP.Value + ", ";
+                TagDesc += MechXP.Key + ": " + MechXP.Value + ", ";
                 i++;
                 if (i == 3) break;
             }
