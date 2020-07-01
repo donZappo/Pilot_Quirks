@@ -142,7 +142,8 @@ namespace Pilot_Quirks
                     unitResult.pilot.pilotDef.PilotTags.Remove("PQ_pilot_regular");
                 if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_veteran"))
                     unitResult.pilot.pilotDef.PilotTags.Remove("PQ_pilot_veteran");
-                if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_elite"))
+                if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_elite") && !(unitResult.mech.Chassis.weightClass == WeightClass.ASSAULT
+                    && unitResult.pilot.IsIncapacitated))
                     unitResult.pilot.pilotDef.PilotTags.Remove("PQ_pilot_elite");
                 if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_Pilot_MissionTattoo"))
                     unitResult.pilot.pilotDef.PilotTags.Remove("PQ_Pilot_MissionTattoo");
@@ -278,6 +279,40 @@ namespace Pilot_Quirks
                 catch (Exception e)
                 {
                     Pre_Control.Helper.Logger.LogError(e);
+                }
+            }
+        }
+
+        //Medium mech mastery allows for moving after melee.
+        [HarmonyPatch(typeof(MechMeleeSequence), "ConsumesMovement", MethodType.Getter)]
+        public static class MechMeleeSequence_ConsumesMovement_Patches
+        {
+            public static void Postfix(MechMeleeSequence __instance, ref bool __result)
+            {
+                if (__instance.owningActor.UnitType == UnitType.Mech)
+                {
+                    var mech = __instance.owningActor as Mech;
+                    if (mech.weightClass == WeightClass.MEDIUM && mech.pilot.pilotDef.PilotTags.Contains("PQ_pilot_elite"))
+                        __result = false;
+                }
+            }
+        }
+
+        //Heavy mech mastery allows for non-hindered movement.
+        [HarmonyPatch(typeof(PathNodeGrid), "GetTerrainCost")]
+        public static class PathNodeGrid_GetTerrainCost_Patches
+        {
+            public static void Postfix(PathNodeGrid __instance, MapTerrainDataCell cell, AbstractActor unit, MoveType moveType, ref float __result)
+            {
+                if (unit.UnitType == UnitType.Mech)
+                {
+                    var mech = unit as Mech;
+                    if (mech.weightClass == WeightClass.HEAVY && mech.pilot.pilotDef.PilotTags.Contains("PQ_pilot_elite"))
+                    {
+                        var gtcScratchMask = unit.Combat.MapMetaData.GetPriorityDesignMask(cell);
+                        if (__result <= 2 && __result >= 1)
+                            __result /= gtcScratchMask.moveCostMechHeavy;
+                    }
                 }
             }
         }

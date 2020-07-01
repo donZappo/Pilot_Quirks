@@ -147,6 +147,7 @@ namespace Pilot_Quirks
                     }
                 }
             }
+
             foreach (Pilot deadpilot in sim.Graveyard)
             {
                 foreach (string tag in deadpilot.pilotDef.PilotTags)
