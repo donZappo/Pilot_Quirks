@@ -291,18 +291,90 @@ namespace Pilot_Quirks
             }
         }
 
-        //Medium mech mastery allows for moving after melee.
-        [HarmonyPatch(typeof(MechMeleeSequence), "ConsumesMovement", MethodType.Getter)]
-        public static class MechMeleeSequence_ConsumesMovement_Patches
+        ////Medium mech mastery allows for moving after melee.
+        [HarmonyPatch(typeof(OrderSequence), "ConsumesActivation", MethodType.Getter)]
+        public static class OrderSequence_ConsumesActivation_Patches
         {
-            public static void Postfix(MechMeleeSequence __instance, ref bool __result)
+            public static bool Prefix(OrderSequence __instance)
+            {
+                if (__instance.owningActor.AutoBrace)
+                {
+                    return true;
+                }
+
+                if (__instance.ConsumesFiring)
+                {
+                    if (__instance.owningActor.UnitType == UnitType.Mech)
+                    {
+                        var mech = __instance.owningActor as Mech;
+                        if (mech.weightClass == WeightClass.MEDIUM && __instance.owningActor.GetPilot().pilotDef.PilotTags.Contains("PQ_pilot_elite")
+                            && !__instance.owningActor.HasMovedThisRound)
+                        {
+                            return false;
+                        }
+                    }
+
+                    if (__instance.ConsumesMovement || __instance.owningActor.HasMovedThisRound || !__instance.owningActor.CanMoveAfterShooting)
+                    {
+                        return true;
+                    }
+                }
+                else if (__instance.ConsumesMovement && __instance.owningActor.HasFiredThisRound)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        ////Medium mech mastery allows for moving after melee.
+        [HarmonyPatch(typeof(MechMeleeSequence), "setState")]
+        public static class MechMeleeSequence_setState_Patches
+        {
+            public static bool ChangeOnAdded = false;
+            public static void Postfix(MechMeleeSequence __instance)
             {
                 if (__instance.owningActor.UnitType == UnitType.Mech)
                 {
                     var mech = __instance.owningActor as Mech;
                     if (mech.weightClass == WeightClass.MEDIUM && mech.pilot.pilotDef.PilotTags.Contains("PQ_pilot_elite"))
-                        __result = false;
+                    {
+                        ChangeOnAdded = true;
+                    }
                 }
+            }
+        }
+
+        [HarmonyPatch(typeof(OrderSequence), "OnAdded")]
+        public static class OrderSequence_OnAdded_Patches
+        {
+            public static bool Prefix(OrderSequence __instance)
+            {
+                if (__instance.RootSequenceGUID == -1)
+                {
+                    __instance.RootSequenceGUID = __instance.SequenceGUID;
+                }
+
+                __instance.owningActor.OnActivationBegin(__instance.owningActor.GUID, __instance.RootSequenceGUID);
+                if (__instance.ConsumesFiring)
+                {
+                    __instance.owningActor.IsAttacking = true;
+                    if (!__instance.ConsumesMovement)
+                    {
+                        __instance.owningActor.OnFiringBegin();
+                    }
+                }
+                Logger.LogLine(MechMeleeSequence_setState_Patches.ChangeOnAdded.ToString());
+                if (__instance.ConsumesMovement && !MechMeleeSequence_setState_Patches.ChangeOnAdded)
+                {
+                    Logger.LogLine("Moved This Turn Enabled");
+                    __instance.owningActor.HasMovedThisRound = true;
+                }
+                else if (MechMeleeSequence_setState_Patches.ChangeOnAdded)
+                    __instance.owningActor.HasMovedThisRound = false;
+
+                MechMeleeSequence_setState_Patches.ChangeOnAdded = false;
+                return false;
             }
         }
 
