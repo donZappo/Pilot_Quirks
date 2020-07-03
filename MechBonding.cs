@@ -295,11 +295,11 @@ namespace Pilot_Quirks
         [HarmonyPatch(typeof(OrderSequence), "ConsumesActivation", MethodType.Getter)]
         public static class OrderSequence_ConsumesActivation_Patches
         {
-            public static bool Prefix(OrderSequence __instance)
+            public static void Postfix(OrderSequence __instance, ref bool __result)
             {
                 if (__instance.owningActor.AutoBrace)
                 {
-                    return true;
+                    __result = true;
                 }
 
                 if (__instance.ConsumesFiring)
@@ -307,23 +307,21 @@ namespace Pilot_Quirks
                     if (__instance.owningActor.UnitType == UnitType.Mech)
                     {
                         var mech = __instance.owningActor as Mech;
-                        if (mech.weightClass == WeightClass.MEDIUM && __instance.owningActor.GetPilot().pilotDef.PilotTags.Contains("PQ_pilot_elite")
-                            && !__instance.owningActor.HasMovedThisRound)
+                        if (mech.weightClass == WeightClass.MEDIUM && __instance.owningActor.GetPilot().pilotDef.PilotTags.Contains("PQ_pilot_elite"))
                         {
-                            return false;
+                            __result = false;
                         }
                     }
 
                     if (__instance.ConsumesMovement || __instance.owningActor.HasMovedThisRound || !__instance.owningActor.CanMoveAfterShooting)
                     {
-                        return true;
+                        __result = true;
                     }
                 }
                 else if (__instance.ConsumesMovement && __instance.owningActor.HasFiredThisRound)
                 {
-                    return true;
+                    __result =  true;
                 }
-                return false;
             }
         }
 
@@ -337,9 +335,11 @@ namespace Pilot_Quirks
                 if (__instance.owningActor.UnitType == UnitType.Mech)
                 {
                     var mech = __instance.owningActor as Mech;
-                    if (mech.weightClass == WeightClass.MEDIUM && mech.pilot.pilotDef.PilotTags.Contains("PQ_pilot_elite"))
+                    if (mech.weightClass == WeightClass.MEDIUM && mech.pilot.pilotDef.PilotTags.Contains("PQ_pilot_elite") &&
+                        !mech.HasMovedThisRound)
                     {
                         ChangeOnAdded = true;
+                        __instance.OrdersAreComplete = false;
                     }
                 }
             }
@@ -391,7 +391,7 @@ namespace Pilot_Quirks
                     {
                         var gtcScratchMask = unit.Combat.MapMetaData.GetPriorityDesignMask(cell);
                         if (__result <= 2 && __result >= 1)
-                            __result /= gtcScratchMask.moveCostMechHeavy;
+                            __result = 1;
                     }
                 }
             }
