@@ -191,13 +191,13 @@ namespace Pilot_Quirks
                 {
                     var weightClass = BondedMech.Key;
                     if (weightClass == "LIGHT")
-                        TierFourString += "\n• Light 'Mechs Have Damage Reduction Per Evasive Pip";
+                        TierFourString += "\n• Light 'Mechs Gain a Ghost Pip After Sprinting";
                     if (weightClass == "MEDIUM")
-                        TierFourString += "\n• Medium 'Mechs Have Bonus To-Hit Per Evasive Pip";
+                        TierFourString += "\n• Medium 'Mechs Take Reduced Damage Per Evasion Pip";
                     if (weightClass == "HEAVY")
                         TierFourString += "\n• Heavy 'Mechs Not Slowed By Rough Terrain";
                     if (weightClass == "ASSAULT")
-                        TierFourString += "\n• Assault 'Mechs Have Pilot Protection";
+                        TierFourString += "\n• Assault 'Mechs Resistant to Critical Hits";
                     TierFour = true;
                 }
                 h++;

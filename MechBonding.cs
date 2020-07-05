@@ -150,8 +150,7 @@ namespace Pilot_Quirks
                     unitResult.pilot.pilotDef.PilotTags.Remove("PQ_pilot_regular");
                 if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_veteran"))
                     unitResult.pilot.pilotDef.PilotTags.Remove("PQ_pilot_veteran");
-                if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_elite") && !(unitResult.mech.Chassis.weightClass == WeightClass.ASSAULT
-                    && unitResult.pilot.IsIncapacitated))
+                if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_pilot_elite"))
                     unitResult.pilot.pilotDef.PilotTags.Remove("PQ_pilot_elite");
                 if (unitResult.pilot.pilotDef.PilotTags.Contains("PQ_Pilot_MissionTattoo"))
                     unitResult.pilot.pilotDef.PilotTags.Remove("PQ_Pilot_MissionTattoo");
