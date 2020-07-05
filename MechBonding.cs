@@ -322,5 +322,34 @@ namespace Pilot_Quirks
                 }
             }
         }
+
+        //Light mech mastery gives a ghost pip after sprinting. 
+        [HarmonyPatch(typeof(ActorMovementSequence), "CompleteOrders")]
+        public static class AbstractActor_CompleteOrders_Patche
+        {
+            public static void Postfix(ActorMovementSequence __instance)
+            {
+                var actor = __instance.OwningActor;
+                Logger.LogLine("Sprinted");
+                if (actor.UnitType == UnitType.Mech)
+                {
+                    Logger.LogLine("Is Mech");
+                    var mech = actor as Mech;
+                    var ECMed = actor.StatCollection.GetValue<bool>("IsIndirectImmune");
+                    var currentGhost = actor.StatCollection.GetValue<int>("GhostEffectStacks");
+                    if (mech.weightClass == WeightClass.LIGHT && actor.GetPilot().pilotDef.PilotTags.Contains("PQ_pilot_elite") && actor.HasSprintedThisRound && !ECMed && currentGhost > -1)
+                    {
+                        Logger.LogLine("Is Light Mech");
+                        Logger.LogLine(currentGhost.ToString());
+                        actor.StatCollection.Set<int>("GhostEffectStacks", 1);
+                        currentGhost = actor.StatCollection.GetValue<int>("GhostEffectStacks");
+                        Logger.LogLine(currentGhost.ToString());
+                    }
+                    else if (mech.weightClass == WeightClass.LIGHT && actor.GetPilot().pilotDef.PilotTags.Contains("PQ_pilot_elite") && !ECMed)
+                        actor.StatCollection.Set<int>("GhostEffectStacks", 0);
+                }
+            }
+        }
+
     }
 }
