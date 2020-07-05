@@ -249,10 +249,24 @@ namespace Pilot_Quirks
                             tempD.Add(ourMech.MechDef.Chassis.weightClass.ToString(), 1);
                             PilotsAndMechs.Add(PilotTattoo, tempD);
                         }
-                        else if (!PilotsAndMechs[PilotTattoo].Keys.Contains(ourMech.MechDef.Chassis.weightClass.ToString()))
-                            PilotsAndMechs[PilotTattoo].Add(ourMech.MechDef.Chassis.weightClass.ToString(), 1);
-                        else
-                            PilotsAndMechs[PilotTattoo][ourMech.MechDef.Chassis.weightClass.ToString()] += 1;
+                        else 
+                        {
+                            if (!PilotsAndMechs[PilotTattoo].Keys.Contains(ourMech.MechDef.Chassis.weightClass.ToString()))
+                                PilotsAndMechs[PilotTattoo].Add(ourMech.MechDef.Chassis.weightClass.ToString(), 1);
+                            else if (PilotsAndMechs[PilotTattoo][ourMech.MechDef.Chassis.weightClass.ToString()] < Pre_Control.settings.Tier4)
+                                PilotsAndMechs[PilotTattoo][ourMech.MechDef.Chassis.weightClass.ToString()] += 1;
+                            var tempDict = new Dictionary<string, Dictionary<string, int>>(PilotsAndMechs);
+                            foreach (var mech in tempDict[PilotTattoo].Keys)
+                            {
+                                if (mech != ourMech.MechDef.Chassis.weightClass.ToString())
+                                {
+                                    PilotsAndMechs[PilotTattoo][mech]--;
+                                    if (PilotsAndMechs[PilotTattoo][mech] == 0)
+                                        PilotsAndMechs[PilotTattoo].Remove(mech);
+
+                                }
+                            }
+                        }
 
 
                         //Add tags based upon 'Mech experience for the pilot.
