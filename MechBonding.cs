@@ -252,17 +252,32 @@ namespace Pilot_Quirks
                         {
                             if (!PilotsAndMechs[PilotTattoo].Keys.Contains(ourMech.MechDef.Chassis.weightClass.ToString()))
                                 PilotsAndMechs[PilotTattoo].Add(ourMech.MechDef.Chassis.weightClass.ToString(), 1);
-                            else if (PilotsAndMechs[PilotTattoo][ourMech.MechDef.Chassis.weightClass.ToString()] < Pre_Control.settings.Tier4)
+                            else if (PilotsAndMechs[PilotTattoo][ourMech.MechDef.Chassis.weightClass.ToString()] < Pre_Control.settings.Tier4 + 10)
                                 PilotsAndMechs[PilotTattoo][ourMech.MechDef.Chassis.weightClass.ToString()] += 1;
+
+                            var sim = UnityGameInstance.BattleTechGame.Simulation;
+                            var argoUpgrades = sim.PurchasedArgoUpgrades;
+                            int minimumBonding = 0;
+                            if (argoUpgrades.Contains("argoUpgrade_trainingModule3"))
+                                minimumBonding = Pre_Control.settings.Tier3;
+                            else if (argoUpgrades.Contains("argoUpgrade_trainingModule2"))
+                                minimumBonding = Pre_Control.settings.Tier2;
+                            if (argoUpgrades.Contains("argoUpgrade_trainingModule1"))
+                                minimumBonding = Pre_Control.settings.Tier1;
+
                             var tempDict = new Dictionary<string, Dictionary<string, int>>(PilotsAndMechs);
                             foreach (var mech in tempDict[PilotTattoo].Keys)
                             {
                                 if (mech != ourMech.MechDef.Chassis.weightClass.ToString())
                                 {
-                                    PilotsAndMechs[PilotTattoo][mech]--;
-                                    if (PilotsAndMechs[PilotTattoo][mech] == 0)
-                                        PilotsAndMechs[PilotTattoo].Remove(mech);
+                                    var mechDrops = PilotsAndMechs[PilotTattoo][mech];
+                                    if (mech != "ASSAULT" || mech != "HEAVY" || mech != "MEDIUM" || mech != "LIGHT")
+                                        PilotsAndMechs[PilotTattoo][mech] = 0;
+                                    else if (mechDrops > minimumBonding)
+                                        PilotsAndMechs[PilotTattoo][mech]--;
 
+                                    if (PilotsAndMechs[PilotTattoo][mech] <= 0)
+                                        PilotsAndMechs[PilotTattoo].Remove(mech);
                                 }
                             }
                         }
@@ -278,7 +293,7 @@ namespace Pilot_Quirks
                             {
                                 TopThreeMechs.Add(mech.Key);
                                 i++;
-                                if (i == 3)
+                                if (i == 4)
                                     break;
                             }
 

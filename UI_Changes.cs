@@ -201,7 +201,7 @@ namespace Pilot_Quirks
                     TierFour = true;
                 }
                 h++;
-                if (h == 3)
+                if (h == 4)
                     break;
             }
 
@@ -239,7 +239,7 @@ namespace Pilot_Quirks
             {
                 TagDesc += MechXP.Key + ": " + MechXP.Value + ", ";
                 i++;
-                if (i == 3) break;
+                if (i == 4) break;
             }
             TagDesc = TagDesc.TrimEnd(charsToTrim);
             TagDesc = TagDesc + "\n\n";
