@@ -237,6 +237,8 @@ namespace Pilot_Quirks
             int i = 0;
             foreach (var MechXP in MechExperience.OrderByDescending(x => x.Value))
             {
+                if (MechXP.Value == 0)
+                    continue;
                 TagDesc += MechXP.Key + ": " + MechXP.Value + ", ";
                 i++;
                 if (i == 4) break;

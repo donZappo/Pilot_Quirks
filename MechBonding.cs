@@ -265,21 +265,23 @@ namespace Pilot_Quirks
                             if (argoUpgrades.Contains("argoUpgrade_trainingModule1"))
                                 minimumBonding = Pre_Control.settings.Tier1;
 
-                            var tempDict = new Dictionary<string, Dictionary<string, int>>(PilotsAndMechs);
-                            foreach (var mech in tempDict[PilotTattoo].Keys)
+                            List<string> MechRemover = new List<string>();
+                            List<string> MechDecreaser = new List<string>();
+                            foreach (var mech in PilotsAndMechs[PilotTattoo])
                             {
-                                if (mech != ourMech.MechDef.Chassis.weightClass.ToString())
+                                if (mech.Key != ourMech.MechDef.Chassis.weightClass.ToString())
                                 {
-                                    var mechDrops = PilotsAndMechs[PilotTattoo][mech];
-                                    if (mech != "ASSAULT" || mech != "HEAVY" || mech != "MEDIUM" || mech != "LIGHT")
-                                        PilotsAndMechs[PilotTattoo][mech] = 0;
+                                    var mechDrops = PilotsAndMechs[PilotTattoo][mech.Key];
+                                    if (mech.Key != "ASSAULT" && mech.Key != "HEAVY" && mech.Key != "MEDIUM" && mech.Key != "LIGHT")
+                                        MechRemover.Add(mech.Key);
                                     else if (mechDrops > minimumBonding)
-                                        PilotsAndMechs[PilotTattoo][mech]--;
-
-                                    if (PilotsAndMechs[PilotTattoo][mech] <= 0)
-                                        PilotsAndMechs[PilotTattoo].Remove(mech);
+                                        MechDecreaser.Add(mech.Key);
                                 }
                             }
+                            foreach (var foo in MechRemover)
+                                PilotsAndMechs[PilotTattoo].Remove(foo);
+                            foreach (var bar in MechDecreaser)
+                                PilotsAndMechs[PilotTattoo][bar]--;
                         }
 
 
