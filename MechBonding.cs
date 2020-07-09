@@ -281,7 +281,11 @@ namespace Pilot_Quirks
                             foreach (var foo in MechRemover)
                                 PilotsAndMechs[PilotTattoo].Remove(foo);
                             foreach (var bar in MechDecreaser)
+                            { 
                                 PilotsAndMechs[PilotTattoo][bar]--;
+                                if (PilotsAndMechs[PilotTattoo][bar] <= 0)
+                                    PilotsAndMechs[PilotTattoo].Remove(bar);
+                            }
                         }
 
 
