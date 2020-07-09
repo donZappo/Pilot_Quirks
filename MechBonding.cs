@@ -262,7 +262,7 @@ namespace Pilot_Quirks
                                 minimumBonding = Pre_Control.settings.Tier3;
                             else if (argoUpgrades.Contains("argoUpgrade_trainingModule2"))
                                 minimumBonding = Pre_Control.settings.Tier2;
-                            if (argoUpgrades.Contains("argoUpgrade_trainingModule1"))
+                            else if (argoUpgrades.Contains("argoUpgrade_trainingModule1"))
                                 minimumBonding = Pre_Control.settings.Tier1;
 
                             List<string> MechRemover = new List<string>();
@@ -287,7 +287,6 @@ namespace Pilot_Quirks
                                     PilotsAndMechs[PilotTattoo].Remove(bar);
                             }
                         }
-
 
                         //Add tags based upon 'Mech experience for the pilot.
                         List<string> TopThreeMechs = new List<string>();
