@@ -11,7 +11,6 @@ using System.Linq;
 using System.Reflection.Emit;
 using Localize;
 using Error = BestHTTP.SocketIO.Error;
-using Logger = Pilot_Quirks.Pre_Control.Helper.Logger;
 
 namespace Pilot_Quirks
 {
@@ -140,7 +139,7 @@ namespace Pilot_Quirks
                 }
                 catch (Exception e)
                 {
-                    Logger.LogError(e);
+                    Pre_Control.Log.Error(e);
                 }
             }
         }
@@ -168,7 +167,7 @@ namespace Pilot_Quirks
                 }
                 catch (Exception e)
                 {
-                    Pre_Control.Helper.Logger.LogError(e);
+                    Pre_Control.Log.Error(e);
                 }
             }
 
@@ -181,7 +180,7 @@ namespace Pilot_Quirks
                 }
                 catch (Exception e)
                 {
-                    Pre_Control.Helper.Logger.LogError(e);
+                    Pre_Control.Log.Error(e);
                 }
             }
         }
@@ -213,7 +212,7 @@ namespace Pilot_Quirks
                 }
                 catch (Exception e)
                 {
-                    Logger.LogError(e);
+                    Pre_Control.Log.Error(e);
                 }
             }
         }
@@ -250,7 +249,7 @@ namespace Pilot_Quirks
                 }
                 catch (Exception e)
                 {
-                    Logger.LogError(e);
+                    Pre_Control.Log.Error(e);
                 }
             }
             public static void Postfix(SGBarracksAdvancementPanel __instance)
@@ -319,7 +318,7 @@ namespace Pilot_Quirks
                     }
                     catch (Exception e)
                     {
-                        Logger.LogError(e);
+                        Pre_Control.Log.Error(e);
                     }
                 }
             }
@@ -391,7 +390,7 @@ namespace Pilot_Quirks
                     }
                     catch (Exception e)
                     {
-                        Logger.LogError(e);
+                        Pre_Control.Log.Error(e);
                     }
                 }
                 public static void Postfix()
@@ -472,7 +471,7 @@ namespace Pilot_Quirks
                     }
                     catch (Exception e)
                     {
-                        Logger.LogError(e);
+                        Pre_Control.Log.Error(e);
                     }
                 }
             }
@@ -497,7 +496,7 @@ namespace Pilot_Quirks
                 }
                     catch (Exception e)
                     {
-                        Pre_Control.Helper.Logger.LogError(e);
+                        Pre_Control.Log.Error(e);
                     }
                 }
             }
@@ -580,7 +579,7 @@ namespace Pilot_Quirks
                     }
                     catch (Exception e)
                     {
-                        Pre_Control.Helper.Logger.LogError(e);
+                        Pre_Control.Log.Error(e);
                     }
                 }
             }
