@@ -11,7 +11,6 @@ using System.Linq;
 using System.Reflection.Emit;
 using Localize;
 using Error = BestHTTP.SocketIO.Error;
-using Logger = Pilot_Quirks.Pre_Control.Helper.Logger;
 using HBS.Collections;
 using BattleTech.Data;
 
@@ -240,7 +239,7 @@ namespace Pilot_Quirks
                 }
                 catch (Exception e)
                 {
-                    Logger.LogError(e);
+                    Pre_Control.Log.Error(e);
                 }
 
                 //Trim out pilots that are no longer needed from the master list. 
@@ -439,7 +438,7 @@ namespace Pilot_Quirks
                 }
                 catch (Exception e)
                 {
-                    Pre_Control.Helper.Logger.LogError(e);
+                    Pre_Control.Log.Error(e);
                 }
             }
         }

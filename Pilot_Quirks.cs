@@ -19,6 +19,9 @@ namespace Pilot_Quirks
     {
         public const string ModName = "Pilot_Quirks";
         public const string ModId = "dZ.Zappo.Pilot_Quirks";
+        public const string LogName = "pilot_quirks";
+
+        public static Logger Log;
 
         internal static ModSettings settings;
         internal static string ModDirectory;
@@ -35,6 +38,10 @@ namespace Pilot_Quirks
                 settings = new ModSettings();
             }
 
+            Log = new Logger(ModDirectory, LogName);
+            Log.Debug($"ModDir is:{ModDirectory}");
+            Log.Debug($"mod.json settings are:({modSettings})");
+
             var harmony = HarmonyInstance.Create(ModId);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
@@ -45,10 +52,10 @@ namespace Pilot_Quirks
         //{
         //    public static void Postfix(SimGameState __instance)
         //    {
-        //        Helper.Logger.LogLine("Add Commander");
+        //        Logger.Debug("Add Commander");
         //        if (__instance.Commander.pilotDef.PilotTags.Contains("commander_ancestry_steiner"))
         //        {
-        //            Helper.Logger.LogLine("Tech Found");
+        //            Logger.Debug("Tech Found");
         //            __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
         //        }
         //    }
@@ -290,32 +297,42 @@ namespace Pilot_Quirks
                 bool hasTM1 = false;
                 bool hasTM3 = false;
 
-                if (settings.ArgoUpgradesAddQuirks && __instance.DayRemainingInQuarter == 30)
+                if (settings.ArgoUpgradesAddQuirks && 
+                    (__instance.DayRemainingInQuarter % Pre_Control.settings.ArgoUpgradeAddQuirksCheckIntervalDays) == 0)
                 {
-                    if (__instance.shipUpgrades.Any(u => u.Tags.Any(t => t.Contains("argoUpgrade_rec_gym"))))
+                    if (__instance.shipUpgrades.Any(u => u.Tags.Any(t => t.Contains("argo_rec_gym"))))
+                    {
                         potentialTags.Add("pilot_athletic");
-                    if (__instance.shipUpgrades.Any(u => u.Tags.Any(t => t.Contains("argoUpgrade_rec_library1"))))
+                    }
+
+                    if (__instance.shipUpgrades.Any(u => u.Tags.Any(t => t.Contains("argo_rec_library1"))))
                     {
                         potentialTags.Add("pilot_tech");
                         potentialTags.Add("pilot_merchant");
                     }
-                    if (__instance.shipUpgrades.Any(u => u.Tags.Any(t => t.Contains("argoUpgrade_rec_library2"))))
+                    if (__instance.shipUpgrades.Any(u => u.Tags.Any(t => t.Contains("argo_rec_library2"))))
+                    {
                         potentialTags.Add("pilot_lostech");
-                    if (__instance.shipUpgrades.Any(u => u.Tags.Any(t => t.Contains("argoUpgrade_trainingModule1"))))
+                    }
+
+                    if (__instance.shipUpgrades.Any(u => u.Tags.Any(t => t.Contains("argo_trainingModule1"))))
+                    {
                         hasTM1 = true;
-                    if (__instance.shipUpgrades.Any(u => u.Tags.Any(t => t.Contains("argoUpgrade_trainingModule2"))))
+                    }
+
+                    if (__instance.shipUpgrades.Any(u => u.Tags.Any(t => t.Contains("argo_trainingModule2"))))
                     {
                         potentialTags.Add("pilot_dependable");
                         potentialTags.Add("pilot_brave");
                     }
-                    if (__instance.shipUpgrades.Any(u => u.Tags.Any(t => t.Contains("argoUpgrade_trainingModule3"))))
+                    if (__instance.shipUpgrades.Any(u => u.Tags.Any(t => t.Contains("argo_trainingModule3"))))
                         hasTM3 = true;
                 }
 
 
+                var rng = new System.Random();
                 foreach (Pilot pilot in __instance.PilotRoster)
                 {
-                    var rng = new System.Random();
                     int Roll = rng.Next(1, 100);
                     if (pilot.pilotDef.PilotTags.Contains("pilot_unstable"))
                     {
@@ -337,38 +354,41 @@ namespace Pilot_Quirks
                     }
 
                     //Section for adding quirks due to Argo Upgrades.
-                    if (settings.ArgoUpgradesAddQuirks && __instance.DayRemainingInQuarter == 30)
+                    if (settings.ArgoUpgradesAddQuirks)
                     {
-                        Roll = rng.Next(0, 100);
-                        if (!pilot.pilotDef.PilotTags.Contains("PQ_Quirk1_Added") && hasTM1 && potentialTags.Count() != 0 && Roll == 0)
+                        Pre_Control.Log.Debug($"ArgoQuirks: potentialTags.Count={potentialTags.Count()}");
+                        if (potentialTags.Count() != 0 &&
+                            (__instance.DayRemainingInQuarter % Pre_Control.settings.ArgoUpgradeAddQuirksCheckIntervalDays) == 0)
                         {
-                            potentialTags.Shuffle();
-                            if (!pilot.pilotDef.PilotTags.Contains(potentialTags[0]))
+                            Roll = rng.Next(0, 100);
+                            Pre_Control.Log.Debug($"checking {pilot.Callsign} Roll={Roll}, hasTM1={hasTM1}");
+                            if (!pilot.pilotDef.PilotTags.Contains("PQ_Quirk1_Added") && hasTM1 && Roll == 0)
                             {
-                                pilot.pilotDef.PilotTags.Add(potentialTags[0]);
-                                pilot.pilotDef.PilotTags.Add("PQ_Quirk1_Added");
-                                if (potentialTags[0] == "pilot_tech" && !settings.pilot_tech_vanillaTech)
-                                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
+                                potentialTags.Shuffle();
+                                if (!pilot.pilotDef.PilotTags.Contains(potentialTags[0]))
+                                {
+                                    pilot.pilotDef.PilotTags.Add(potentialTags[0]);
+                                    pilot.pilotDef.PilotTags.Add("PQ_Quirk1_Added");
+                                    if (potentialTags[0] == "pilot_tech" && !settings.pilot_tech_vanillaTech)
+                                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
+                                }
                             }
-                        }
-                        Roll = rng.Next(0, 100);
-                        if (!pilot.pilotDef.PilotTags.Contains("PQ_Quirk2_Added") && hasTM3 && potentialTags.Count() != 0 && Roll == 0)
-                        {
-                            potentialTags.Shuffle();
-                            if (!pilot.pilotDef.PilotTags.Contains(potentialTags[0]))
+                            Roll = rng.Next(0, 100);
+                            if (!pilot.pilotDef.PilotTags.Contains("PQ_Quirk2_Added") && hasTM3 && Roll == 0)
                             {
-                                pilot.pilotDef.PilotTags.Add(potentialTags[0]);
-                                pilot.pilotDef.PilotTags.Add("PQ_Quirk2_Added");
-                                if (potentialTags[0] == "pilot_tech" && !settings.pilot_tech_vanillaTech)
-                                    __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
+                                potentialTags.Shuffle();
+                                if (!pilot.pilotDef.PilotTags.Contains(potentialTags[0]))
+                                {
+                                    pilot.pilotDef.PilotTags.Add(potentialTags[0]);
+                                    pilot.pilotDef.PilotTags.Add("PQ_Quirk2_Added");
+                                    if (potentialTags[0] == "pilot_tech" && !settings.pilot_tech_vanillaTech)
+                                        __instance.CompanyStats.ModifyStat<int>("SimGame", 0, "MechTechSkill", StatCollection.StatOperation.Int_Add, settings.pilot_tech_TechBonus, -1, true);
+                                }
                             }
                         }
                     }
 
                 }
-
-
-
 
                 if (settings.RTCompatible)
                 {
@@ -383,7 +403,6 @@ namespace Pilot_Quirks
                     {
                         if (pilot.pilotDef.PilotTags.Contains("pilot_criminal") && !honest)
                         {
-                            var rng = new System.Random();
                             int Roll = rng.Next(1, 101);
                             if (Roll < settings.pilot_criminal_StealPercent)
                             {
@@ -512,7 +531,7 @@ namespace Pilot_Quirks
         //    public static void Postfix(SimGameState __instance, ref float __result)
         //    {
         //        float MerchantCount = 0;
-        //        Helper.Logger.LogLine("SimGameReputation");
+        //        Logger.Debug("SimGameReputation");
         //        foreach (Pilot pilot in __instance.PilotRoster)
         //        {
         //            if (pilot.pilotDef.PilotTags.Contains("pilot_merchant"))
@@ -520,10 +539,10 @@ namespace Pilot_Quirks
         //                MerchantCount = MerchantCount + 1;
         //            }
         //        }
-        //        Helper.Logger.LogLine(MerchantCount.ToString());
-        //        Helper.Logger.LogLine(__result.ToString());
+        //        Pre_Control.Logger.Debug(MerchantCount.ToString());
+        //        Pre_Control.Logger.Debug(__result.ToString());
         //        __result = __result - settings.pilot_merchant_ShopDiscount * MerchantCount / 100;
-        //        Helper.Logger.LogLine(__result.ToString());
+        //        Pre_Control.Logger.Debug(__result.ToString());
         //    }
         //}
 
@@ -594,7 +613,6 @@ namespace Pilot_Quirks
                 bool command = false;
                 var unitResults = (List<UnitResult>) Traverse.Create(__instance).Field("UnitResults").GetValue();
                 var theContract = (Contract)Traverse.Create(__instance).Field("theContract").GetValue();
-                var experienceEarned = (int)Traverse.Create(theContract).Property("ExperienceEarned").GetValue();
 
                 for (int i = 0; i < 4; i++)
                 {
@@ -605,10 +623,12 @@ namespace Pilot_Quirks
                             command = true;
                     }
                 }
+                Pre_Control.Log.Debug($"Live commander found={command}");
                 if (command)
                 {
-                    int XP = theContract.ExperienceEarned;
-                    experienceEarned += (int)(XP * settings.pilot_command_BonusLanceXP / 100);
+                    int XP = (int)(theContract.ExperienceEarned * (settings.pilot_command_BonusLanceXP / 100));
+                    Pre_Control.Log.Debug($"Commander XP gain={XP} for {theContract.ExperienceEarned}");
+                    theContract.ExperienceEarned += XP;
                 }
             }
         }
@@ -1242,7 +1262,7 @@ namespace Pilot_Quirks
         //{
         //    public static void Postfix(ref int __result)
         //    {
-        //        Helper.Logger.LogLine("Is it even?");
+        //        Pre_Control.Logger.Debug("Is it even?");
         //        var sim = UnityGameInstance.BattleTechGame.Simulation;
         //        float TotalDiscount = 0;
         //        foreach (Pilot pilot in sim.PilotRoster)
@@ -1250,9 +1270,9 @@ namespace Pilot_Quirks
         //            if (pilot.pilotDef.PilotTags.Contains("pilot_comstar"))
         //                TotalDiscount += settings.pilot_comstar_ArgoDiscount;
         //        }
-        //        Helper.Logger.LogLine("Original Cost: " + __result);
+        //        Pre_Control.Logger.Debug("Original Cost: " + __result);
         //        __result -= (int)(TotalDiscount / 100);
-        //        Helper.Logger.LogLine("New Cost: " + __result);
+        //        Pre_Control.Logger.Debug("New Cost: " + __result);
         //    }
         //}
 
@@ -1261,6 +1281,10 @@ namespace Pilot_Quirks
         {
             public float CostAdjustment = 1.0f;
             public Dictionary<string, float> QuirkTier = new Dictionary<string, float>();
+
+            public bool Debug = true;
+            public int ArgoUpgradeAddQuirksChance = 100;
+            public int ArgoUpgradeAddQuirksCheckIntervalDays = 30;
 
             public bool ArgoUpgradesAddQuirks = false;
             public int pilot_tech_TechBonus = 100;
@@ -1294,7 +1318,7 @@ namespace Pilot_Quirks
             public int pilot_mechwarrior_XP = 4000;
             public float pilot_XP_change = 0.1f;
             public int pilot_officer_BonusResolve = 5;
-            public float pilot_command_BonusLanceXP = 5;
+            public float pilot_command_BonusLanceXP = 5; // percent
             public int CriminalCount = 0;
             public float pilot_criminal_bonus = 2.0f;
             public float pilot_spacer_InjuryTimeReduction = 0.9f;
