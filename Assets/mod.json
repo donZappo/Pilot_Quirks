@@ -16,7 +16,7 @@
         
         "ArgoUpgradesAddQuirks" : true,
         "ArgoUpgradeAddQuirksChance": 100,
-        "ArgoUpgradeAddQuirksCheckIntervalDays": 1
+        "ArgoUpgradeAddQuirksCheckIntervalDays": 1,
         
         //**Quirk bonuses and maluses
         "pilot_cautious_ToHitBonus" : 2,
