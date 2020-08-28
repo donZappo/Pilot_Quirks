@@ -25,13 +25,15 @@ namespace Pilot_Quirks
                 if (!p.pilotDef.PilotTags.Contains("PQ_Tagged"))
                 {
                     p.pilotDef.PilotTags.Add("PQ_Tagged");
-                    if (p.pilotDef.Description.Id.StartsWith("pilot_ronin") || p.pilotDef.Description.Id.StartsWith("pilot_backer"))
+                    if (p.pilotDef.Description.Id.StartsWith("pilot_ronin") || p.pilotDef.Description.Id.StartsWith("pilot_backer") ||
+                            p.pilotDef.Description.Id.StartsWith("pilot_jk"))
                         p.Description.Details += "\n\n";
 
                     var sim = UnityGameInstance.BattleTechGame.Simulation;
                     foreach (var tag in p.pilotDef.PilotTags)
                     {
-                        if (p.pilotDef.Description.Id.StartsWith("pilot_ronin") || p.pilotDef.Description.Id.StartsWith("pilot_backer"))
+                        if (p.pilotDef.Description.Id.StartsWith("pilot_ronin") || p.pilotDef.Description.Id.StartsWith("pilot_backer") ||
+                            p.pilotDef.Description.Id.StartsWith("pilot_jk"))
                         {
                             if (Pre_Control.settings.TagIDToDescription.Keys.Contains(tag))
                             {
